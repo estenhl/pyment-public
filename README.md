@@ -13,6 +13,11 @@ tations of the ageing brain"
 ```conda activate pyment```
 5. Install required packages<br />
 ```pip install -r requirements.txt```
+6. Install Tensorflow<br />
+a. Tensorflow for GPU<br />
+```pip install tensorflow-gpu```<br />
+b. Tensorflow for CPU<br />
+```pip install tensorflow```
 6. Source the package<br />
 ```conda develop .```
 
@@ -39,3 +44,13 @@ A full example which downloads the IXI dataset and preprocesses it can be found 
 
 # Estimating brain age in Python
 Estimating brain age using the trained brain age model from the paper consists of downloading the weights, instantiating the model with said weights, and calling [Model.fit()](https://www.tensorflow.org/api_docs/python/tf/keras/Model#predict) with an appropriate generator. A full tutorial (which relies on having a prepared dataset) can be found in the [Python prediction tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Encode%20dataset%20as%20feature%20vectors.ipynb)
+
+# Estimating brain age with Docker (with preprocessed images)
+1. (Optional, if you want to change model/weights/parameters) Build a prediction container<br />
+```
+docker build \
+      -t estenhl:sfcn-reg-predict-brain-age \ # Name of the container
+      -f docker/Dockerfile.predict \ #Dockerfile used
+      . # Root folder, should be root folder of the repository
+```
+2. Run the prediction container

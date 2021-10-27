@@ -1,0 +1,24 @@
+FROM python:3.9.0
+
+RUN mkdir /src
+
+COPY pyment /src/pyment
+COPY scripts /src/scripts
+COPY requirements.txt /src/requirements.txt
+COPY setup.py /src/setup.py
+
+WORKDIR /src
+
+RUN pip install pip --upgrade
+RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install tensorflow==2.5.0
+RUN pip install -e /src
+
+CMD python /src/scripts/predict_brain_age.py \
+        -f /images \
+        -m sfcn-reg \
+        -w brain_age \
+        -b 4 \
+        -t 4 \
+        -n \
+        -d /predictions/predictions.csv

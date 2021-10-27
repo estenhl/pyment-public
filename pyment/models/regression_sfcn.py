@@ -5,16 +5,22 @@ from tensorflow.keras.regularizers import l2
 from typing import List, Tuple
 
 from .model import Model
+from .model_type import ModelType
 from .utils import restrict_range, WeightRepository
 
 
 class RegressionSFCN(Model):
+    @property
+    def type(self) -> ModelType:
+        return ModelType.REGRESSION
+
     def __init__(self, *, input_shape: Tuple[int, int, int] = (167, 212, 160), 
                  dropout: float = .0, weight_decay: float = .0, 
                  activation: str = 'relu', include_top: bool = True,
                  depths: List[int] = [32, 64, 128, 256, 256, 64],
                  prediction_range: Tuple[float, float] = (3, 95),
                  name: str = 'Regression3DSFCN', weights: str = None):
+
         regularizer = l2(weight_decay) if weight_decay is not None else None
 
         inputs = Input(input_shape, name=f'{name}/inputs')
@@ -48,7 +54,7 @@ class RegressionSFCN(Model):
         if not include_top:
             x = bottleneck
 
-        super().__init__(inputs, x)
+        super().__init__(inputs, x, name=name)
 
         if weights is not None:
             path = WeightRepository.get_path(model=self.__class__.__name__, 
