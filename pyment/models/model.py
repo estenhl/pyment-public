@@ -1,12 +1,21 @@
 import numpy as np
 
+from abc import abstractproperty
 from collections.abc import Iterator
 from tensorflow.keras import Model as KerasModel
 from typing import Any
 from tqdm import tqdm
 
+from .model_type import ModelType
+
 
 class Model(KerasModel):
+    @abstractproperty
+    def type(self) -> ModelType:
+        """Returns the type of the model, as defined by the ModelType 
+        enum"""
+        pass
+
     def predict(self, data: Any, *, return_labels: bool = False, **kwargs):
         if isinstance(data, Iterator):
             predictions = None
