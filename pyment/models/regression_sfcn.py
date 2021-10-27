@@ -28,9 +28,9 @@ class RegressionSFCN(Model):
                        bias_regularizer=regularizer,
                        name=f'{name}/block{i+1}/conv')(x)
             x = BatchNormalization(name=f'{name}/block{i+1}/norm')(x)
-            x = MaxPooling3D((2, 2, 2), name=f'{name}/block{i+1}/pool')(x)
             x = Activation(activation,
                            name=f'{name}/block{i+1}/{activation}')(x)
+            x = MaxPooling3D((2, 2, 2), name=f'{name}/block{i+1}/pool')(x)
 
         x = Conv3D(depths[-1], (1, 1, 1), padding='SAME', activation=None,
                    name=f'{name}/top/conv')(x)
