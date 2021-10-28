@@ -23,5 +23,5 @@ def download(url: str, filename: str, chunksize: int = 2**16) -> None:
     
     with open(filename, 'wb') as f:
         downloaded = 0
-        for chunk in tqdm(resp.iter_content(chunk_size=chunksize), total=size):
+        for chunk in tqdm(resp.iter_content(chunk_size=chunksize), total=math.ceil(size / chunksize)):
             f.write(chunk)
