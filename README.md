@@ -1,5 +1,4 @@
-Repository containing code, models and tutorials for the paper "Deep neural networks learn general and clinically relevant represen-
-tations of the ageing brain"
+Repository containing code, models and tutorials for the paper "Deep neural networks learn general and clinically relevant representations of the ageing brain"
 
 # Installation (via terminal and Anaconda)
 
@@ -33,6 +32,8 @@ While the models adhere to the Keras [Model](https://www.tensorflow.org/api_docs
       └── imageN.nii.gz
 ``` 
 where ```labels.csv``` is a csv-file with column ```id``` (corresponding to image1, image2, etc) and column ```age```.
+
+## Preprocessing
 Before training the models all images were ran through the following preprocessing pipeline:
 
 1. Extract brainmask with ```recon-all -autorecon1``` (FreeSurfer)
@@ -40,17 +41,34 @@ Before training the models all images were ran through the following preprocessi
 3. Translate to FSL space with ```fslreorient2std``` (FSL)
 4. Register to MNI space with ```flirt -dof 6``` (FSL, linear registration), and the standard FSL template ```MNI152_T1_1mm_brain.nii.gz```
 5. Crop away borders of ```[6:173,2:214,0:160]```
+
 A full example which downloads the IXI dataset and preprocesses it can be found in the [Preprocessing tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Download%20and%20preprocess%20IXI.ipynb)
 
 # Estimating brain age in Python
 Estimating brain age using the trained brain age model from the paper consists of downloading the weights, instantiating the model with said weights, and calling [Model.fit()](https://www.tensorflow.org/api_docs/python/tf/keras/Model#predict) with an appropriate generator. A full tutorial (which relies on having a prepared dataset) can be found in the [Python prediction tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Encode%20dataset%20as%20feature%20vectors.ipynb)
 
 # Estimating brain age with Docker (with preprocessed images)
-1. (Optional, if you want to change model/weights/parameters) Build a prediction container<br />
+If you want to use docker containers for predictions there are two options:
+      1. Configuring and building your own docker container
+      2. Using one of our prebuilt containers
+## 1. Build your own docker container
+We recommend only building your own docker container if you want to configure it yourself, e.g. by using a different model or your own trained weights. If so, there is a set of dockerfiles in the[docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder that can be used as starting points. Building a container for estimating brain age using SFCN-reg with our pretrained weights can e.g. be done via
 ```
 docker build \
-      -t estenhl:sfcn-reg-predict-brain-age \ # Name of the container
-      -f docker/Dockerfile.predict \ #Dockerfile used
-      . # Root folder, should be root folder of the repository
+      --tag estenhl/sfcn-reg-predict-brain-age \
+      --file docker/Dockerfile.predict \ 
+      .
 ```
-2. Run the prediction container
+## 2. Download our prebuilt docker containers
+We have built a set of docker containers containing different models, weights and preprocessing schemes in our [dockerhub account](https://hub.docker.com/search?q=estenhl&type=image). Downloading one of these can be done via
+```
+docker pull estenhl/sfcn-reg-predict-brain-age
+```
+
+## 3. Estimate brain age using the container
+When you have a container with the model, it needs to be run to get the brain age estimates. If you are using one of our containers it needs access to two volumes (e.g. folders on your local computer) which is passed to the ```docker run``` command via the [```--mount```](https://docs.docker.com/storage/bind-mounts/)-argument. One folder should contain the images and the labels as explained in the [Preparing data](#preparing-data)-section. The second should be a folder where the predictions and the logs are written.<br />
+<b>NOTE: If using a container which does not preprocess data (e.g. does not explicitly have ```preprocess``` in its name) the data needs to be preprocessed according to our [Preprocessing pipeline](#preprocessing) beforehand</b></br>
+Running our prebuilt ```sfcn-reg-predict-brain-age```-container can be done via e.g.
+````
+````
+

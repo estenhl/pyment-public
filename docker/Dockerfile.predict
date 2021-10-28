@@ -18,7 +18,8 @@ CMD python /src/scripts/predict_brain_age.py \
         -f /images \
         -m sfcn-reg \
         -w brain_age \
-        -b 4 \
+        -b 1 \
         -t 4 \
         -n \
-        -d /predictions/predictions.csv
+        -d /predictions/predictions.csv \
+        2>&1 | tee /predictions/logs.txt
