@@ -47,7 +47,7 @@ def test_get_model_ranking_sfcn():
                                                        ') does not return a '
                                                        'RankingSFCN')
 
-def test_get_model_sfcnsm():
+def test_get_model_sfcnrank():
     model = get('sfcn-rank')
 
     assert isinstance(model, RankingSFCN), ('models.get(sfcn-rank) '
