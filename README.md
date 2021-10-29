@@ -52,7 +52,7 @@ If you want to use docker containers for predictions there are two options:
       1. Configuring and building your own docker container
       2. Using one of our prebuilt containers
 ## 1. Build your own docker container
-We recommend only building your own docker container if you want to configure it yourself, e.g. by using a different model or your own trained weights. If so, there is a set of dockerfiles in the[docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder that can be used as starting points. Building a container for estimating brain age using SFCN-reg with our pretrained weights can e.g. be done via
+We recommend only building your own docker container if you want to configure it yourself, e.g. by using a different model or your own trained weights. If so, there is a set of dockerfiles in the [docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder that can be used as starting points. Building a container for estimating brain age using SFCN-reg with our pretrained weights can e.g. be done via
 ```
 docker build \
       --tag estenhl/sfcn-reg-predict-brain-age \
