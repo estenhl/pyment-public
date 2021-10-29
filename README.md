@@ -56,8 +56,7 @@ We recommend only building your own docker container if you want to configure it
 ```
 docker build \
       --tag estenhl/sfcn-reg-predict-brain-age \
-      --file docker/Dockerfile.predict \ 
-      .
+      --file docker/Dockerfile.predict .
 ```
 ## 2. Download our prebuilt docker containers
 We have built a set of docker containers containing different models, weights and preprocessing schemes in our [dockerhub account](https://hub.docker.com/search?q=estenhl&type=image). Downloading one of these can be done via
