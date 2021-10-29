@@ -55,5 +55,5 @@ class RankingSFCN(Model):
         if not include_top:
             x = bottleneck
 
-        super().__init__(inputs, x, weights=weights, include_top=include_top, 
+        super().__init__(inputs, x, weights=weights, include_top=include_top,
                          name=name)

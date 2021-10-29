@@ -54,5 +54,6 @@ class RegressionSFCN(Model):
         if not include_top:
             x = bottleneck
 
-        super().__init__(inputs, x, name=name)
+        super().__init__(inputs, x, weights=weights, include_top=include_top,
+                         name=name)
 
