@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 from abc import abstractproperty
@@ -7,6 +8,7 @@ from typing import Any
 from tqdm import tqdm
 
 from .model_type import ModelType
+from .utils import WeightRepository
 
 
 class Model(KerasModel):
@@ -15,6 +17,20 @@ class Model(KerasModel):
         """Returns the type of the model, as defined by the ModelType 
         enum"""
         pass
+
+    def __init__(self, *args, weights: str = None, include_top: bool = True, 
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+        if weights is not None:
+            if not os.path.isfile(weights):
+                weights = WeightRepository.get_path(
+                    model=self.__class__.__name__, 
+                    weights=weights, 
+                    include_top=include_top)
+        
+            self.load_weights(weights)
 
     def predict(self, data: Any, *, return_labels: bool = False, **kwargs):
         if isinstance(data, Iterator):
