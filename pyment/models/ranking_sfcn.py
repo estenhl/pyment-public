@@ -9,17 +9,17 @@ from .model_type import ModelType
 from .utils import restrict_range, WeightRepository
 
 
-class RegressionSFCN(Model):
+class RankingSFCN(Model):
     @property
     def type(self) -> ModelType:
-        return ModelType.REGRESSION
+        return ModelType.RANKING
 
     def __init__(self, *, input_shape: Tuple[int, int, int] = (167, 212, 160), 
                  dropout: float = .0, weight_decay: float = .0, 
                  activation: str = 'relu', include_top: bool = True,
                  depths: List[int] = [32, 64, 128, 256, 256, 64],
                  prediction_range: Tuple[float, float] = (3, 95),
-                 name: str = 'Regression3DSFCN', weights: str = None):
+                 name: str = 'Ranking3DSFCN', weights: str = None):
 
         regularizer = l2(weight_decay) if weight_decay is not None else None
 
@@ -46,7 +46,8 @@ class RegressionSFCN(Model):
         bottleneck = x
 
         x = Dropout(dropout, name=f'{name}/top/dropout')(x)
-        x = Dense(1, activation=None, name=f'{name}/predictions')(x)
+        x = Dense((prediction_range[1] - prediction_range[0]) - 1, 
+                  activation='sigmoid', name=f'{name}/predictions')(x)
 
         if prediction_range is not None:
             x = restrict_range(x, *prediction_range, name=f'{name}/restrict')
@@ -54,5 +55,5 @@ class RegressionSFCN(Model):
         if not include_top:
             x = bottleneck
 
-        super().__init__(inputs, x, name=name)
-
+        super().__init__(inputs, x, weights=weights, include_top=include_top, 
+                         name=name)
