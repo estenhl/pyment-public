@@ -70,5 +70,11 @@ When you have a container with the model, it needs to be run to get the brain ag
 <b>NOTE: If using a container which does not preprocess data (e.g. does not explicitly have ```preprocess``` in its name) the data needs to be preprocessed according to our [Preprocessing pipeline](#preprocessing) beforehand</b></br>
 Running our prebuilt ```sfcn-reg-predict-brain-age```-container can be done via e.g.
 ````
+docker run \
+      --rm \
+      --name predict-brain-age \
+      --mount type=bind,source=/Users/esten/images,target=/images \
+      --mount type=bind,source=/Users/esten/preds,target=/predictions \
+      estenhl/sfcn-reg-predict-brain-age
 ````
 
