@@ -60,7 +60,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    predict_brain_age(folder=args.folder, model=args.model, 
+    predict_brain_age(folder=args.folder, 
+                      model=args.model, 
                       weights=args.weights, batch_size=args.batch_size,
                       threads=args.threads, normalize=args.normalize,
                       destination=args.destination)

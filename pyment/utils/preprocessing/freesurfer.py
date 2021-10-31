@@ -39,6 +39,9 @@ def autorecon1_folder(src: str, dest: str, *, threads: int = 1,
     filenames = os.listdir(src)
     remaining = [f for f in filenames if not _brainmask_exists(dest, f)]
 
+    if not os.path.isdir(dest):
+        os.mkdir(dest)
+
     logger.info((f'Skipping {len(filenames) - len(remaining)} ' 
                  'existing subjects'))
 
@@ -82,7 +85,16 @@ def convert_mgz_to_nii_gz(src: str, dest: str, *,
 
 def convert_mgz_to_nii_gz_folder(src: str, dest: str, *, 
                                  silence: bool = True) -> None:
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+    
     for filename in os.listdir(src):
         target = filename.split('.')[0] + '.nii.gz'
-        convert_mgz_to_nii_gz(os.path.join(src, filename), 
-                              os.path.join(dest, target))
+        path = os.path.join(dest, target)
+
+        if os.path.isfile(path):
+            logger.info(f'Skipping {filename}: Already exists')
+            continue
+
+        convert_mgz_to_nii_gz(os.path.join(src, filename), path,
+                              silence=silence)
