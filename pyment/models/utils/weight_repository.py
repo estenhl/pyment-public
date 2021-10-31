@@ -4,12 +4,12 @@ from ...utils import download
 
 
 _mapping = {
-    ('RegressionSFCN', 'brain_age', True): {
+    ('RegressionSFCN', 'brain-age', True): {
         'url': ('https://drive.google.com/u/0/'
                 'uc?id=196e6ddCaUfdVWdeEaYVRQOEgE5_414b7&export=download'),
         'filename': 'regression_sfcn_brain_age_weights.hdf5'
     },
-    ('RegressionSFCN', 'brain_age', False): {
+    ('RegressionSFCN', 'brain-age', False): {
         'url': ('https://drive.google.com/u/0/'
                 'uc?id=1Mev57Rdst5TAxGEt3OUY97ToKOWq0uCC&export=download'),
         'filename': 'regression_sfcn_brain_age_weights_no_top.hdf5'

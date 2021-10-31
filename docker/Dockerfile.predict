@@ -17,7 +17,7 @@ RUN pip install -e /src
 CMD python /src/scripts/predict_brain_age.py \
         -f /images \
         -m sfcn-reg \
-        -w brain_age \
+        -w brain-age \
         -b 1 \
         -t 4 \
         -n \

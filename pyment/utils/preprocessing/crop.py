@@ -1,8 +1,13 @@
+import logging
 import os
 import nibabel as nib
 
 from typing import Tuple
 
+
+logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=logformat, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def crop_mri(src: str, dest: str, bounds: Tuple[Tuple[int]]) -> None:
     """Crops an MRI by the given bounds and stores the result 
@@ -44,6 +49,15 @@ def crop_mri(src: str, dest: str, bounds: Tuple[Tuple[int]]) -> None:
 
 def crop_folder(src: str, dest: str, bounds: Tuple[Tuple[int]]) -> None:
     """Crops all MRIs in a folder by the given bounds"""
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+
     for filename in os.listdir(src):
+        path = os.path.join(dest, filename)
+
+        if os.path.isfile(path):
+            logger.info(f'Skipping {filename}: Already exists')
+            continue
+    
         crop_mri(os.path.join(src, filename), os.path.join(dest, filename),
                  bounds)

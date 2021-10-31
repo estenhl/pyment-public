@@ -18,8 +18,18 @@ def reorient2std(src: str, dest: str, *, silence: bool = True):
 
 
 def reorient2std_folder(src: str, dest: str, *, silence: bool = True):
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+
     for filename in os.listdir(src):
-        reorient2std(os.path.join(src, filename), os.path.join(dest, filename))
+        path = os.path.join(dest, filename)
+
+        if os.path.isfile(path):
+            logger.info(f'Skipping {filename}: Already exists')
+            continue
+    
+        reorient2std(os.path.join(src, filename), path,
+                     silence=silence)
 
 
 def flirt(src: str, dest: str, *, template: str, silence: bool = True):
@@ -31,6 +41,15 @@ def flirt(src: str, dest: str, *, template: str, silence: bool = True):
 
 
 def flirt_folder(src: str, dest: str, *, template: str, silence: bool = True):
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+    
     for filename in os.listdir(src):
-        flirt(os.path.join(src, filename), os.path.join(dest, filename),
-              template=template, silence=silence)
+        path = os.path.join(dest, filename)
+
+        if os.path.isfile(path):
+            logger.info(f'Skipping {filename}: Already exists')
+            continue
+    
+        flirt(os.path.join(src, filename), path, template=template, 
+              silence=silence)
