@@ -51,29 +51,51 @@ Estimating brain age using the trained brain age model from the paper consists o
 If you want to use docker containers for predictions there are two options:
       1. Configuring and building your own docker container
       2. Using one of our prebuilt containers
-## 1. Build your own docker container
+## 1a. Build your own docker container
 We recommend only building your own docker container if you want to configure it yourself, e.g. by using a different model or your own trained weights. If so, there is a set of dockerfiles in the [docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder that can be used as starting points. Building a container for estimating brain age using SFCN-reg with our pretrained weights can e.g. be done via
 ```
 docker build \
       --tag estenhl/sfcn-reg-predict-brain-age \
       --file docker/Dockerfile.predict .
 ```
-## 2. Download our prebuilt docker containers
+## 1b. Download our prebuilt docker containers
 We have built a set of docker containers containing different models, weights and preprocessing schemes in our [dockerhub account](https://hub.docker.com/search?q=estenhl&type=image). Downloading one of these can be done via
 ```
 docker pull estenhl/sfcn-reg-predict-brain-age
 ```
 
-## 3. Estimate brain age using the container
+## 2. Estimate brain age using the container
 When you have a container with the model, it needs to be run to get the brain age estimates. If you are using one of our containers it needs access to two volumes (e.g. folders on your local computer) which is passed to the ```docker run``` command via the [```--mount```](https://docs.docker.com/storage/bind-mounts/)-argument. One folder should contain the images and the labels as explained in the [Preparing data](#preparing-data)-section. The second should be a folder where the predictions and the logs are written.<br />
 <b>NOTE: If using a container which does not preprocess data (e.g. does not explicitly have ```preprocess``` in its name) the data needs to be preprocessed according to our [Preprocessing pipeline](#preprocessing) beforehand</b></br>
 Running our prebuilt ```sfcn-reg-predict-brain-age```-container can be done via e.g.
-````
+```
 docker run \
       --rm \
       --name predict-brain-age \
       --mount type=bind,source=/Users/esten/images,target=/images \
       --mount type=bind,source=/Users/esten/preds,target=/predictions \
       estenhl/sfcn-reg-predict-brain-age
-````
+```
 
+# Estimating brain age with Docker (including preprocessing)
+## Building your own container
+### 1. Build a freesurfer container
+To build the freesurfer container you need a [freesurfer 5.3.0 tar.gz](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/5.3.0/freesurfer-Linux-centos6_x86_64-stable-pub-v5.3.0.tar.gz)-file available _within_ the root folder of this project
+```
+docker build \
+      --tag estenhl/freesurfer:5.3 \
+      --file docker/Dockerfile.freesurfer \
+      --build-arg tarPath=freesurfer-Linux-centos6_x86_64-stable-pub-v5.3.0.tar.gz .
+```
+### 1b. Test the freesurfer container
+Test the freesurfer-container by copying in an image and running ```recon-all```. Note that you need to copy in a valid free-surfer license for the container to run successfully
+```
+docker run \
+      -it \
+      --rm \
+      --mount type=bind,source=/Users/esten/freesurfer-license.txt,target=/usr/local/freesurfer/license.txt \
+      --mount type=bind,source=/Users/esten/tmp/images/tmp.nii.gz,target=/tmp.nii.gz \
+      estenhl/freesurfer:5.3
+mkdir subjects
+recon-all -sd subjects -s tmp -i /tmp.nii.gz -autorecon1
+```
