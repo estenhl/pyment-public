@@ -72,8 +72,8 @@ Running our prebuilt ```sfcn-reg-predict-brain-age```-container can be done via 
 docker run \
       --rm \
       --name predict-brain-age \
-      --mount type=bind,source=/Users/esten/images,target=/images \
-      --mount type=bind,source=/Users/esten/preds,target=/predictions \
+      --mount type=bind,source=<path-to-folder-with-images>,target=/images \
+      --mount type=bind,source=<path-to-folder-with-predictions>,target=/predictions \
       estenhl/sfcn-reg-predict-brain-age
 ```
 
@@ -94,8 +94,23 @@ docker run \
       -it \
       --rm \
       --mount type=bind,source=/Users/esten/freesurfer-license.txt,target=/usr/local/freesurfer/license.txt \
-      --mount type=bind,source=/Users/esten/tmp/images/tmp.nii.gz,target=/tmp.nii.gz \
+      --mount type=bind,source=<path-to-example-image>,target=/tmp.nii.gz \
       estenhl/freesurfer:5.3
 mkdir subjects
 recon-all -sd subjects -s tmp -i /tmp.nii.gz -autorecon1
+```
+### 2. Build a FreeSurfer and FSL container
+```
+docker build \
+      --tag estenhl/freesurfer_and_fsl:6.0 \
+      --file docker/Dockerfile.freesurfer_and_fsl .
+```
+
+### 2b. Test the FreeSurfer and FSL container
+Test the FSL-portion of the container by running flirt
+```
+flirt \
+      -in tmp.nii.gz \
+      -out flirted.nii.gz \
+      -ref /usr/local/fsl/data/linearMNI/MNI152lin_T1_1mm_brain.nii.gz
 ```

@@ -62,7 +62,7 @@ class NiftiDataset(Dataset):
 
     @property
     def variables(self):
-        if len(self._labels) == 0:
+        if self._labels is None or len(self._labels) == 0:
             return []
 
         return list(self._labels.keys())
@@ -112,3 +112,6 @@ class NiftiDataset(Dataset):
         self._paths = paths
         self._labels = labels
         self.target = target
+
+    def __len__(self) -> int:
+        return len(self.paths)
