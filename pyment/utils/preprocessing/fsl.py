@@ -32,15 +32,18 @@ def reorient2std_folder(src: str, dest: str, *, silence: bool = True):
                      silence=silence)
 
 
-def flirt(src: str, dest: str, *, template: str, silence: bool = True):
+def flirt(src: str, dest: str, *, template: str, 
+          degrees_of_freedom: int = 6, silence: bool = True):
     logger.debug(f'Running flirt on {src} with template {template}')
 
-    cmd = f'flirt -in {src} -out {dest} -ref {template} -dof 6'
+    cmd = (f'flirt -in {src} -out {dest} -ref {template} '
+           f'-dof {degrees_of_freedom}')
 
     run(cmd, silence=silence)
 
 
-def flirt_folder(src: str, dest: str, *, template: str, silence: bool = True):
+def flirt_folder(src: str, dest: str, *, template: str, 
+                 degrees_of_freedom: int = 6, silence: bool = True):
     if not os.path.isdir(dest):
         os.makedirs(dest)
     
@@ -52,4 +55,4 @@ def flirt_folder(src: str, dest: str, *, template: str, silence: bool = True):
             continue
     
         flirt(os.path.join(src, filename), path, template=template, 
-              silence=silence)
+              silence=silence, degrees_of_freedom=degrees_of_freedom)

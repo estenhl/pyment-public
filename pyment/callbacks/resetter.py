@@ -17,6 +17,8 @@ class Resetter(Callback):
     def __init__(self, obj: Resettable):
         super().__init__()
 
+        assert isinstance(obj, Resettable)
+
         self.obj = obj
 
     def on_epoch_end(self, *args, **kwargs) -> None:

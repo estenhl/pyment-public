@@ -1,7 +1,7 @@
 FROM estenhl/freesurfer:5.3
 
 RUN yum update
-RUN yum -y install bc dc git libopenblas python tar unzip wget
+RUN yum -y install bc dc git libopenblas python tar unzip wget file libquadmath
 RUN curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 RUN yum -y install nodejs npm
 RUN yum clean all
@@ -11,13 +11,12 @@ RUN npm install -gq bids-validator
 
 RUN wget -q http://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py 
 RUN chmod 755 /fslinstaller.py
-#RUN /fslinstaller.py -d /usr/local/fsl -q
+RUN /fslinstaller.py -d /usr/local/fsl -q
 
-#ENV FSLDIR=/usr/local/fsl
-#ENV PATH=$FSLDIR/bin:$PATH
-#RUN /bin/bash -c 'source /usr/local/fsl/etc/fslconf/fsl.sh'
-#ENV FSLMULTIFILEQUIT=TRUE
-#ENV FSLOUTPUTTYPE=NIFTI_GZ
-#RUN ln -s /usr/local/fsl/bin/eddy_openmp /usr/local/fsl/bin/eddy
+ENV FSLDIR=/usr/local/fsl
+ENV PATH=$FSLDIR/bin:$PATH
+RUN /bin/bash -c 'source /usr/local/fsl/etc/fslconf/fsl.sh'
+ENV FSLMULTIFILEQUIT=TRUE
+ENV FSLOUTPUTTYPE=NIFTI_GZ
 
 CMD bash

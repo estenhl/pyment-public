@@ -7,6 +7,9 @@ class Dataset(ABC):
     @abstractproperty
     def y(self) -> np.ndarray:
         """Returns the target vector of the dataset"""
+        pass
 
-    def __len__(self):
-        return len(self.y)
+    @abstractproperty
+    def __len__(self) -> int:
+        """Returns length of the dataset"""
+        pass

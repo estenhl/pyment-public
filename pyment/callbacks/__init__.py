@@ -1,1 +1,1 @@
-from .resetter import Resettable
+from .resetter import Resettable, Resetter

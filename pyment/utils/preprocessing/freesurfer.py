@@ -76,6 +76,9 @@ def autorecon1_folder(src: str, dest: str, *, threads: int = 1,
 
 def convert_mgz_to_nii_gz(src: str, dest: str, *, 
                           silence: bool = True) -> None:
+    assert src.endswith('mgz'), ('First argument to convert_mgz_to_nii_gz '
+                                 'be an mgz-file')
+
     logger.debug(f'Running convert on {src}')
 
     cmd = f'mri_convert {src} {dest} -ot nii'
