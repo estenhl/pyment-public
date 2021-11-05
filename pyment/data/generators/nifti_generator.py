@@ -49,7 +49,7 @@ class NiftiGenerator(Iterator, Resettable):
         return image
 
     def get_label(self, idx: int) -> np.ndarray:
-        """Returns a single image identified by the given index"""
+        """Returns a single label identified by the given index"""
         if idx > len(self.dataset):
             raise ValueError((f'Index {idx} out of bounds for generator with '
                              f'{len(self.dataset)} data points'))

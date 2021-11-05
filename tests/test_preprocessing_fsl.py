@@ -14,8 +14,8 @@ def test_autorecon1(mock):
     assert 1 == mock.call_count, 'reorient2std does not call run function'
     cmd = mock.call_args[0][0]
     expected_cmd = 'fslreorient2std src.nii.gz dest.nii.gz'
-    assert expected_cmd == cmd, ('fslreorient2std does not call run with '
-                                    'correct command')
+    assert expected_cmd == cmd, \
+        'fslreorient2std does not call run with correct command'
 
 @patch('pyment.utils.preprocessing.fsl.run')
 def test_reorient2std_folder(mock):
@@ -31,11 +31,11 @@ def test_reorient2std_folder(mock):
 
         reorient2std_folder(src, dest)
 
-        assert os.path.isdir(dest), ('reorient2std_folder does not create '
-                                     'destination folder')
+        assert os.path.isdir(dest), \
+            'reorient2std_folder does not create destination folder'
 
-        assert 5 == mock.call_count, ('reorient2std_folder does not call run '
-                                      'for every subject')
+        assert 5 == mock.call_count, \
+            'reorient2std_folder does not call run for every subject'
     finally:
         rmtree('tmp')
 
@@ -74,11 +74,11 @@ def test_flirt_folder(mock):
 
         flirt_folder(src, dest, template='template.nii.gz')
 
-        assert os.path.isdir(dest), ('flirt_folder does not create '
-                                     'destination folder')
+        assert os.path.isdir(dest), \
+            'flirt_folder does not create destination folder'
 
-        assert 5 == mock.call_count, ('flirt_folder does not call run for '
-                                      'every subject')
+        assert 5 == mock.call_count, \
+            'flirt_folder does not call run for every subject'
     finally:
         rmtree('tmp')
 
@@ -97,13 +97,12 @@ def test_flirt_folder_degrees_of_freedom(mock):
         flirt_folder(src, dest, template='template.nii.gz', 
                      degrees_of_freedom=9)
 
-        assert 'degrees_of_freedom' in mock.call_args[1], ('flirt_folder does '
-                                                           'not use degrees_'
-                                                           'of_freedom kwargs')
+        assert 'degrees_of_freedom' in mock.call_args[1], \
+            'flirt_folder does not use degrees_of_freedom kwargs'
 
         degrees_of_freedom = mock.call_args[1]['degrees_of_freedom']
 
-        assert 9 == degrees_of_freedom, ('flirt_folder does not pass on '
-                                         'correct degrees of freedom')
+        assert 9 == degrees_of_freedom, \
+            'flirt_folder does not pass on correct degrees of freedom'
     finally:
         rmtree('tmp')

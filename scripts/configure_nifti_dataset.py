@@ -6,14 +6,16 @@ from typing import List
 from pyment.data import NiftiDataset
 
 
-def configure_nifti_dataset(folder: str, target: List[str]):
+def configure_nifti_dataset(*, folder: str, target: List[str], 
+                            destination: str):
     assert os.path.isdir(os.path.join(folder, 'images')), \
         'Folder must have a subfolder \'images\''
     assert os.path.isfile(os.path.join(folder, 'labels.csv')), \
         'Folder must contain a csv-file \'labels.csv\''
 
-    dataset = NiftiDataset.from_folder(folder)
-    dataset.target = target
+    dataset = NiftiDataset.from_folder(folder, target=target)
+
+    dataset.save(destination)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(('Configures and saves a NiftiDataset '
@@ -32,7 +34,10 @@ if __name__ == '__main__':
                                             'dataset. Must correspond to one '
                                             'or more of the columns of '
                                             '\'labels.csv\''))
+    parser.add_argument('-d', '--destination', required=True,
+                        help='Path where dataset json file is stored')
 
     args = parser.parse_args()
 
-    configure_nifti_dataset(folder=args.folder, target=args.target)
+    configure_nifti_dataset(folder=args.folder, target=args.target,
+                            destination=args.destination)
