@@ -142,4 +142,7 @@ class MultiLabelDataset(Dataset):
             if not np.array_equal(self.labels[var], other.labels[var]):
                 return False
         
-        return self.target == other.target
+        if not self.target == other.target:
+            return False
+
+        return super().__eq__(other)

@@ -50,3 +50,6 @@ class Dataset(ABC):
     def __eq__(self, other: Dataset) -> bool:
         """Check equality between this dataset and another"""
         pass
+
+    def __eq__(self, other: Dataset) -> bool:
+        return isinstance(other, Dataset)

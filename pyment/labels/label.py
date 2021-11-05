@@ -34,8 +34,7 @@ class Label(ABC):
             'missing_strategy': self.missing_strategy
         }
 
-        if self.is_fitted:
-            obj['fit'] = self._fit
+        obj['fit'] = self._fit
 
         return obj
     
@@ -64,6 +63,9 @@ class Label(ABC):
     def __init__(self, name: str, 
                 missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
                 fit: Dict[str, Any] = None) -> Label:
+        if fit is None:
+            fit = {}
+        
         self.name = name
         self.missing_strategy = missing_strategy
 

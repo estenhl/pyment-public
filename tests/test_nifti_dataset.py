@@ -428,9 +428,6 @@ def test_dataset_to_from_json_with_binary_label_y():
     data1 = NiftiDataset(paths, labels, target=label)
     data2 = NiftiDataset.from_json(data1.json)
 
-    from pyment.labels import load_label_from_json
-    label = load_label_from_json(data1.json['target'])
-
     assert np.array_equal(data1.y, data2.y, equal_nan=True), \
         ('NiftiDataset to and from json does apply transform equally before '
          'and after')
