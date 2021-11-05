@@ -18,18 +18,19 @@ logger = logging.getLogger(__name__)
 class BinaryLabel(Label):
     @property
     def is_fitted(self) -> bool:
-        return self._fit is not None
+        return 'encoding' in self._fit and \
+               'frequencies' in self._fit
 
     @property
     def encoding(self) -> Dict[Any, int]:
-        if not self.is_fitted:
+        if 'encoding' not in self._fit:
             raise ValueError(f'Unfitted BinaryLabel does not have an encoding')
 
         return self._fit['encoding']
 
     @property
     def frequencies(self) -> Dict[Any, float]:
-        if not self.is_fitted:
+        if 'frequencies' not in self._fit:
             raise ValueError(f'Unfitted BinaryLabel does not have frequencies')
 
         return self._fit['frequencies']
@@ -66,8 +67,6 @@ class BinaryLabel(Label):
     def json(self) -> Dict[str, Any]:
         obj = super().json
 
-        obj['encoding'] = self._encoding
-
         return obj
 
     def __init__(self, name: str, allowed: List[Any] = None,
@@ -89,7 +88,7 @@ class BinaryLabel(Label):
             assert len(encoding) == 2, \
                 'List of encoding for binary label must have length 2'
 
-        self._encoding = encoding
+            self._fit['encoding'] = encoding
 
     def _encode_missing(self, values: np.ndarray, 
                         strategy: MissingStrategy) -> np.ndarray:
@@ -103,15 +102,13 @@ class BinaryLabel(Label):
         return values
 
     def fit(self, values: np.ndarray) -> None:
-        self._fit = {}
-
         counts = Counter(values)
         unique = sorted(list(counts.keys()))
     
         logger.info(f'Found values {unique} for binary variable {self.name}')
 
-        if self._encoding is not None:
-            encoding = self._encoding
+        if 'encoding' in self._fit:
+            encoding = self._fit['encoding']
         else:
             encoding = {unique[i]: i for i in range(len(unique))}
 
@@ -156,11 +153,4 @@ class BinaryLabel(Label):
         if not isinstance(other, BinaryLabel):
             return False
 
-        if not super().__eq__(other):
-            return False
-
-        if not self.is_fitted and self._encoding is not None and \
-           self._encoding != other._encoding:
-           return False
-        
-        return True
+        return super().__eq__(other)
