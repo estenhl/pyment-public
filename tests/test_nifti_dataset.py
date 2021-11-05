@@ -83,8 +83,8 @@ def test_dataset_labels():
     }
     data = NiftiDataset(paths, labels, target='y1')
 
-    assert [1, 2, 3] == data.y, ('NiftiDataset does not return the correct '
-                                 'labels')
+    assert np.array_equal([1, 2, 3], data.y), \
+        'NiftiDataset does not return the correct labels'
 
 def test_dataset_invalid_target():
     paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
@@ -123,9 +123,13 @@ def test_dataset_json_labels():
 
     assert 'labels' in data.json, \
         'NiftiDataset.json does not contain a field for labels'
-    assert labels == data.json['labels'], \
+    assert 'y1' in data.labels and \
+            np.array_equal([1, 2, 3], data.labels['y1']), \
         'NiftiDataset.json does not contain correct labels'
-
+    assert 'y2' in data.labels and \
+            np.array_equal(['a', 'b', 'c'], data.labels['y2']), \
+        'NiftiDataset.json does not contain correct labels'
+        
 def test_dataset_json_target():
     paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
     labels = {
@@ -397,3 +401,36 @@ def test_dataset_label_target_unfitted_warning(caplog):
         data.y
         assert caplog.text != '', \
             'NiftiDataset with unfitted BinaryLabel does not raise a warning'
+
+def test_dataset_to_from_json_with_binary_label():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray(['A', 'B', 'C'])
+    }
+    label = BinaryLabel('y1', encoding={'A': 0, 'B': 1})
+    label.fit(np.asarray(['A', 'B', 'C', 'B']))
+
+    data1 = NiftiDataset(paths, labels, target=label)
+    data2 = NiftiDataset.from_json(data1.json)
+
+    assert data1.target == data2.target, \
+        'NiftiDataset to and from json does not retain BinaryLabel target'
+
+
+def test_dataset_to_from_json_with_binary_label_y():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray(['A', 'B', 'C'])
+    }
+    label = BinaryLabel('y1', encoding={'A': 0, 'B': 1})
+    label.fit(np.asarray(['A', 'B', 'C', 'B']))
+
+    data1 = NiftiDataset(paths, labels, target=label)
+    data2 = NiftiDataset.from_json(data1.json)
+
+    from pyment.labels import load_label_from_json
+    label = load_label_from_json(data1.json['target'])
+
+    assert np.array_equal(data1.y, data2.y, equal_nan=True), \
+        ('NiftiDataset to and from json does apply transform equally before '
+         'and after')

@@ -6,8 +6,9 @@ import numpy as np
 from typing import Any, Dict, List, Union
 
 from .dataset import Dataset
-from ...labels import Label
+from ...labels import load_label_from_json, Label
 from ...utils.decorators import json_serialized_property
+from ...utils.io.json import encode_object_as_json
 
 
 logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
@@ -57,6 +58,7 @@ class MultiLabelDataset(Dataset):
 
     @property
     def y(self) -> np.ndarray:
+        print('Getting y')
         if self.target is None:
             return np.asarray([None] * len(self))
         elif isinstance(self.target, list):
@@ -67,13 +69,35 @@ class MultiLabelDataset(Dataset):
 
     @json_serialized_property
     def json(self) -> str:
+        target = self.target if not isinstance(self.target, Label) \
+                 else encode_object_as_json(self.target, 
+                                            include_timestamp=False,
+                                            include_user=False)
+
         return {
             'labels': self.labels,
-            'target': self.target
+            'target': target
         }
+
+    @classmethod
+    def from_json(cls, obj: Dict[str, Any]) -> Label:
+        if 'target' in obj and isinstance(obj['target'], dict):
+            obj['target'] = load_label_from_json(obj['target'])
+    
+        return cls(**obj)
 
     def __init__(self, labels: Dict[str, np.ndarray] = None, 
                  target: str = None) -> MultiLabelDataset:
+        if isinstance(labels, dict):
+            for key in labels:
+                if isinstance(labels[key], list):
+                    labels[key] = np.asarray(labels[key])
+                elif not isinstance(labels[key], np.ndarray):
+                    raise ValueError(f'Dataset labels must be numpy arrays')
+        elif labels != None:
+            raise ValueError(('Dataset labels must be either None or a '
+                              'dictionary'))
+
         self._labels = labels
         self.target = target
 

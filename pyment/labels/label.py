@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from typing import Any, Dict
 
 from .missing_strategy import MissingStrategy
-from ..utils import save_object_as_json
+from ..utils.io.json import encode_object_as_jsonstring, save_object_as_json
 from ..utils.decorators import json_serialized_property
 
 
@@ -103,3 +103,6 @@ class Label(ABC):
         return self.name == other.name and \
                self.missing_strategy == other.missing_strategy and \
                self._fit == other._fit
+
+    def __str__(self) -> str:
+        return encode_object_as_jsonstring(self)
