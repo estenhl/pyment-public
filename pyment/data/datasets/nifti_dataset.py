@@ -5,16 +5,17 @@ import os
 import numpy as np
 import pandas as pd
 
-from typing import Dict
+from typing import Any, Dict, List
 
-from .dataset import Dataset
+from .multi_label_dataset import MultiLabelDataset
+from ...utils.decorators import json_serialized_property
 
 
 logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
 logging.basicConfig(format=logformat, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class NiftiDataset(Dataset):
+class NiftiDataset(MultiLabelDataset):
     @classmethod
     def from_folder(cls, root: str, *, images: str = 'images', 
                     labels: str = 'labels.csv', suffix: str = 'nii.gz', 
@@ -26,7 +27,7 @@ class NiftiDataset(Dataset):
 
         assert 'id' in df.columns, 'labels is missing id column'
 
-        label_ids = set(df['id'])
+        label_ids = set(df['id'].astype(str))
         image_ids = set([filename.split('.')[0] \
                          for filename in os.listdir(images)])
 
@@ -61,57 +62,50 @@ class NiftiDataset(Dataset):
         return cls(paths, labels, **kwargs)
 
     @property
-    def variables(self):
-        if self._labels is None or len(self._labels) == 0:
-            return []
-
-        return list(self._labels.keys())
+    def filenames(self) -> np.ndarray:
+        return np.asarray([os.path.basename(p) for p in self.paths])
 
     @property
-    def paths(self):
-        return self._paths
+    def ids(self) -> np.ndarray:
+        return np.asarray([f.split('.')[0] for f in self.filenames])
 
     @property
-    def filenames(self):
-        return [os.path.basename(p) for p in self.paths]
-
-    @property
-    def ids(self):
-        return [f.split('.')[0] for f in self.filenames]
-
-    @property
-    def target(self):
-        return self._target
-
-    @target.setter
-    def target(self, value: str):
-        valid = self.variables + [None, 'path', 'filename', 'id']
-        if value not in valid:
-            raise ValueError((f'Unable to set target {value}. '
-                              f'Must be in {valid}'))
-
-        self._target = value
+    def targets(self) -> List[Any]:
+        return super().targets + ['path', 'filename', 'id']
         
     @property
-    def y(self):
-        if self.target is None:
-            return np.asarray([None] * len(self))
-        elif self.target == 'path':
+    def y(self) -> np.ndarray: 
+        if self.target == 'path':
             return self.paths
         elif self.target == 'filename':
             return self.filenames
         elif self.target == 'id':
             return self.ids
+        else:
+            return super().y
 
-        return self._labels[self.target]
-    
+    @json_serialized_property
+    def json(self) -> str:
+        obj = super().json
+
+        obj['paths'] = self.paths
+
+        return obj
     
     def __init__(self, paths: np.ndarray, 
                  labels: Dict[str, np.ndarray] = None, 
                  target: str = None) -> NiftiDataset:
-        self._paths = paths
-        self._labels = labels
-        self.target = target
+        self._paths = paths if isinstance(paths, np.ndarray) \
+                      else np.asarray(paths)
+
+        super().__init__(labels, target)
 
     def __len__(self) -> int:
         return len(self.paths)
+
+    def __eq__(self, other: NiftiDataset) -> bool:
+        if not isinstance(other, NiftiDataset):
+            return False
+
+        return super().__eq__(other) and \
+               np.array_equal(self.paths, other.paths)
