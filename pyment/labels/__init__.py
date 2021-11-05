@@ -1,6 +1,8 @@
 import json
 import sys
 
+from typing import Any, Dict
+
 from .binary_label import BinaryLabel
 from .continuous_label import ContinuousLabel
 from .label import Label
@@ -25,6 +27,9 @@ def load_label_from_jsonfile(path: str) -> Label:
     with open(path, 'r') as f:
         data = json.load(f)
 
+    return load_label_from_json(data)
+
+def load_label_from_json(data: Dict[str, Any]) -> Label:
     classname = data['cls']
     object = data['object']
 
