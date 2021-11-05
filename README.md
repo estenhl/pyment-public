@@ -1,4 +1,4 @@
-Repository containing code, models and tutorials for the paper "Deep neural networks learn general and clinically relevant representations of the ageing brain"
+Repository containing code, models and tutorials for the paper [Deep neural networks learn general and clinically relevant representations of the ageing brain](https://www.medrxiv.org/content/10.1101/2021.10.29.21265645v1)
 
 # Installation (via terminal and Anaconda)
 
