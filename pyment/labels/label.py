@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 from abc import ABC, abstractmethod, abstractproperty
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from .missing_strategy import MissingStrategy
 from ..utils.io.json import encode_object_as_jsonstring, save_object_as_json
@@ -18,13 +18,26 @@ class Label(ABC):
         (e.g. if fit() has been called, or the label was instantiated 
         with a previous fit"""
         return self._fit is not None
+    
+    @abstractproperty
+    def applicable_missing_strategies(self) -> List[MissingStrategy]:
+        """Returns a list of all applicable missing strategies for 
+        the given object"""
+        pass
 
     @property
     def missing_strategy(self) -> str:
         return self._missing_strategy
 
     @missing_strategy.setter
-    def missing_strategy(self, strategy: str) -> None:
+    def missing_strategy(self, strategy: Union[str, MissingStrategy]) -> None:
+        if isinstance(strategy, str):
+            strategy = MissingStrategy(strategy)
+    
+        if strategy not in self.applicable_missing_strategies:
+            raise ValueError(('Illegal strategy for missing values '
+                              f'{strategy} for {self.__class__.__name__}'))
+
         self._missing_strategy = strategy
 
     @json_serialized_property
