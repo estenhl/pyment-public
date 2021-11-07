@@ -1,19 +1,26 @@
 import argparse
+import json
+import numpy as np
 import pandas as pd
+
+from functools import reduce
 
 from pyment.labels import Label
 
 
-def configure_label(*, name: str, type: str, filename: pd.DataFrame = None,
-                    column: str = None, destination: str):
-    label = Label.from_type(type, name=name)
+def configure_label(*, name: str, type: str, filenames: pd.DataFrame = None,
+                    columns: str = None, destination: str, kwargs: str = '{}'):
+    kwargs = json.loads(kwargs)
+    
+    label = Label.from_type(type, name=name, **kwargs)
 
-    if filename is not None:
-        if column is None:
-            raise ValueError('Must supply a column alongside the CSV')
+    if len(filenames) is not None:
+        assert len(filenames) == len(columns), \
+            'Must provide one column per filename'
 
-        df = pd.read_csv(filename)
-        values = df[column].values
+        values = reduce(lambda x, y: np.concatenate([x, y]),
+                        [pd.read_csv(filenames[i])[columns[i]].values \
+                         for i in range(len(filenames))])
 
         label.fit(values)
 
@@ -32,16 +39,22 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--type', required=True, choices=Label.types,
                         help=('Type of the variable. Possible options are'
                               f'{Label.types}'))
-    parser.add_argument('-f', '--filename', required=False, default=None,
-                        help=('Optional CSV containing data used for fitting '
-                              'the variable preprocessing'))
-    parser.add_argument('-c', '--column', required=False, default=None,
-                        help=('Optional column containing the values of the '
-                              'CSV used for fitting variable preprocessing'))
+    parser.add_argument('-f', '--filenames', required=False, default=[], 
+                        nargs='+', help=('Optional CSVs containing data used '
+                                         'for fitting the variable '
+                                         'preprocessing'))
+    parser.add_argument('-c', '--columns', required=False, default=[], 
+                        nargs='+', help=('Optional columns containing the '
+                                         'corresponding to the CSVs for '
+                                         'fitting variable preprocessing'))
     parser.add_argument('-d', '--destination', required=True,
                         help='Path where json configuring the label is stored')
+    parser.add_argument('-k', '--kwargs', required=False, default='{}',
+                        help=('Optional jsonstring containing keyword'
+                              'arguments for instantiating the label'))
 
     args = parser.parse_args()
 
-    configure_label(name=args.name, type=args.type, filename=args.filename,
-                    column=args.column, destination=args.destination)
+    configure_label(name=args.name, type=args.type, filenames=args.filenames,
+                    columns=args.columns, destination=args.destination,
+                    kwargs=args.kwargs)
