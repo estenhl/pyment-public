@@ -416,7 +416,6 @@ def test_dataset_to_from_json_with_binary_label():
     assert data1.target == data2.target, \
         'NiftiDataset to and from json does not retain BinaryLabel target'
 
-
 def test_dataset_to_from_json_with_binary_label_y():
     paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
     labels = {
@@ -431,3 +430,55 @@ def test_dataset_to_from_json_with_binary_label_y():
     assert np.array_equal(data1.y, data2.y, equal_nan=True), \
         ('NiftiDataset to and from json does apply transform equally before '
          'and after')
+
+def test_dataset_target_from_file():
+    try:
+        label = BinaryLabel('y1', encoding={'A': 0, 'B': 1})
+        label.fit(['A', 'B', 'C', 'B'])
+        label.save('tmp.json')
+
+        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+        labels = {
+            'y1': np.asarray(['A', 'B', 'C', 'B'])
+        }
+        data = NiftiDataset(paths, labels, target='tmp.json')
+
+        assert np.array_equal([0, 1, np.nan, 1], data.y, equal_nan=True), \
+            'NiftiDataset does not apply label from file'
+    finally:
+        if os.path.isfile('tmp.json'):
+            os.remove('tmp.json')
+
+def test_dataset_targets_from_files():
+    try:
+        label1 = BinaryLabel('y1', encoding={'A': 0, 'B': 1})
+        label1.fit(['A', 'B', 'C', 'B'])
+        label1.save('tmp1.json')
+
+        label2 = BinaryLabel('y2', encoding={'A': 1, 'B': 0})
+        label2.fit(['A', 'B', 'C', 'B'])
+        label2.save('tmp2.json')
+
+        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+        labels = {
+            'y1': np.asarray(['A', 'B', 'C', 'B']),
+            'y2': np.asarray(['A', 'B', 'C', 'B'])
+        }
+        data = NiftiDataset(paths, labels, target=['tmp1.json', 'tmp2.json'])
+
+        expected = np.asarray([
+            [0, 1],
+            [1, 0],
+            [np.nan, np.nan],
+            [1, 0]
+        ])
+
+        print(data.y)
+
+        assert np.array_equal(expected, data.y, equal_nan=True), \
+            'NiftiDataset does not apply label from file'
+    finally:
+        if os.path.isfile('tmp1.json'):
+            os.remove('tmp1.json')
+        if os.path.isfile('tmp2.json'):
+            os.remove('tmp2.json')
