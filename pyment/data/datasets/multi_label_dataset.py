@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
+import os
 import numpy as np
 
 from typing import Any, Dict, List, Union
 
 from .dataset import Dataset
-from ...labels import load_label_from_json, Label
+from ...labels import load_label_from_json, Label, load_label_from_jsonfile
 from ...utils.decorators import json_serialized_property
 from ...utils.io.json import encode_object_as_json
 
@@ -37,6 +38,9 @@ class MultiLabelDataset(Dataset):
 
     @target.setter
     def target(self, value: Any) -> None:
+        if isinstance(value, str) and os.path.isfile(value):
+            value = load_label_from_jsonfile(value)
+    
         if value is None or isinstance(value, str) or isinstance(value, Label):
             self._validate_and_set_target(value)
         elif isinstance(value, list):
@@ -45,6 +49,9 @@ class MultiLabelDataset(Dataset):
             elif len(value) == 1:
                 self._validate_and_set_target(value[0])
             else:
+                value = [load_label_from_jsonfile(v) if isinstance(v, str) \
+                                                     and os.path.isfile(v) \
+                         else v for v in value]
                 for v in value:
                     self._validate_target(v)
 
