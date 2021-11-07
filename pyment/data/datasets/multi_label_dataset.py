@@ -17,27 +17,55 @@ logging.basicConfig(format=logformat, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MultiLabelDataset(Dataset):
+    """An interface class for datasets which has many possible labels.
+    A typical example would be a dataset which is loaded from csv,
+    where several of the columns can be used as the dataset label
+    during a program execution"""
+
     @property
     def variables(self) -> List[str]:
+        """Returns a list of all the variables the dataset has, e.g. the
+        possible targets of the dataset
+        
+        Returns:
+            list: A list of variables usable as targets
+        """
         if self._labels is None or len(self._labels) == 0:
             return []
 
         return list(self._labels.keys())
 
     @property
-    def paths(self) -> np.ndarray:
-        return self._paths
-
-    @property
     def target(self) -> str:
+        """Returns the current target of the dataset. The current target
+        defines which label is returned in dataset.y
+        
+        Returns:
+            str: The current target of the dataset
+        """
         return self._target
 
     @property
     def targets(self) -> List[Any]:
+        """Returns a list of all possible targets for the dataset
+        
+        Returns:
+            list: The possible targets of the dataset
+        """
         return self.variables + [None]
 
     @target.setter
     def target(self, value: Any) -> None:
+        """Sets the target of the dataset. Can only be set to a value
+        which occurs in the dataset.targets list, or a list of 
+        multiple such. Can be a string, a Label, or path to a jsonfile
+        which stores a Label
+        
+        Args:
+            value (Union[str, Label]): The value which is set as target
+        Raises:
+            ValueError: If the given value is not a valid target
+        """
         if isinstance(value, str) and os.path.isfile(value):
             value = load_label_from_jsonfile(value)
     
@@ -49,6 +77,8 @@ class MultiLabelDataset(Dataset):
             elif len(value) == 1:
                 self._validate_and_set_target(value[0])
             else:
+                # If either of the values given as files, a Label
+                # instance is loaded from that file
                 value = [load_label_from_jsonfile(v) if isinstance(v, str) \
                                                      and os.path.isfile(v) \
                          else v for v in value]
@@ -65,7 +95,6 @@ class MultiLabelDataset(Dataset):
 
     @property
     def y(self) -> np.ndarray:
-        print('Getting y')
         if self.target is None:
             return np.asarray([None] * len(self))
         elif isinstance(self.target, list):
@@ -137,6 +166,9 @@ class MultiLabelDataset(Dataset):
 
         raise ValueError(('Unable to retrieve target vector for target with '
                           f'type {type(target)}'))
+
+    def stratified(self, variables: List[str]) -> MultiLabelDataset:
+        return self
 
     def __eq__(self, other: MultiLabelDataset) -> bool:
         if not isinstance(other, MultiLabelDataset):

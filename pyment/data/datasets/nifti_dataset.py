@@ -62,6 +62,10 @@ class NiftiDataset(MultiLabelDataset):
         return cls(paths, labels, **kwargs)
 
     @property
+    def paths(self) -> np.ndarray:
+        return self._paths
+
+    @property
     def filenames(self) -> np.ndarray:
         return np.asarray([os.path.basename(p) for p in self.paths])
 
@@ -109,3 +113,39 @@ class NiftiDataset(MultiLabelDataset):
 
         return super().__eq__(other) and \
                np.array_equal(self.paths, other.paths)
+
+    def __add__(self, other: NiftiDataset) -> NiftiDataset:
+        assert isinstance(other, NiftiDataset), \
+            f'Unable to add NiftiDataset with {type(other)}'
+
+        paths = np.concatenate([self.paths, other.paths])
+
+        labels = {}
+
+        if self.labels is not None:
+            for key in self.labels:
+                other_values = other.labels[key] if other.labels is not None \
+                                                    and key in other.labels \
+                               else np.repeat(np.nan, len(other)) 
+                labels[key] = np.concatenate([self.labels[key], 
+                                              other_values])
+
+        if other.labels is not None:
+            for key in other.labels:
+                self_values = self.labels[key] if self.labels is not None \
+                                                    and key in self.labels \
+                               else np.repeat(np.nan, len(other)) 
+                labels[key] = np.concatenate([self_values, 
+                                              other.labels[key]])
+
+        labels = None if len(labels) == 0 else labels
+        target = None
+
+        if self.target == other.target:
+            target = self.target
+        elif not self.target == other.target == None:
+            logger.warning(('Unable to inherit target from two NiftiDatasets '
+                            f'with different targets {self.target} and '
+                            f'{other.target}. Resorting to None'))
+
+        return NiftiDataset(paths, labels, target=target)

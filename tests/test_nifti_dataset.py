@@ -6,7 +6,9 @@ import numpy as np
 from shutil import rmtree
 
 from pyment.data import load_dataset_from_jsonfile, NiftiDataset
-from pyment.labels import BinaryLabel
+from pyment.labels import BinaryLabel, ContinuousLabel
+
+from utils import assert_exception
 
 
 def test_dataset_length():
@@ -473,8 +475,6 @@ def test_dataset_targets_from_files():
             [1, 0]
         ])
 
-        print(data.y)
-
         assert np.array_equal(expected, data.y, equal_nan=True), \
             'NiftiDataset does not apply label from file'
     finally:
@@ -482,3 +482,131 @@ def test_dataset_targets_from_files():
             os.remove('tmp1.json')
         if os.path.isfile('tmp2.json'):
             os.remove('tmp2.json')
+
+def test_niftidataset_add_unknown_other():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+    data = NiftiDataset(paths, labels, target='y1')
+    
+    assert_exception(lambda: data + 5,
+                     message=('Adding an int to a NiftiDataset does not raise '
+                              'an error'))
+
+def test_niftidataset_add_paths():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    data = NiftiDataset(paths) + NiftiDataset(paths)
+    
+    assert np.array_equal(np.concatenate([paths, paths]), data.paths), \
+        'Two added NiftiDatasets does not produce the correct paths'
+
+def test_niftidataset_add_labels():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+
+    data = NiftiDataset(paths, labels) + NiftiDataset(paths, labels)
+
+    assert 'y1' in data.labels, \
+        'Two added NiftiDatasets does not have the right label keys'
+    assert np.array_equal([1, 2, 3, 1, 2, 3], data.labels['y1']), \
+        'Two added NiftiDatasets does not have the correct labels'
+
+def test_niftidataset_add_labels_none_other():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+
+    data = NiftiDataset(paths, labels) + NiftiDataset(paths)
+
+    assert 'y1' in data.labels, \
+        ('Two added NiftiDatasets does not have the right label keys '
+         'when the other dataset has no labels')
+    assert np.array_equal([1, 2, 3, np.nan, np.nan, np.nan], data.labels['y1'],
+                          equal_nan=True), \
+        ('Two added NiftiDatasets does not have the correct labels '
+         'when the other dataset has no labels')
+
+def test_niftidataset_add_labels_none_self():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+
+    data = NiftiDataset(paths) + NiftiDataset(paths, labels)
+
+    assert 'y1' in data.labels, \
+        ('Two added NiftiDatasets does not have the right label keys '
+         'when self has no labels')
+    assert np.array_equal([np.nan, np.nan, np.nan, 1, 2, 3], data.labels['y1'],
+                          equal_nan=True), \
+        ('Two added NiftiDatasets does not have the correct labels '
+         'when self has no labels')
+
+def test_niftidataset_add_labels_missing():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels1 = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+    labels2 = {
+        'y2': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+
+    data = NiftiDataset(paths, labels1) + NiftiDataset(paths, labels2)
+
+    assert set(['y1', 'y2']) == set(data.labels.keys()), \
+        ('Two added NiftiDatasets does not have the right label keys '
+         'when they have disjunct label sets')
+    assert np.array_equal([1, 2, 3, np.nan, np.nan, np.nan], data.labels['y1'],
+                          equal_nan=True), \
+        ('Two added NiftiDatasets does not have the correct labels '
+         'label is missing from other')
+    assert np.array_equal([np.nan, np.nan, np.nan, 1, 2, 3], data.labels['y2'],
+                          equal_nan=True), \
+        ('Two added NiftiDatasets does not have the correct labels '
+         'label is missing from self')
+
+def test_niftidataset_add_equal_string_target():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+    data = NiftiDataset(paths, labels, 'y1') + \
+           NiftiDataset(paths, labels, 'y1')
+
+    assert 'y1' == data.target, \
+        ('Adding two NiftiDatasets with the same string target does not '
+         'produce a new NiftiDataset with the same target')
+
+def test_niftidataset_add_equal_label_target():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64)
+    }
+    data = NiftiDataset(paths, labels, ContinuousLabel('y1')) + \
+           NiftiDataset(paths, labels, ContinuousLabel('y1'))
+
+    assert ContinuousLabel('y1') == data.target, \
+        ('Adding two NiftiDatasets with the same Label target does not '
+         'produce a new NiftiDataset with the same target')
+
+def test_niftidataset_add_different_targets(caplog):
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray([1, 2, 3])
+    }
+
+
+    with caplog.at_level(logging.WARNING):
+        data = NiftiDataset(paths, labels, ContinuousLabel('y1')) + \
+               NiftiDataset(paths, labels, ContinuousLabel('y2'))
+        assert caplog.text != '', \
+            ('Adding two NiftiDatasets with different targets does not raise '
+             'a warning')
+
+def test_niftidataset_stratified():
+    pass

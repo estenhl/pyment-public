@@ -156,6 +156,12 @@ class ContinuousLabel(Label):
         self._fit['min'] = np.nanmin(transformed)
         self._fit['max'] = np.nanmax(transformed)
 
+        logger.info((f'Configured continuous label \'{self.name}\' with '
+                     f'mean {round(self._fit["mean"], 2)}, '
+                     f'stddev {round(self._fit["stddev"], 2)}, '
+                     f'min {round(self._fit["min"], 2)} '
+                     f'and max {round(self._fit["max"], 2)}'))
+
         if transform:
             return transformed
         
