@@ -280,36 +280,48 @@ def test_fitted_binary_label_to_from_json():
 
     values2 = label2.transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
 
-#     assert np.array_equal(values1, values2), \
-#         'BinaryLabel to and from json does not produce the same encoded values'
+    assert np.array_equal(values1, values2), \
+        'BinaryLabel to and from json does not produce the same encoded values'
 
-# def test_fitted_binary_label_to_from_jsonstring():
-#     label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
-#                         missing_strategy=MissingStrategy.MEAN_FILL)
-#     values1 = label1.fit_transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
-#     label2 = BinaryLabel.from_jsonstring(label1.jsonstring)
+def test_fitted_binary_label_to_from_jsonstring():
+    label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+                        missing_strategy=MissingStrategy.MEAN_FILL)
+    values1 = label1.fit_transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
+    label2 = BinaryLabel.from_jsonstring(label1.jsonstring)
 
-#     assert label1 == label2, \
-#         'BinaryLabel to and from json does not produce an equivalent object'
+    assert label1 == label2, \
+        'BinaryLabel to and from json does not produce an equivalent object'
 
-#     values2 = label2.transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
+    values2 = label2.transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
 
-#     assert np.array_equal(values1, values2), \
-#         'BinaryLabel to and from json does not produce the same encoded values'
+    assert np.array_equal(values1, values2), \
+        'BinaryLabel to and from json does not produce the same encoded values'
 
-# def test_binary_label_save_load():
-#     try:
-#         label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
-#                             missing_strategy=MissingStrategy.MEAN_FILL)
-#         label1.save('tmp.json')
-#         label2 = load_label_from_jsonfile('tmp.json')
+def test_binary_label_save_load():
+    try:
+        label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+                            missing_strategy=MissingStrategy.MEAN_FILL)
+        label1.save('tmp.json')
+        label2 = load_label_from_jsonfile('tmp.json')
 
-#         assert label1 == label2, \
-#             'BinaryLabel save and load does not produce an equivalent object'
-#     finally:
-#         if os.path.isfile('tmp.json'):
-#             os.remove('tmp.json')
+        assert label1 == label2, \
+            'BinaryLabel save and load does not produce an equivalent object'
+    finally:
+        if os.path.isfile('tmp.json'):
+            os.remove('tmp.json')
 
-# def test_equal_string():
-#     assert BinaryLabel('test') != 'test', \
-#         'BinaryLabel is considered equal as string with the same value'
+def test_equal_string():
+    assert BinaryLabel('test') != 'test', \
+        'BinaryLabel is considered equal as string with the same value'
+
+def test_binary_label_reinitialization():
+        label = BinaryLabel('test')
+        label.fit(['A', 'B'])
+
+        assert_exception(BinaryLabel, args=['test'], 
+                         kwargs={'encoding': {'B': 0, 'A': 1}, 
+                                 'fit': label._fit}, 
+                         exception=ValueError,
+                         message=('Initializing a BinaryLabel with a '
+                                  'previous fit and new configuration does '
+                                  'not raise an error'))

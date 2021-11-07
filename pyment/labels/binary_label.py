@@ -36,22 +36,6 @@ class BinaryLabel(Label):
         return self._fit['frequencies']
 
     @property
-    def missing_strategy(self) -> str:
-        return self._missing_strategy
-
-    @missing_strategy.setter
-    def missing_strategy(self, strategy: Union[str, MissingStrategy]) -> None:
-        if isinstance(strategy, str):
-            strategy = MissingStrategy(strategy)
-    
-        if strategy not in [MissingStrategy.ALLOW, MissingStrategy.CENTRE_FILL,
-                            MissingStrategy.MEAN_FILL]:
-            raise ValueError(('Illegal strategy for missing values '
-                              f'{strategy} for binary label'))
-
-        self._missing_strategy = strategy
-
-    @property
     def mean(self) -> float:
         if not self.is_fitted:
             raise ValueError('The mean of an unfitted binary label is unknown')
@@ -64,6 +48,11 @@ class BinaryLabel(Label):
         return total / count
 
     @property
+    def applicable_missing_strategies(self) -> List[MissingStrategy]:
+        return [MissingStrategy.ALLOW, MissingStrategy.CENTRE_FILL,
+                MissingStrategy.MEAN_FILL]
+
+    @property
     def json(self) -> Dict[str, Any]:
         obj = super().json
 
@@ -74,6 +63,18 @@ class BinaryLabel(Label):
                  missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
                  fit: Dict[str, Any] = None) -> BinaryLabel:
         super().__init__(name, missing_strategy=missing_strategy, fit=fit)
+
+        # Validate that object is not initialized both with a previous
+        # fit and a new configuration 
+        params = [
+            (encoding, None, 'encoding')
+        ]
+
+        for var, default, key in params:
+            if key in self._fit and var != default:
+                raise ValueError(('Unable to instantiate BinaryLabel '
+                                  'with a previous fit and non-default '
+                                  f'{key}={var}'))
 
         if allowed is not None:
             if encoding is not None:
@@ -98,6 +99,9 @@ class BinaryLabel(Label):
             values[np.where(np.isnan(values))] = self.mean
         elif strategy == MissingStrategy.CENTRE_FILL:
             values[np.where(np.isnan(values))] = 0.5
+        else:
+            raise ValueError((f'Invalid missing strategy {strategy} for '
+                              'BinaryLabel'))
 
         return values
 
