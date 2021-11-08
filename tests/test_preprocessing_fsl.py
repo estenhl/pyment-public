@@ -1,6 +1,6 @@
 import os
 
-from mock import patch, MagicMock
+from mock import patch
 from shutil import rmtree
 
 from pyment.utils.preprocessing import flirt, flirt_folder, reorient2std, \
