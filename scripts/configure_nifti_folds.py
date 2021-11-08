@@ -10,6 +10,10 @@ from collections import Counter
 from functools import reduce
 from typing import List
 
+from utils import configure_environment
+
+configure_environment()
+
 from pyment.data import NiftiDataset
 
 
@@ -34,8 +38,8 @@ def configure_nifti_folds(*, folders: List[str], targets: List[str],
 
     logger.info(f'Instantiated dataset with {len(dataset)} datapoints')
 
-    if test_portion is not None:
-        assert test_portion <= .5, \
+    if test_portion > 0.0:
+        assert test_portion <= 0.5, \
             'Unable to configure folds with test portion > 0.5'
 
         test_splits = math.ceil(1 / test_portion)
@@ -53,10 +57,14 @@ def configure_nifti_folds(*, folders: List[str], targets: List[str],
     for i in range(len(folds)):
         folds[i].save(os.path.join(destination, f'fold_{i}.json'))
 
-    test.save(os.path.join(destination, 'test.json'))
+    names = [f'fold {i}' for i in range(k)]
+    datasets = folds
 
-    names = [f'fold {i}' for i in range(k)] + ['test']
-    datasets = folds + [test]
+    if test_portion > 0.0:
+        test.save(os.path.join(destination, 'test.json'))
+        names.append('test')
+        datasets.append(test)
+
     df = pd.DataFrame({}, index=names)
     df.index.name = 'split'
 
@@ -72,6 +80,7 @@ def configure_nifti_folds(*, folders: List[str], targets: List[str],
             df[f'{variable} min'] = [np.nanmin(dataset.labels[variable]) \
                                     for dataset in datasets]
 
+    pd.set_option('display.max_columns', 999)
     logger.info(f'Datasets:\n{str(df)}\n')
     df.to_csv(os.path.join(destination, 'overview.csv'),
               quoting=csv.QUOTE_NONNUMERIC)

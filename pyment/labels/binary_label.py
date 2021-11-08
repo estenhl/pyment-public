@@ -52,12 +52,6 @@ class BinaryLabel(Label):
         return [MissingStrategy.ALLOW, MissingStrategy.CENTRE_FILL,
                 MissingStrategy.MEAN_FILL]
 
-    @property
-    def json(self) -> Dict[str, Any]:
-        obj = super().json
-
-        return obj
-
     def __init__(self, name: str, allowed: List[Any] = None,
                  encoding: Set[Any, int] = None, 
                  missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
@@ -108,8 +102,6 @@ class BinaryLabel(Label):
     def fit(self, values: np.ndarray) -> None:
         counts = Counter(values)
         unique = sorted(list(counts.keys()))
-    
-        logger.info(f'Found values {unique} for binary variable {self.name}')
 
         if 'encoding' in self._fit:
             encoding = self._fit['encoding']
@@ -119,15 +111,12 @@ class BinaryLabel(Label):
             assert len(encoding) == 2, \
                 'Values provided for fitting binary label has >2 levels'
 
-        logger.info((f'Using encoding {encoding} for binary variable '
-                     f'{self.name}'))
-
         frequencies = {key: counts[key] for key in counts if key in encoding}
         total = np.sum(list(frequencies.values()))
         frequencies = {key: frequencies[key] / total for key in frequencies}
 
-        logger.info((f'Found frequencies {frequencies} for binary variable '
-                     f'{self.name}'))
+        logger.info((f'Configured binary variable \'{self.name}\' with '
+                     f'encoding {encoding} and frequencies {frequencies}'))
 
         self._fit = {
             'encoding': encoding,
@@ -136,7 +125,7 @@ class BinaryLabel(Label):
 
     def transform(self, values: np.ndarray) -> None:
         if not self.is_fitted:
-            raise ValueError((f'Unable to call transform on an unfitted '
+            raise ValueError(('Unable to call transform on an unfitted '
                               'BinaryLabel'))
 
         encoded = np.empty(len(values))
@@ -149,9 +138,12 @@ class BinaryLabel(Label):
 
         return encoded
 
-    def fit_transform(self, values: np.ndarray) -> None:
+    def fit_transform(self, values: np.ndarray) -> np.ndarray:
         self.fit(values)
         return self.transform(values)
+    
+    def revert(self, values: np.ndarray) -> np.ndarray:
+        return values
 
     def __eq__(self, other: BinaryLabel) -> bool:
         if not isinstance(other, BinaryLabel):

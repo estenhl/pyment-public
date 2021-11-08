@@ -3,6 +3,8 @@ import numpy as np
 from enum import Enum
 from typing import Any
 
+from ..io.json import encode_object_as_json, JSONSerializable
+
 _json_safe = [int, str, float]
 
 def _recursive_serialize(obj: Any):
@@ -12,7 +14,7 @@ def _recursive_serialize(obj: Any):
 
     if obj is None:
         return None
-    elif isinstance(obj, list):
+    elif isinstance(obj, list) or isinstance(obj, tuple):
         return [_recursive_serialize(x) for x in obj]
     elif isinstance(obj, dict):
         return {_recursive_serialize(key): _recursive_serialize(obj[key]) \
@@ -25,6 +27,9 @@ def _recursive_serialize(obj: Any):
         return float(obj)
     elif isinstance(obj, Enum):
         return obj.value
+    elif isinstance(obj, JSONSerializable):
+        return encode_object_as_json(obj, include_timestamp=False, 
+                                     include_user=False)
     else:
         raise NotImplementedError(('Unable to serialize object of type '
                                    f'{type(obj)}'))

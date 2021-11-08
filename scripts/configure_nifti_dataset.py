@@ -3,6 +3,10 @@ import os
 
 from typing import List
 
+from utils import configure_environment
+
+configure_environment()
+
 from pyment.data import NiftiDataset
 
 

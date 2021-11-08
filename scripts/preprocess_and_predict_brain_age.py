@@ -4,12 +4,17 @@ import os
 
 from shutil import copyfile, rmtree, which
 
+from utils import configure_environment
+
+configure_environment()
+
 from pyment.utils.preprocessing import autorecon1_folder, \
                                        convert_mgz_to_nii_gz_folder, \
                                        crop_folder, \
                                        extract_brainmasks_from_recon, \
                                        flirt_folder, \
                                        reorient2std_folder
+
 from predict_brain_age import predict_brain_age
 
 

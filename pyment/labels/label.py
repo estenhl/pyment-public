@@ -7,11 +7,12 @@ from abc import ABC, abstractmethod, abstractproperty
 from typing import Any, Dict, List, Union
 
 from .missing_strategy import MissingStrategy
-from ..utils.io.json import encode_object_as_jsonstring, save_object_as_json
+from ..utils.io.json import encode_object_as_jsonstring, save_object_as_json, \
+                            JSONSerializable
 from ..utils.decorators import json_serialized_property
 
 
-class Label(ABC):
+class Label(ABC, JSONSerializable):
     @abstractproperty
     def is_fitted(self) -> bool:
         """Returns true if the variable is fitted and ready for use 
@@ -110,6 +111,13 @@ class Label(ABC):
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
         """Convenience-function for combining fit and transform in a 
         single call"""
+        pass
+
+    @abstractmethod
+    def revert(self, values: np.ndarray) -> np.ndarray:
+        """Reverts the operations applied in transform, effectively 
+        decoding the values back to their original format"""
+        pass
 
     def __eq__(self, other: Label) -> bool:
         if not isinstance(other, Label):

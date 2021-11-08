@@ -67,15 +67,22 @@ class MultiLabelDataset(Dataset):
         Raises:
             ValueError: If the given value is not a valid target
         """
+        if isinstance(value, str) and os.path.isfile(value):
+            value = load_label_from_jsonfile(value)
+        elif isinstance(value, dict):
+            value = load_label_from_json(value)
     
         if value is None or isinstance(value, str) or isinstance(value, Label):
             self._validate_and_set_target(value)
         elif isinstance(value, list):
             # If either of the values given as files, a Label
             # instance is loaded from that file
-            value = [load_label_from_jsonfile(v) if isinstance(v, str) and \
-                                                    os.path.isfile(v) \
-                     else v for v in value]
+            for i in range(len(value)):
+                if isinstance(value[i], str) and os.path.isfile(value[i]):
+                    value[i] = load_label_from_jsonfile(value[i])
+                elif isinstance(value[i], dict):
+                    value[i] = load_label_from_json(value[i])
+
             if len(value) == 0:
                 self._target = None
             elif len(value) == 1:
@@ -104,14 +111,9 @@ class MultiLabelDataset(Dataset):
 
     @json_serialized_property
     def json(self) -> str:
-        target = self.target if not isinstance(self.target, Label) \
-                 else encode_object_as_json(self.target, 
-                                            include_timestamp=False,
-                                            include_user=False)
-
         return {
             'labels': self.labels,
-            'target': target
+            'target': self.target
         }
 
     @classmethod

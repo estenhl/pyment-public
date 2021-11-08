@@ -185,3 +185,6 @@ class ContinuousLabel(Label):
 
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
         return self.fit(values, transform=True)
+
+    def revert(self, values: np.ndarray) -> np.ndarray:
+        return values

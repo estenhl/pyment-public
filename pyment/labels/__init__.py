@@ -7,11 +7,13 @@ from .binary_label import BinaryLabel
 from .continuous_label import ContinuousLabel
 from .label import Label
 from .missing_strategy import MissingStrategy
+from .ordinal_label import OrdinalLabel
 
 
 _label_types = {
     'binary': BinaryLabel,
-    'continuous': ContinuousLabel
+    'continuous': ContinuousLabel,
+    'ordinal': OrdinalLabel
 }
 
 def label_from_type(type: str, **kwargs) -> Label:

@@ -88,7 +88,8 @@ class NiftiGenerator(Iterator, Resettable):
         self.index = 0
 
         if self.shuffle:
-            self.dataset = self.dataset.shuffled()
+            idx = np.random.permutation(np.arange(len(self.dataset)))
+            self.dataset = self.dataset[idx]
 
     def reset(self) -> None:
         self._initialize()
