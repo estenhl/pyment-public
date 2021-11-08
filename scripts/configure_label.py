@@ -5,6 +5,10 @@ import pandas as pd
 
 from functools import reduce
 
+from utils import configure_environment
+
+configure_environment()
+
 from pyment.labels import Label
 
 

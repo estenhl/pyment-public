@@ -20,6 +20,8 @@ class RegressionSFCN(Model):
                  depths: List[int] = [32, 64, 128, 256, 256, 64],
                  prediction_range: Tuple[float, float] = (3, 95),
                  name: str = 'Regression3DSFCN', weights: str = None):
+        if isinstance(input_shape, list):
+            input_shape = tuple(input_shape)
 
         regularizer = l2(weight_decay) if weight_decay is not None else None
 
@@ -39,7 +41,8 @@ class RegressionSFCN(Model):
             x = MaxPooling3D((2, 2, 2), name=f'{name}/block{i+1}/pool')(x)
 
         x = Conv3D(depths[-1], (1, 1, 1), padding='SAME', activation=None,
-                   name=f'{name}/top/conv')(x)
+                   kernel_regularizer=regularizer, 
+                   bias_regularizer=regularizer, name=f'{name}/top/conv')(x)
         x = BatchNormalization(name=f'{name}/top/norm')(x)
         x = Activation(activation, name=f'{name}/top/{activation}')(x)
         x = GlobalAveragePooling3D(name=f'{name}/top/pool')(x)

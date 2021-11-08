@@ -699,3 +699,20 @@ def test_dataset_stratified_multiple():
                np.mean(folds[1].labels['age'])) < 1e-2, \
         ('Stratifying a NiftiDataset on multiple variables does not yield '
          'approximately similar splits for the third variable')
+
+def test_dataset_to_from_json_with_binary_labels():
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
+    labels = {
+        'y1': np.asarray(['A', 'B', 'C']),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+    label1 = BinaryLabel('y1', encoding={'A': 0, 'B': 1})
+    label1.fit(np.asarray(['A', 'B', 'C', 'B']))
+    label2 = BinaryLabel('y2', encoding={'A': 0, 'B': 1})
+    label2.fit(np.asarray(['A', 'B', 'C', 'B']))
+
+    data1 = NiftiDataset(paths, labels, target=[label1, label2])
+    data2 = NiftiDataset.from_json(data1.json)
+
+    assert data1.target == data2.target, \
+        'NiftiDataset to and from json does not retain BinaryLabel target'
