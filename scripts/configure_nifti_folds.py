@@ -1,6 +1,12 @@
 import argparse
+import csv
 import logging
+import math
+import os
+import numpy as np
+import pandas as pd
 
+from collections import Counter
 from functools import reduce
 from typing import List
 
@@ -12,19 +18,63 @@ logging.basicConfig(format=logformat, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def configure_nifti_folds(*, folders: List[str], targets: List[str], 
-                          stratification: List[str] = None,
-                          folds: int = 1, test_portion: float = .0,
-                          destination: str):
+                          stratification: List[str] = None, k: int = 1, 
+                          test_portion: float = .0, destination: str):
+    if os.path.isdir(destination):
+        raise ValueError(f'Folder {destination} already exists')
+
     if targets is None:
         targets = []
     if stratification is None:
         stratification = []
     
-    datasets = [NiftiDataset.from_folder(folder) for folder in folders]
+    datasets = [NiftiDataset.from_folder(folder, target=targets) \
+                for folder in folders]
     dataset = reduce(lambda x, y: x + y, datasets)
-    dataset = dataset.stratified(stratification)
 
     logger.info(f'Instantiated dataset with {len(dataset)} datapoints')
+
+    if test_portion is not None:
+        assert test_portion <= .5, \
+            'Unable to configure folds with test portion > 0.5'
+
+        test_splits = math.ceil(1 / test_portion)
+        folds = dataset.stratified_folds(test_splits, stratification)
+        test = folds[-1]
+        dataset = reduce(lambda x, y: x + y, folds[:-1])
+
+        logger.info(f'Reserved {len(test)} images for test')
+        logger.info(f'Using {len(dataset)} images for folds')
+
+    folds = dataset.stratified_folds(k, stratification)
+
+    os.mkdir(destination)
+
+    for i in range(len(folds)):
+        folds[i].save(os.path.join(destination, f'fold_{i}.json'))
+
+    test.save(os.path.join(destination, 'test.json'))
+
+    names = [f'fold {i}' for i in range(k)] + ['test']
+    datasets = folds + [test]
+    df = pd.DataFrame({}, index=names)
+    df.index.name = 'split'
+
+    for variable in datasets[0].variables:
+        if datasets[0].labels[variable].dtype == object:
+            df[variable] = [Counter(dataset.labels[variable]) \
+                            for dataset in datasets]
+        else:
+            df[f'{variable} mean'] = [np.nanmean(dataset.labels[variable]) \
+                                    for dataset in datasets]
+            df[f'{variable} max'] = [np.nanmax(dataset.labels[variable]) \
+                                    for dataset in datasets]
+            df[f'{variable} min'] = [np.nanmin(dataset.labels[variable]) \
+                                    for dataset in datasets]
+
+    logger.info(f'Datasets:\n{str(df)}\n')
+    df.to_csv(os.path.join(destination, 'overview.csv'),
+              quoting=csv.QUOTE_NONNUMERIC)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(('Configures and saves K folds of a '
@@ -53,6 +103,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     configure_nifti_folds(folders=args.folders, targets=args.targets, 
-                          stratification=args.stratification, folds=args.folds, 
+                          stratification=args.stratification, k=args.folds, 
                           test_portion=args.test_portion,
                           destination=args.destination)

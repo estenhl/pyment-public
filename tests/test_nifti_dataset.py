@@ -3,6 +3,7 @@ import logging
 import os
 import numpy as np
 
+from collections import Counter
 from shutil import rmtree
 
 from pyment.data import load_dataset_from_jsonfile, NiftiDataset
@@ -12,20 +13,20 @@ from utils import assert_exception
 
 
 def test_dataset_length():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
 
     assert 3 == len(data), 'NiftiDataset does not report correct length'
 
 def test_dataset_paths():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
 
     assert np.array_equal(paths, data.paths), \
         'NiftiDataset does not report correct paths'
 
 def test_dataset_filenames():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
 
     filenames = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
@@ -34,7 +35,7 @@ def test_dataset_filenames():
         'NiftiDataset does not report correct filenames'
 
 def test_dataset_ids():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
 
     ids = ['path1', 'path2', 'path3']
@@ -43,14 +44,14 @@ def test_dataset_ids():
         'NiftiDataset does not report correct ids'
 
 def test_dataset_init_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths, target='id')
 
     assert 'id' == data.target, \
         'Setting NiftiDataset target via init does not work'
 
 def test_dataset_set_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
     data.target = 'id'
 
@@ -58,7 +59,7 @@ def test_dataset_set_target():
         'Setting NiftiDataset target via init does not work'
 
 def test_dataset_id_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths, target='id')
 
     ids = ['path1', 'path2', 'path3']
@@ -67,7 +68,7 @@ def test_dataset_id_target():
         'NiftiDataset with target=id does not return ids as labels'
 
 def test_dataset_variables():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -78,7 +79,7 @@ def test_dataset_variables():
                                             'return the correct labels')
 
 def test_dataset_labels():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -89,7 +90,7 @@ def test_dataset_labels():
         'NiftiDataset does not return the correct labels'
 
 def test_dataset_invalid_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -107,7 +108,7 @@ def test_dataset_invalid_target():
         'NiftiDataset does not raise an exception if setting an invalid target'
 
 def test_dataset_json_paths():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths)
     
     assert 'paths' in data.json, ('NiftiDataset.json does not contain a field '
@@ -116,7 +117,7 @@ def test_dataset_json_paths():
         'NiftiDataset.json does not contain correct paths'
 
 def test_dataset_json_labels():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -133,7 +134,7 @@ def test_dataset_json_labels():
         'NiftiDataset.json does not contain correct labels'
         
 def test_dataset_json_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -146,7 +147,7 @@ def test_dataset_json_target():
         'NiftiDataset.json does not contain correct target'
 
 def test_dataset_json_handles_numpy_labels():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -162,7 +163,7 @@ def test_dataset_json_handles_numpy_labels():
     assert not exception, 'NiftiDataset.json does not handle numpy arrays'
 
 def test_dataset_equal():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -211,7 +212,7 @@ def test_dataset_unequal_target():
         'Two NiftiDatasets with different targets are considered equal'
 
 def test_dataset_jsonstring():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -228,7 +229,7 @@ def test_dataset_jsonstring():
         'NiftiDataset.jsonstring contains wrong labels'
 
 def test_dataset_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -242,7 +243,7 @@ def test_dataset_target():
 
 def test_dataset_from_json():
     obj = {
-        'paths': ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz'],
+        'paths': ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz'],
         'labels': {
             'y1': np.asarray([1, 2, 3], dtype=np.int64)
         },
@@ -262,7 +263,7 @@ def test_dataset_from_json():
         'NiftiDataset.from_json returns object with wrong labels'
 
 def test_dataset_to_from_json():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -274,7 +275,7 @@ def test_dataset_to_from_json():
 
 
 def test_dataset_to_from_jsonstring():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -287,7 +288,7 @@ def test_dataset_to_from_jsonstring():
 
 def test_dataset_save_load():
     try:
-        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
         labels = {
             'y1': np.asarray([1, 2, 3], dtype=np.int64)
         }
@@ -322,7 +323,7 @@ def test_dataset_from_folder_kwargs():
         rmtree('tmp')
 
 def test_dataset_invalid_init_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': [1, 2, 3],
         'y2': ['a', 'b', 'c']
@@ -339,7 +340,7 @@ def test_dataset_invalid_init_target():
         'Instatiating NiftiDataset with invalid target does not raise an error'
 
 def test_dataset_multitarget():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64),
         'y2': np.asarray(['a', 'b', 'c'])
@@ -359,7 +360,7 @@ def test_dataset_multitarget():
         'NiftiDataset does not return correct y with multiple targets'
 
 def test_dataset_label_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([0, 1, 0], dtype=np.int64)
     }
@@ -378,7 +379,7 @@ def test_dataset_label_target():
 
 
 def test_dataset_label_target_transform():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray(['A', 'B', 'C'])
     }
@@ -391,7 +392,7 @@ def test_dataset_label_target_transform():
         'NiftiDataset does not apply transform from BinaryLabel'
 
 def test_dataset_label_target_unfitted_warning(caplog):
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray(['A', 'B', 'C'])
     }
@@ -405,7 +406,7 @@ def test_dataset_label_target_unfitted_warning(caplog):
             'NiftiDataset with unfitted BinaryLabel does not raise a warning'
 
 def test_dataset_to_from_json_with_binary_label():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray(['A', 'B', 'C'])
     }
@@ -419,7 +420,7 @@ def test_dataset_to_from_json_with_binary_label():
         'NiftiDataset to and from json does not retain BinaryLabel target'
 
 def test_dataset_to_from_json_with_binary_label_y():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray(['A', 'B', 'C'])
     }
@@ -439,7 +440,7 @@ def test_dataset_target_from_file():
         label.fit(['A', 'B', 'C', 'B'])
         label.save('tmp.json')
 
-        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
         labels = {
             'y1': np.asarray(['A', 'B', 'C', 'B'])
         }
@@ -461,7 +462,7 @@ def test_dataset_targets_from_files():
         label2.fit(['A', 'B', 'C', 'B'])
         label2.save('tmp2.json')
 
-        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+        paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
         labels = {
             'y1': np.asarray(['A', 'B', 'C', 'B']),
             'y2': np.asarray(['A', 'B', 'C', 'B'])
@@ -484,7 +485,7 @@ def test_dataset_targets_from_files():
             os.remove('tmp2.json')
 
 def test_niftidataset_add_unknown_other():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -495,14 +496,14 @@ def test_niftidataset_add_unknown_other():
                               'an error'))
 
 def test_niftidataset_add_paths():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     data = NiftiDataset(paths) + NiftiDataset(paths)
     
     assert np.array_equal(np.concatenate([paths, paths]), data.paths), \
         'Two added NiftiDatasets does not produce the correct paths'
 
 def test_niftidataset_add_labels():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -515,7 +516,7 @@ def test_niftidataset_add_labels():
         'Two added NiftiDatasets does not have the correct labels'
 
 def test_niftidataset_add_labels_none_other():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -531,7 +532,7 @@ def test_niftidataset_add_labels_none_other():
          'when the other dataset has no labels')
 
 def test_niftidataset_add_labels_none_self():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -547,7 +548,7 @@ def test_niftidataset_add_labels_none_self():
          'when self has no labels')
 
 def test_niftidataset_add_labels_missing():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels1 = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -570,7 +571,7 @@ def test_niftidataset_add_labels_missing():
          'label is missing from self')
 
 def test_niftidataset_add_equal_string_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -582,7 +583,7 @@ def test_niftidataset_add_equal_string_target():
          'produce a new NiftiDataset with the same target')
 
 def test_niftidataset_add_equal_label_target():
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64)
     }
@@ -594,7 +595,7 @@ def test_niftidataset_add_equal_label_target():
          'produce a new NiftiDataset with the same target')
 
 def test_niftidataset_add_different_targets(caplog):
-    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', '/tmp/path3.nii.gz']
+    paths = ['tmp/path1.nii.gz', 'tmp/path2.nii.gz', 'tmp/path3.nii.gz']
     labels = {
         'y1': np.asarray([1, 2, 3], dtype=np.int64),
         'y2': np.asarray([1, 2, 3])
@@ -608,5 +609,93 @@ def test_niftidataset_add_different_targets(caplog):
             ('Adding two NiftiDatasets with different targets does not raise '
              'a warning')
 
-def test_niftidataset_stratified():
-    pass
+def test_dataset_slice():
+    paths = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+    
+    data = NiftiDataset(paths, labels, target='y1')
+    data = data[:2]
+
+    assert len(data) == 2, \
+        'Slicing a NiftiDataset does not remove indexes'
+    assert np.array_equal(['path1.nii.gz', 'path2.nii.gz'], data.paths), \
+        'Slicing a NiftiDataset yields the wrong paths'
+    assert set(['y1', 'y2']) == set(data.labels.keys()), \
+        'Slicing a NiftiDataset does not retain all labels'
+    assert np.array_equal([1, 2], data.labels['y1']), \
+        'Slicing a NiftiDataset retains the wrong labels'
+    assert np.array_equal(['A', 'B'], data.labels['y2']), \
+        'Slicing a NiftiDataset retains the wrong labels'
+    assert 'y1' == data.target, \
+        'Slicing a NiftiDataset changes the target'
+
+def test_dataset_stratified_categorical():
+    paths = [f'{i}.nii.gz' for i in range(12)]
+    labels = {
+        'dataset': ['d1'] * 6 + ['d2'] * 6,
+        'sex': np.random.permutation(['F'] * 6 + ['M'] * 6),
+        'age': np.random.uniform(0, 1, 12)
+    }
+    data = NiftiDataset(paths, labels)
+    folds = data.stratified_folds(2, ['dataset'])
+
+    assert len(folds) == 2, \
+        'NiftiDataset.stratified_folds(k) does not return k folds'
+
+    counts1 = Counter(folds[0].labels['dataset'])
+    counts2 = Counter(folds[1].labels['dataset'])
+
+    assert counts1 == counts2, \
+        ('Stratifying a NiftiDataset on a categorical variable does not yield '
+         'an even split')
+
+def test_dataset_stratified_continuous():
+    np.random.seed(42)
+
+    paths = [f'{i}.nii.gz' for i in range(100)]
+    labels = {
+        'dataset': ['d1'] * 50 + ['d2'] * 50,
+        'sex': np.random.permutation(['F'] * 50 + ['M'] * 50),
+        'age': np.random.uniform(0, 1, 100)
+    }
+    data = NiftiDataset(paths, labels)
+    folds = data.stratified_folds(2, ['age'])
+
+    assert abs(np.mean(folds[0].labels['age']) - \
+               np.mean(folds[1].labels['age'])) < 1e-2, \
+        ('Stratifying a NiftiDataset on a continuous variables does not yield '
+         'resembling means')
+
+def test_dataset_stratified_multiple():
+    np.random.seed(42)
+
+    paths = [f'{i}.nii.gz' for i in range(1000)]
+    labels = {
+        'dataset': np.random.permutation(['d1'] * 500 + ['d2'] * 500),
+        'sex': np.random.permutation(['F'] * 500 + ['M'] * 500),
+        'age': np.random.uniform(0, 1, 1000)
+    }
+    data = NiftiDataset(paths, labels)
+    folds = data.stratified_folds(2, ['dataset', 'sex', 'age'])
+
+    dataset_counts1 = Counter(folds[0].labels['dataset'])
+    dataset_counts2 = Counter(folds[1].labels['dataset'])
+
+    assert dataset_counts1 == dataset_counts2, \
+        ('Stratifying a NiftiDataset on multiple variables does not yield '
+         'equivalent splits for the first variable')
+    
+    M_counts1 = Counter(folds[0].labels['sex'])['M']
+    M_counts2 = Counter(folds[1].labels['sex'])['M']
+
+    assert abs(M_counts1 - M_counts2) < 10, \
+        ('Stratifying a NiftiDataset on multiple variables does not yield '
+         'approximately similar splits for the second variable')
+
+    assert abs(np.mean(folds[0].labels['age']) - \
+               np.mean(folds[1].labels['age'])) < 1e-2, \
+        ('Stratifying a NiftiDataset on multiple variables does not yield '
+         'approximately similar splits for the third variable')

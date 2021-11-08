@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import numpy as np
+import pandas as pd
 
 from typing import Any, Dict, List, Union
 
@@ -66,22 +67,20 @@ class MultiLabelDataset(Dataset):
         Raises:
             ValueError: If the given value is not a valid target
         """
-        if isinstance(value, str) and os.path.isfile(value):
-            value = load_label_from_jsonfile(value)
     
         if value is None or isinstance(value, str) or isinstance(value, Label):
             self._validate_and_set_target(value)
         elif isinstance(value, list):
+            # If either of the values given as files, a Label
+            # instance is loaded from that file
+            value = [load_label_from_jsonfile(v) if isinstance(v, str) and \
+                                                    os.path.isfile(v) \
+                     else v for v in value]
             if len(value) == 0:
                 self._target = None
             elif len(value) == 1:
                 self._validate_and_set_target(value[0])
             else:
-                # If either of the values given as files, a Label
-                # instance is loaded from that file
-                value = [load_label_from_jsonfile(v) if isinstance(v, str) \
-                                                     and os.path.isfile(v) \
-                         else v for v in value]
                 for v in value:
                     self._validate_target(v)
 
@@ -129,6 +128,7 @@ class MultiLabelDataset(Dataset):
                 if isinstance(labels[key], list):
                     labels[key] = np.asarray(labels[key])
                 elif not isinstance(labels[key], np.ndarray):
+                    print(labels[key])
                     raise ValueError(f'Dataset labels must be numpy arrays')
         elif labels != None:
             raise ValueError(('Dataset labels must be either None or a '
@@ -166,9 +166,6 @@ class MultiLabelDataset(Dataset):
 
         raise ValueError(('Unable to retrieve target vector for target with '
                           f'type {type(target)}'))
-
-    def stratified(self, variables: List[str]) -> MultiLabelDataset:
-        return self
 
     def __eq__(self, other: MultiLabelDataset) -> bool:
         if not isinstance(other, MultiLabelDataset):

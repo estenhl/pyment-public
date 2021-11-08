@@ -104,15 +104,38 @@ class NiftiDataset(MultiLabelDataset):
 
         super().__init__(labels, target)
 
-    def __len__(self) -> int:
-        return len(self.paths)
+    def stratified_folds(self, k: int, variables: List[str]) -> NiftiDataset:
+        """Returns a stratified copy of the dataset, using the variables
+        given as input for stratification. Each of these variables must
+        correspond to a label of the dataset, e.g. occur in 
+        dataset.labels
+        
+        Args:
+            k (int): Number of folds to divide the dataset into
+            variables (List[str]): (Ordered) stratification variables
+        Returns:
+            NiftiDataset: The stratified copy
+        Raises:
+            """
 
-    def __eq__(self, other: NiftiDataset) -> bool:
-        if not isinstance(other, NiftiDataset):
-            return False
+        data = {key: self.labels[key] for key in self.labels}
+        data['path'] = self.paths 
+        df = pd.DataFrame(data)
+        df = df.sort_values(variables)
+        df['fold'] = np.arange(len(df)) % k
+        df = df.sort_values(['fold'] + variables)
 
-        return super().__eq__(other) and \
-               np.array_equal(self.paths, other.paths)
+        labels = [{col: df.loc[df['fold'] == i, col].values \
+                   for col in df.columns if col not in ['path', 'fold']}
+                  for i in range(k)]
+        paths = [df.loc[df['fold'] == i, 'path'].values \
+                 for i in range(k)]
+
+        return [NiftiDataset(paths[i], labels[i], target=self.target) \
+                for i in range(k)]
+
+    def _slice_labels(self, idx: Any) -> Dict[str, np.ndarray]:
+        return {key: self.labels[key][idx] for key in self.labels}
 
     def __add__(self, other: NiftiDataset) -> NiftiDataset:
         assert isinstance(other, NiftiDataset), \
@@ -149,3 +172,20 @@ class NiftiDataset(MultiLabelDataset):
                             f'{other.target}. Resorting to None'))
 
         return NiftiDataset(paths, labels, target=target)
+
+    def __eq__(self, other: NiftiDataset) -> bool:
+        if not isinstance(other, NiftiDataset):
+            return False
+
+        return super().__eq__(other) and \
+               np.array_equal(self.paths, other.paths)
+
+    def __len__(self) -> int:
+        return len(self.paths)
+
+    def __getitem__(self, idx: Any) -> NiftiDataset:
+        paths = self.paths[idx]
+        labels = self._slice_labels(idx)
+        target = self.target
+
+        return self.__class__(paths, labels, target)
