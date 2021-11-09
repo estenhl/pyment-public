@@ -8,8 +8,9 @@ import pandas as pd
 from functools import reduce
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.callbacks import LearningRateScheduler
 from tensorflow.random import set_seed
-from typing import List
+from typing import Any, List
 
 from utils import configure_environment
 
@@ -21,6 +22,8 @@ from pyment.data.generators.async_nifti_generator import AsyncNiftiGenerator
 from pyment.labels import Label
 from pyment.models import get as get_model
 from pyment.models import get_model_names, ModelType
+from pyment.utils.decorators import json_serialize_object
+from pyment.utils.learning_rate import LearningRateSchedule
 
 
 logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
@@ -29,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
               validation: List[str], batch_size: int, num_threads: int,
-              loss: str, metrics: str, learning_rate: float = 1e-3,
+              loss: str, metrics: str, learning_rate_schedule: Any = 1e-3,
               destination: str):
     set_seed(42)
 
@@ -78,6 +81,17 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                  ModelCheckpoint(checkpoints, save_best_only=True),
                  EarlyStopping(patience=5, restore_best_weights=True)]
 
+    learning_rate = learning_rate_schedule
+
+    if isinstance(learning_rate, str):
+        try:
+            learning_rate = float(learning_rate)
+        except Exception:
+            if os.path.isfile(learning_rate):
+                schedule = LearningRateSchedule.from_jsonfile(learning_rate)
+                callbacks.append(LearningRateScheduler(schedule))
+                learning_rate = schedule(0)
+
     model.compile(loss=loss, metrics=metrics, optimizer=Adam(learning_rate))
 
     history = model.fit(training_generator, 
@@ -87,7 +101,9 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                         epochs=1, callbacks=callbacks)
     
     with open(os.path.join(destination, 'history.json'), 'w') as f:
-        json.dump(history.history, f)
+        json.dump(json_serialize_object(history.history), f)
+
+    model.save(os.path.join(destination, 'model'))
 
     training_generator.reset()
     training_generator.infinite = False
@@ -190,8 +206,8 @@ if __name__ == '__main__':
                         help='Loss function used for optimizing the model')
     parser.add_argument('-e', '--metrics', required=False, default=None,
                         help='Metrics logged during model training')
-    parser.add_argument('-lr', '--learning_rate', required=False, default=1e-3,
-                        type=float, help='Learning rate used by optimizer')
+    parser.add_argument('-lr', '--learning_rate_schedule', required=False, 
+                        default=1e-3, help='Learning rate used by optimizer')
     parser.add_argument('-d', '--destination', required=True,
                         help='Folder where results are stored')
                             
@@ -201,4 +217,5 @@ if __name__ == '__main__':
               training=args.training, validation=args.validation,
               batch_size=args.batch_size, num_threads=args.num_threads,
               loss=args.loss, metrics=args.metrics, 
-              learning_rate=args.learning_rate, destination=args.destination)
+              learning_rate_schedule=args.learning_rate_schedule, 
+              destination=args.destination)
