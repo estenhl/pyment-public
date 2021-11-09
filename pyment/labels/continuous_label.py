@@ -186,5 +186,12 @@ class ContinuousLabel(Label):
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
         return self.fit(values, transform=True)
 
-    def revert(self, values: np.ndarray) -> np.ndarray:
-        return values
+    def revert(self, values: np.ndarray) -> np.ndarray:        
+        if not self.is_fitted:
+            raise ValueError((f'Unable to call revert on an unfitted '
+                              'ContinuousLabel'))
+
+        decoded = values * self._fit['sigma']
+        decoded = decoded + self._fit['mu']
+
+        return decoded

@@ -193,3 +193,14 @@ def test_continuous_label_max():
     
     assert 5 == label.max, \
         'ContinuousLabel.max is not set properly'
+
+def test_continuous_label_revert():
+    label = ContinuousLabel('test', standardize=True)
+    values = np.random.uniform(0, 1, 5)
+    encoded = label.fit_transform(values)
+    decoded = label.revert(encoded)
+
+    assert not np.array_equal(values, encoded), \
+        'ContinuousLabel.transform does not transform values'
+    assert np.array_equal(values, decoded), \
+        'ContinuousLabel.revert does not revert values to the origin'

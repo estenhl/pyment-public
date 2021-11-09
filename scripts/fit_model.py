@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import numpy as np
+import pandas as pd
 
 from functools import reduce
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -83,7 +84,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                         validation_data=validation_generator,
                         steps_per_epoch=training_generator.batches,
                         validation_steps=validation_generator.batches,
-                        epochs=5, callbacks=callbacks)
+                        epochs=1, callbacks=callbacks)
     
     with open(os.path.join(destination, 'history.json'), 'w') as f:
         json.dump(history.history, f)
@@ -117,6 +118,15 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
         decoded_validation_labels = label.revert(validation_labels)
                                                               
     if model.type == ModelType.REGRESSION:
+        training_predictions = np.squeeze(training_predictions)
+        validation_predictions = np.squeeze(validation_predictions)
+
+        if isinstance(training.target, Label):
+            decoded_training_predictions = \
+                np.squeeze(decoded_training_predictions)
+            decoded_validation_predictions = \
+                np.squeeze(decoded_validation_predictions)
+
         training_mae = np.mean(np.abs(training_predictions - training_labels))
         print(f'Training MAE: {round(training_mae, 4)}')
 
@@ -124,6 +134,38 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                                         validation_labels))
         print(f'Validation MAE: {round(validation_mae, 4)}')
 
+        training_df = pd.DataFrame({
+            'id': training_ids,
+            'label': training_labels,
+            'prediction': training_predictions
+        })
+
+        validation_df = pd.DataFrame({
+            'id': validation_ids,
+            'label': validation_labels,
+            'prediction': validation_predictions
+        })
+
+        if isinstance(training.target, Label):
+            decoded_training_mae = np.mean(np.abs(decoded_training_predictions - \
+                                                  decoded_training_labels))
+            print(f'Decoded training MAE: {decoded_training_mae}')
+
+            decoded_validation_mae = np.mean(np.abs(decoded_validation_predictions - \
+                                                    decoded_validation_labels))
+            print(f'Decoded validation MAE: {decoded_validation_mae}')
+
+            training_df['decoded_label'] = decoded_training_labels
+            training_df['decoded_prediction'] = decoded_training_predictions
+            validation_df['decoded_label'] = decoded_validation_labels
+            validation_df['decoded_prediction'] = decoded_validation_predictions
+
+        training_df.to_csv(os.path.join(destination, 
+                                        'training_predictions.csv'),
+                           index=False)
+        validation_df.to_csv(os.path.join(destination,
+                                          'validation_predictions.csv'),
+                             index=False)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Fits a model on the given dataset')
