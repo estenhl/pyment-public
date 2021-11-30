@@ -4,9 +4,9 @@ import logging
 import os
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 
 from functools import reduce
-from tensorflow.distribute import MirroredStrategy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.python.keras.callbacks import LearningRateScheduler
@@ -38,7 +38,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
               destination: str):
     set_seed(42)
 
-    with MirroredStrategy().scope():
+    with tf.distribute.MirroredStrategy().scope():
         if os.path.isdir(destination):
             raise ValueError(f'Folder {destination} already exists')
 
