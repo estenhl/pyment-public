@@ -49,7 +49,7 @@ class NiftiGenerator(Iterator, Resettable):
         return image
 
     def get_label(self, idx: int) -> np.ndarray:
-        """Returns a single image identified by the given index"""
+        """Returns a single label identified by the given index"""
         if idx > len(self.dataset):
             raise ValueError((f'Index {idx} out of bounds for generator with '
                              f'{len(self.dataset)} data points'))
@@ -88,7 +88,8 @@ class NiftiGenerator(Iterator, Resettable):
         self.index = 0
 
         if self.shuffle:
-            self.dataset = self.dataset.shuffled()
+            idx = np.random.permutation(np.arange(len(self.dataset)))
+            self.dataset = self.dataset[idx]
 
     def reset(self) -> None:
         self._initialize()
