@@ -4,7 +4,7 @@ import numpy as np
 from abc import abstractproperty
 from collections.abc import Iterator
 from tensorflow.keras import Model as KerasModel
-from typing import Any
+from typing import Any, Tuple
 from tqdm import tqdm
 
 from .model_type import ModelType
@@ -17,6 +17,10 @@ class Model(KerasModel):
         """Returns the type of the model, as defined by the ModelType 
         enum"""
         pass
+
+    @property
+    def input_shape(self) -> Tuple[int]:
+        return self.layers[0].input.shape
 
     def __init__(self, *args, weights: str = None, include_top: bool = True, 
                  **kwargs):
