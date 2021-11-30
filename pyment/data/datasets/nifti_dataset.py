@@ -5,16 +5,17 @@ import os
 import numpy as np
 import pandas as pd
 
-from typing import Dict
+from typing import Any, Dict, List
 
-from .dataset import Dataset
+from .multi_label_dataset import MultiLabelDataset
+from ...utils.decorators import json_serialized_property
 
 
 logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
 logging.basicConfig(format=logformat, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class NiftiDataset(Dataset):
+class NiftiDataset(MultiLabelDataset):
     @classmethod
     def from_folder(cls, root: str, *, images: str = 'images', 
                     labels: str = 'labels.csv', suffix: str = 'nii.gz', 
@@ -26,7 +27,7 @@ class NiftiDataset(Dataset):
 
         assert 'id' in df.columns, 'labels is missing id column'
 
-        label_ids = set(df['id'])
+        label_ids = set(df['id'].astype(str))
         image_ids = set([filename.split('.')[0] \
                          for filename in os.listdir(images)])
 
@@ -61,57 +62,130 @@ class NiftiDataset(Dataset):
         return cls(paths, labels, **kwargs)
 
     @property
-    def variables(self):
-        if self._labels is None or len(self._labels) == 0:
-            return []
-
-        return list(self._labels.keys())
-
-    @property
-    def paths(self):
+    def paths(self) -> np.ndarray:
         return self._paths
 
     @property
-    def filenames(self):
-        return [os.path.basename(p) for p in self.paths]
+    def filenames(self) -> np.ndarray:
+        return np.asarray([os.path.basename(p) for p in self.paths])
 
     @property
-    def ids(self):
-        return [f.split('.')[0] for f in self.filenames]
+    def ids(self) -> np.ndarray:
+        return np.asarray([f.split('.')[0] for f in self.filenames])
 
     @property
-    def target(self):
-        return self._target
-
-    @target.setter
-    def target(self, value: str):
-        valid = self.variables + [None, 'path', 'filename', 'id']
-        if value not in valid:
-            raise ValueError((f'Unable to set target {value}. '
-                              f'Must be in {valid}'))
-
-        self._target = value
+    def targets(self) -> List[Any]:
+        return super().targets + ['path', 'filename', 'id']
         
     @property
-    def y(self):
-        if self.target is None:
-            return np.asarray([None] * len(self))
-        elif self.target == 'path':
+    def y(self) -> np.ndarray: 
+        if self.target == 'path':
             return self.paths
         elif self.target == 'filename':
             return self.filenames
         elif self.target == 'id':
             return self.ids
+        else:
+            return super().y
 
-        return self._labels[self.target]
-    
+    @json_serialized_property
+    def json(self) -> str:
+        obj = super().json
+
+        obj['paths'] = self.paths
+
+        return obj
     
     def __init__(self, paths: np.ndarray, 
                  labels: Dict[str, np.ndarray] = None, 
                  target: str = None) -> NiftiDataset:
-        self._paths = paths
-        self._labels = labels
-        self.target = target
+        self._paths = paths if isinstance(paths, np.ndarray) \
+                      else np.asarray(paths)
+
+        super().__init__(labels, target)
+
+    def stratified_folds(self, k: int, variables: List[str]) -> NiftiDataset:
+        """Returns a stratified copy of the dataset, using the variables
+        given as input for stratification. Each of these variables must
+        correspond to a label of the dataset, e.g. occur in 
+        dataset.labels
+        
+        Args:
+            k (int): Number of folds to divide the dataset into
+            variables (List[str]): (Ordered) stratification variables
+        Returns:
+            NiftiDataset: The stratified copy
+        Raises:
+            """
+
+        data = {key: self.labels[key] for key in self.labels}
+        data['path'] = self.paths 
+        df = pd.DataFrame(data)
+        df = df.sort_values(variables)
+        df['fold'] = np.arange(len(df)) % k
+        df = df.sort_values(['fold'] + variables)
+
+        labels = [{col: df.loc[df['fold'] == i, col].values \
+                   for col in df.columns if col not in ['path', 'fold']}
+                  for i in range(k)]
+        paths = [df.loc[df['fold'] == i, 'path'].values \
+                 for i in range(k)]
+
+        return [NiftiDataset(paths[i], labels[i], target=self.target) \
+                for i in range(k)]
+
+    def _slice_labels(self, idx: Any) -> Dict[str, np.ndarray]:
+        return {key: self.labels[key][idx] for key in self.labels}
+
+    def __add__(self, other: NiftiDataset) -> NiftiDataset:
+        assert isinstance(other, NiftiDataset), \
+            f'Unable to add NiftiDataset with {type(other)}'
+
+        paths = np.concatenate([self.paths, other.paths])
+
+        labels = {}
+
+        if self.labels is not None:
+            for key in self.labels:
+                other_values = other.labels[key] if other.labels is not None \
+                                                    and key in other.labels \
+                               else np.repeat(np.nan, len(other)) 
+                labels[key] = np.concatenate([self.labels[key], 
+                                              other_values])
+
+        if other.labels is not None:
+            for key in other.labels:
+                self_values = self.labels[key] if self.labels is not None \
+                                                    and key in self.labels \
+                               else np.repeat(np.nan, len(other)) 
+                labels[key] = np.concatenate([self_values, 
+                                              other.labels[key]])
+
+        labels = None if len(labels) == 0 else labels
+        target = None
+
+        if self.target == other.target:
+            target = self.target
+        elif not self.target == other.target == None:
+            logger.warning(('Unable to inherit target from two NiftiDatasets '
+                            f'with different targets {self.target} and '
+                            f'{other.target}. Resorting to None'))
+
+        return NiftiDataset(paths, labels, target=target)
+
+    def __eq__(self, other: NiftiDataset) -> bool:
+        if not isinstance(other, NiftiDataset):
+            return False
+
+        return super().__eq__(other) and \
+               np.array_equal(self.paths, other.paths)
 
     def __len__(self) -> int:
         return len(self.paths)
+
+    def __getitem__(self, idx: Any) -> NiftiDataset:
+        paths = self.paths[idx]
+        labels = self._slice_labels(idx)
+        target = self.target
+
+        return self.__class__(paths, labels, target)
