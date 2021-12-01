@@ -17,6 +17,7 @@ class NiftiGenerator(Iterator, Resettable):
 
     def __init__(self, dataset, *, loader: Callable[str, np.ndarray] = None,
                  preprocessor: Callable[np.ndarray, np.ndarray] = None,
+                 additional_inputs: List[str] = None,
                  batch_size: int, infinite: bool = False, 
                  shuffle: bool = False, 
                  name: str = 'NiftiGenerator') -> NiftiGenerator:
@@ -26,9 +27,14 @@ class NiftiGenerator(Iterator, Resettable):
         if preprocessor is None:
             preprocessor = lambda x: x
 
+        if additional_inputs is None:
+            additional_inputs = []
+
         self.dataset = dataset
         self.loader = loader
         self.preprocessor = preprocessor
+
+        self.additional_inputs = additional_inputs
 
         self.batch_size = batch_size
         self.infinite = infinite
@@ -63,6 +69,12 @@ class NiftiGenerator(Iterator, Resettable):
             'label': self.get_label(idx)
         }
 
+        for key in self.additional_inputs:
+            if not key in self.dataset.variables:
+                raise ValueError((f'Additional input {key} does not exist in '
+                                  'the dataset'))
+            datapoint[key] = self.dataset.labels[key][idx]
+
         return datapoint
 
     def get_batch(self, start: int, end: int) -> Tuple[np.ndarray]:
@@ -72,12 +84,13 @@ class NiftiGenerator(Iterator, Resettable):
             raise ValueError((f'End index {i} out of bounds for generator '
                               f'with {len(dataset)} data points'))
 
-        X = []
-        y = []
+        datapoints = [self.get_datapoint(i) for i in range(start, end)]
+        X = [datapoint['image'] for datapoint in datapoints]
+        y = [datapoint['label'] for datapoint in datapoints]
 
-        for i in range(start, end):
-            X.append(self.get_image(i))
-            y.append(self.get_label(i))
+        if len(self.additional_inputs) > 0:
+            X = [X] + [[datapoint[key] for datapoint in datapoints] \
+                       for key in self.additional_inputs]
 
         X = np.asarray(X)
         y = np.asarray(y)
