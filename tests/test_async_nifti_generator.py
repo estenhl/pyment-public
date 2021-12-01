@@ -1,9 +1,12 @@
 import numpy as np
 
 from mock import patch
+from time import sleep
 
 from pyment.data import NiftiDataset
 from pyment.data import AsyncNiftiGenerator
+
+from test_nifti_generator import mock_read
 
 
 @patch('pyment.data.io.nifti_loader.NiftiLoader.load')
@@ -18,16 +21,22 @@ def test_generator(mock):
     generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                     shuffle=False, infinite=False)
 
-    for X, y in generator:
-        pass
+    # Sleep to allow the generator to finish preloading initial batch
+    sleep(0.1)
 
-    assert 4 <= mock.call_count, \
+    # Picks out any samples that are preloaded before the generator is 
+    # reinitialized
+    preloads = len(mock.call_args_list)
+
+    for _ in generator:
+        call_args = [mock.call_args_list[i][0][0] \
+                     for i in range(len(mock.call_args_list))]
+
+    call_args = call_args[preloads:]
+
+    assert 4 == len(call_args), \
         ('AsyncNiftiGenerator does not try to load all images when '
          'infinite=False')
-
-    print(mock.call_args_list)
-
-    call_args = [mock.call_args_list[i][0][0] for i in range(4)]
 
     assert set(paths) == set(call_args), \
         ('AsyncNiftiGenerator does not try to load all images when '
@@ -47,14 +56,18 @@ def test_generator_shuffle(mock):
     generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                     shuffle=True, infinite=False)
 
-    for X, y in generator:
-        pass
+    sleep(0.1)
+    preloads = len(mock.call_args_list)
 
-    assert 4 <= mock.call_count, \
+    for _ in generator:
+        call_args = [mock.call_args_list[i][0][0] \
+                     for i in range(len(mock.call_args_list))]
+
+    call_args = call_args[preloads:]
+
+    assert 4 == len(call_args), \
         ('AsyncNiftiGenerator does not try to load all images when '
-         'infinite=False and shuffle=True')
-
-    call_args = [mock.call_args_list[i][0][0] for i in range(4)]
+         'infinite=False')
 
     assert set(paths) == set(call_args), \
         ('AsyncNiftiGenerator does not try to load all images when '
@@ -63,14 +76,9 @@ def test_generator_shuffle(mock):
     assert paths != call_args, \
         'AsyncNiftiGenerator does not shuffle for first epoch'
 
-def mock_image(_, path):
-    id = int(path.split('.')[0])
-
-    return np.ones((3, 3, 3)) * id
-
 def test_generator_infinite():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', mock_image) \
-         as mock:
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+               wraps=mock_read):
         paths = ['1.nii.gz', '2.nii.gz', '3.nii.gz', '4.nii.gz']
         labels = {
             'y1': [1, 2, 3, 4]
@@ -82,7 +90,7 @@ def test_generator_infinite():
         epochs = [[], []]
 
         for epoch in range(2):
-            for batch in range(2):
+            for _ in range(2):
                 X, y = next(generator)
                 for i in range(len(X)):
                     assert X[i][0][0][0] == y[i], \
@@ -96,8 +104,9 @@ def test_generator_infinite():
 
 def test_generator_shuffle_infinite():
     np.random.seed(42)
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', mock_image) \
-         as mock:
+
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+               wraps=mock_read):
         paths = ['1.nii.gz', '2.nii.gz', '3.nii.gz', '4.nii.gz']
         labels = {
             'y1': [1, 2, 3, 4]
@@ -125,3 +134,88 @@ def test_generator_shuffle_infinite():
         assert epochs[0] != epochs[1], \
             ('AsyncNiftiGenerator with infinite=True and shuffle=True does '
              'not shuffle batches between epochs')
+
+def test_nifti_generator_additional_inputs():
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+               wraps=mock_read):
+        paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
+        labels = {
+            'y1': [0, 1, 2, 3],
+            'additional': ['a', 'b', 'c', 'd']
+        }
+        dataset = NiftiDataset(paths, labels, target='y1')
+
+        generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
+                                        additional_inputs=['additional'])
+
+        datapoint = generator.get_datapoint(1)
+
+        assert 'image' in datapoint.keys(), \
+            ('NiftiGenerator.get_datapoint with additional inputs does not '
+             'return image')
+        assert 'label' in datapoint.keys(), \
+            ('NiftiGenerator.get_datapoint with additional inputs does not '
+             'return label')
+        assert 'additional' in datapoint.keys(), \
+            ('NiftiGenerator.get_datapoint with additional inputs does not '
+             'return additional variables')
+        assert 'b' == datapoint['additional'], \
+            ('NiftiGenerator.get_datapoint with additional inputs does not '
+             'return correct value for the additional inputs')
+
+def test_nifti_generator_next_additional_inputs():
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+               wraps=mock_read):
+        paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
+        labels = {
+            'y1': [0, 1, 2, 3],
+            'additional': ['a', 'b', 'c', 'd']
+        }
+        dataset = NiftiDataset(paths, labels, target='y1')
+
+        generator = AsyncNiftiGenerator(dataset, batch_size=3, threads=2,
+                                        additional_inputs=['additional'])
+        iter(generator)
+        batch = next(generator)
+        
+        X, _ = batch
+
+        assert 2 == len(X), \
+            ('NiftiGenerator.get_batch with additional inputs does not return '
+             'a tuple for X')
+
+        X, additional = X
+        assert np.array_equal(np.zeros((3, 3, 3)), X[0]), \
+            'NiftiGenerator.get_batch does not return the correct images'
+        assert np.array_equal(np.ones((3, 3, 3)), X[1]), \
+            'NiftiGenerator.get_batch does not return the correct images'
+        assert np.array_equal(np.ones((3, 3, 3)) * 2, X[2]), \
+            'NiftiGenerator.get_batch does not return the correct images'
+        assert np.array_equal(['a', 'b', 'c'], additional), \
+            'NiftiGenerator.get_batch does not return the correct labels'
+
+def test_nifti_generator_next_additional_inputs_shuffle():
+    np.random.seed(42)
+
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+               wraps=mock_read):
+        paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
+        labels = {
+            'y1': [0, 1, 2, 3],
+            'additional': ['0', '1', '2', '3']
+        }
+        dataset = NiftiDataset(paths, labels, target='y1')
+
+        generator = AsyncNiftiGenerator(dataset, batch_size=3, shuffle=True,
+                                        threads=2, 
+                                        additional_inputs=['additional'])
+        iter(generator)
+        (X, additional), _ = next(generator)
+
+        assert not np.array_equal(['1', '2', '3'], additional), \
+            'NiftiGenerator.get_batch does not shuffle additional inputs'
+
+        for i in range(3):
+            assert str(int(X[i][0][0][0])) == additional[i], \
+                ('NiftiGenerator.get_batch with shuffle does not retain '
+                  'relationship between image and additional inputs')
