@@ -11,14 +11,17 @@ from .multi_label_dataset import MultiLabelDataset
 from ...utils.decorators import json_serialized_property
 
 
-logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=logformat, level=logging.INFO)
+LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class NiftiDataset(MultiLabelDataset):
+    """Represents a dataset with Nifti images, where the datapoints are
+    typically a pair consisting of one Nifti image and a label"""
+
     @classmethod
-    def from_folder(cls, root: str, *, images: str = 'images', 
-                    labels: str = 'labels.csv', suffix: str = 'nii.gz', 
+    def from_folder(cls, root: str, *, images: str = 'images',
+                    labels: str = 'labels.csv', suffix: str = 'nii.gz',
                     **kwargs) -> NiftiDataset:
         images = os.path.join(root, images)
         labels = os.path.join(root, labels)
@@ -35,11 +38,11 @@ class NiftiDataset(MultiLabelDataset):
         missing_labels = image_ids - label_ids
         complete = label_ids & image_ids
 
-        for id in missing_images:
-            logger.warning(f'Skipping {id}: Missing image')
+        for image_id in missing_images:
+            logger.warning(f'Skipping {image_id}: Missing image')
 
-        for id in missing_labels:
-            logger.warning(f'Skipping {id}: Missing labels')
+        for label_id in missing_labels:
+            logger.warning(f'Skipping {label_id}: Missing labels')
 
         df = df[df['id'].isin(complete)]
 
@@ -63,22 +66,26 @@ class NiftiDataset(MultiLabelDataset):
 
     @property
     def paths(self) -> np.ndarray:
+        """Returns the file paths of the dataset"""
         return self._paths
 
     @property
     def filenames(self) -> np.ndarray:
+        """Returns the file basenames of the dataset"""
         return np.asarray([os.path.basename(p) for p in self.paths])
 
     @property
     def ids(self) -> np.ndarray:
+        """Returns the ids (typically the filename minus the suffix) of
+        the dataset"""
         return np.asarray([f.split('.')[0] for f in self.filenames])
 
     @property
     def targets(self) -> List[Any]:
         return super().targets + ['path', 'filename', 'id']
-        
+
     @property
-    def y(self) -> np.ndarray: 
+    def y(self) -> np.ndarray:
         if self.target == 'path':
             return self.paths
         elif self.target == 'filename':
@@ -95,9 +102,9 @@ class NiftiDataset(MultiLabelDataset):
         obj['paths'] = self.paths
 
         return obj
-    
-    def __init__(self, paths: np.ndarray, 
-                 labels: Dict[str, np.ndarray] = None, 
+
+    def __init__(self, paths: np.ndarray,
+                 labels: Dict[str, np.ndarray] = None,
                  target: str = None) -> NiftiDataset:
         self._paths = paths if isinstance(paths, np.ndarray) \
                       else np.asarray(paths)
@@ -107,9 +114,9 @@ class NiftiDataset(MultiLabelDataset):
     def stratified_folds(self, k: int, variables: List[str]) -> NiftiDataset:
         """Returns a stratified copy of the dataset, using the variables
         given as input for stratification. Each of these variables must
-        correspond to a label of the dataset, e.g. occur in 
+        correspond to a label of the dataset, e.g. occur in
         dataset.labels
-        
+
         Args:
             k (int): Number of folds to divide the dataset into
             variables (List[str]): (Ordered) stratification variables
@@ -119,7 +126,7 @@ class NiftiDataset(MultiLabelDataset):
             """
 
         data = {key: self.labels[key] for key in self.labels}
-        data['path'] = self.paths 
+        data['path'] = self.paths
         df = pd.DataFrame(data)
         df = df.sort_values(variables)
         df['fold'] = np.arange(len(df)) % k
@@ -149,16 +156,16 @@ class NiftiDataset(MultiLabelDataset):
             for key in self.labels:
                 other_values = other.labels[key] if other.labels is not None \
                                                     and key in other.labels \
-                               else np.repeat(np.nan, len(other)) 
-                labels[key] = np.concatenate([self.labels[key], 
+                               else np.repeat(np.nan, len(other))
+                labels[key] = np.concatenate([self.labels[key],
                                               other_values])
 
         if other.labels is not None:
             for key in other.labels:
                 self_values = self.labels[key] if self.labels is not None \
                                                     and key in self.labels \
-                               else np.repeat(np.nan, len(other)) 
-                labels[key] = np.concatenate([self_values, 
+                               else np.repeat(np.nan, len(other))
+                labels[key] = np.concatenate([self_values,
                                               other.labels[key]])
 
         labels = None if len(labels) == 0 else labels

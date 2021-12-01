@@ -11,15 +11,18 @@ from ...callbacks import Resettable
 
 
 class NiftiGenerator(Iterator, Resettable):
+    """Class for serving batches of nifti images"""
+
     @property
     def batches(self) -> int:
+        """Returns the number of batches in the generator"""
         return int(math.ceil(len(self) / self.batch_size))
 
-    def __init__(self, dataset, *, loader: Callable[str, np.ndarray] = None,
-                 preprocessor: Callable[np.ndarray, np.ndarray] = None,
+    def __init__(self, dataset, *, loader: Callable[[str], np.ndarray] = None,
+                 preprocessor: Callable[[np.ndarray], np.ndarray] = None,
                  additional_inputs: List[str] = None,
-                 batch_size: int, infinite: bool = False, 
-                 shuffle: bool = False, 
+                 batch_size: int, infinite: bool = False,
+                 shuffle: bool = False,
                  name: str = 'NiftiGenerator') -> NiftiGenerator:
         if loader is None:
             loader = NiftiLoader()
@@ -81,8 +84,8 @@ class NiftiGenerator(Iterator, Resettable):
         """Returns a batch of images and labels, in two separate numpy
         arrays"""
         if end > len(self.dataset):
-            raise ValueError((f'End index {i} out of bounds for generator '
-                              f'with {len(dataset)} data points'))
+            raise ValueError((f'End index {end} out of bounds for generator '
+                              f'with {len(self.dataset)} data points'))
 
         datapoints = [self.get_datapoint(i) for i in range(start, end)]
         X = [datapoint['image'] for datapoint in datapoints]
@@ -105,6 +108,7 @@ class NiftiGenerator(Iterator, Resettable):
             self.dataset = self.dataset[idx]
 
     def reset(self) -> None:
+        """Resets the generator"""
         self._initialize()
 
     def __iter__(self) -> NiftiGenerator:

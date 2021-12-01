@@ -3,18 +3,16 @@ from __future__ import annotations
 import logging
 import os
 import numpy as np
-import pandas as pd
 
 from typing import Any, Dict, List, Union
 
 from .dataset import Dataset
 from ...labels import load_label_from_json, Label, load_label_from_jsonfile
 from ...utils.decorators import json_serialized_property
-from ...utils.io.json import encode_object_as_json
 
 
-logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=logformat, level=logging.INFO)
+LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MultiLabelDataset(Dataset):
@@ -27,7 +25,7 @@ class MultiLabelDataset(Dataset):
     def variables(self) -> List[str]:
         """Returns a list of all the variables the dataset has, e.g. the
         possible targets of the dataset
-        
+
         Returns:
             list: A list of variables usable as targets
         """
@@ -40,7 +38,7 @@ class MultiLabelDataset(Dataset):
     def target(self) -> str:
         """Returns the current target of the dataset. The current target
         defines which label is returned in dataset.y
-        
+
         Returns:
             str: The current target of the dataset
         """
@@ -49,7 +47,7 @@ class MultiLabelDataset(Dataset):
     @property
     def targets(self) -> List[Any]:
         """Returns a list of all possible targets for the dataset
-        
+
         Returns:
             list: The possible targets of the dataset
         """
@@ -58,10 +56,10 @@ class MultiLabelDataset(Dataset):
     @target.setter
     def target(self, value: Any) -> None:
         """Sets the target of the dataset. Can only be set to a value
-        which occurs in the dataset.targets list, or a list of 
+        which occurs in the dataset.targets list, or a list of
         multiple such. Can be a string, a Label, or path to a jsonfile
         which stores a Label
-        
+
         Args:
             value (Union[str, Label]): The value which is set as target
         Raises:
@@ -71,7 +69,7 @@ class MultiLabelDataset(Dataset):
             value = load_label_from_jsonfile(value)
         elif isinstance(value, dict):
             value = load_label_from_json(value)
-    
+
         if value is None or isinstance(value, str) or isinstance(value, Label):
             self._validate_and_set_target(value)
         elif isinstance(value, list):
@@ -97,6 +95,7 @@ class MultiLabelDataset(Dataset):
 
     @property
     def labels(self) -> Dict[str, np.ndarray]:
+        """Returns the labels of the dataset"""
         return self._labels
 
     @property
@@ -120,10 +119,10 @@ class MultiLabelDataset(Dataset):
     def from_json(cls, obj: Dict[str, Any]) -> Label:
         if 'target' in obj and isinstance(obj['target'], dict):
             obj['target'] = load_label_from_json(obj['target'])
-    
+
         return cls(**obj)
 
-    def __init__(self, labels: Dict[str, np.ndarray] = None, 
+    def __init__(self, labels: Dict[str, np.ndarray] = None,
                  target: str = None) -> MultiLabelDataset:
         if isinstance(labels, dict):
             for key in labels:
@@ -131,8 +130,8 @@ class MultiLabelDataset(Dataset):
                     labels[key] = np.asarray(labels[key])
                 elif not isinstance(labels[key], np.ndarray):
                     print(labels[key])
-                    raise ValueError(f'Dataset labels must be numpy arrays')
-        elif labels != None:
+                    raise ValueError('Dataset labels must be numpy arrays')
+        elif labels is not None:
             raise ValueError(('Dataset labels must be either None or a '
                               'dictionary'))
 
@@ -172,14 +171,14 @@ class MultiLabelDataset(Dataset):
     def __eq__(self, other: MultiLabelDataset) -> bool:
         if not isinstance(other, MultiLabelDataset):
             return False
-        
+
         if not np.array_equal(self.variables, other.variables):
             return False
 
         for var in self.variables:
             if not np.array_equal(self.labels[var], other.labels[var]):
                 return False
-        
+
         if not self.target == other.target:
             return False
 
