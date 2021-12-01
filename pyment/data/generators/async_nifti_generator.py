@@ -62,8 +62,15 @@ class AsyncNiftiGenerator(NiftiGenerator):
 
         futures = self.threadpool.map(self._preload_datapoint, idx)
         results = [f for f in futures]
-        X = np.asarray([result['image'] for result in results])
-        y = np.asarray([result['label'] for result in results])
+        X = [result['image'] for result in results]
+        y = [result['label'] for result in results]
+
+        if len(self.additional_inputs) > 0:
+            X = [X] + [[datapoint[key] for datapoint in results] \
+                       for key in self.additional_inputs]
+
+        X = np.asarray(X)
+        y = np.asarray(y)
 
         self._next_batch = X, y
 
@@ -89,7 +96,7 @@ class AsyncNiftiGenerator(NiftiGenerator):
 
         X, y = self._next_batch
 
-        if isinstance(X, tuple):
+        if len(self.additional_inputs) > 0:
             assert len(X[0]) == len(y), \
                    'Got different number of images and labels'
         else:
