@@ -16,7 +16,7 @@ def test_generator(mock):
     labels = {
         'y1': [1, 2, 3, 4]
     }
-    dataset = NiftiDataset(paths, labels, target='y1')
+    dataset = NiftiDataset(paths, labels=labels, target='y1')
 
     generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                     shuffle=False, infinite=False)
@@ -24,7 +24,7 @@ def test_generator(mock):
     # Sleep to allow the generator to finish preloading initial batch
     sleep(0.1)
 
-    # Picks out any samples that are preloaded before the generator is 
+    # Picks out any samples that are preloaded before the generator is
     # reinitialized
     preloads = len(mock.call_args_list)
 
@@ -45,13 +45,13 @@ def test_generator(mock):
 @patch('pyment.data.io.nifti_loader.NiftiLoader.load')
 def test_generator_shuffle(mock):
     np.random.seed(42)
-    
+
     mock.return_value = np.ones((3, 3, 3))
     paths = ['1.nii.gz', '2.nii.gz', '3.nii.gz', '4.nii.gz']
     labels = {
         'y1': [1, 2, 3, 4]
     }
-    dataset = NiftiDataset(paths, labels, target='y1')
+    dataset = NiftiDataset(paths, labels=labels, target='y1')
 
     generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                     shuffle=True, infinite=False)
@@ -72,18 +72,18 @@ def test_generator_shuffle(mock):
     assert set(paths) == set(call_args), \
         ('AsyncNiftiGenerator does not try to load all images when '
          'infinite=False and shuffle=True')
-    
+
     assert paths != call_args, \
         'AsyncNiftiGenerator does not shuffle for first epoch'
 
 def test_generator_infinite():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['1.nii.gz', '2.nii.gz', '3.nii.gz', '4.nii.gz']
         labels = {
             'y1': [1, 2, 3, 4]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
         generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                         shuffle=False, infinite=True)
 
@@ -105,13 +105,13 @@ def test_generator_infinite():
 def test_generator_shuffle_infinite():
     np.random.seed(42)
 
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['1.nii.gz', '2.nii.gz', '3.nii.gz', '4.nii.gz']
         labels = {
             'y1': [1, 2, 3, 4]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
         generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                         shuffle=True, infinite=True)
 
@@ -136,14 +136,14 @@ def test_generator_shuffle_infinite():
              'not shuffle batches between epochs')
 
 def test_nifti_generator_additional_inputs():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['a', 'b', 'c', 'd']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = AsyncNiftiGenerator(dataset, batch_size=2, threads=2,
                                         additional_inputs=['additional'])
@@ -164,20 +164,20 @@ def test_nifti_generator_additional_inputs():
              'return correct value for the additional inputs')
 
 def test_nifti_generator_next_additional_inputs():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['a', 'b', 'c', 'd']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = AsyncNiftiGenerator(dataset, batch_size=3, threads=2,
                                         additional_inputs=['additional'])
         iter(generator)
         batch = next(generator)
-        
+
         X, _ = batch
 
         assert 2 == len(X), \
@@ -197,17 +197,17 @@ def test_nifti_generator_next_additional_inputs():
 def test_nifti_generator_next_additional_inputs_shuffle():
     np.random.seed(42)
 
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['0', '1', '2', '3']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = AsyncNiftiGenerator(dataset, batch_size=3, shuffle=True,
-                                        threads=2, 
+                                        threads=2,
                                         additional_inputs=['additional'])
         iter(generator)
         (X, additional), _ = next(generator)

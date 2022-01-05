@@ -32,7 +32,7 @@ logging.basicConfig(format=logformat, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
-              validation: List[str], target: str = None, batch_size: int, 
+              validation: List[str], target: str = None, batch_size: int,
               num_threads: int, loss: str, metrics: str,
               learning_rate_schedule: Any = 1e-3, epochs: int,
               destination: str):
@@ -54,7 +54,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
             training.target = target
 
         training = training[np.where(~np.isnan(training.y))[0]]
-        
+
         logger.info((f'Training on dataset with {len(training)} samples with '
                     f'y ranging from {round(np.amin(training.y), 2)} '
                     f'to {round(np.amax(training.y), 2)} '
@@ -66,9 +66,9 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
 
         if target is not None:
             validation.target = target
-        
+
         validation = validation[np.where(~np.isnan(validation.y))[0]]
-        
+
         logger.info((f'Validating on dataset with {len(validation)} samples '
                     f'with y ranging from {round(np.amin(validation.y), 2)} '
                     f'to {round(np.amax(validation.y), 2)} '
@@ -76,7 +76,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
 
         preprocessor = lambda x: x / 255.
 
-        training_generator = AsyncNiftiGenerator(training, 
+        training_generator = AsyncNiftiGenerator(training,
                                                 preprocessor=preprocessor,
                                                 batch_size=batch_size,
                                                 threads=num_threads,
@@ -109,15 +109,15 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                     callbacks.append(LearningRateScheduler(schedule))
                     learning_rate = schedule(0)
 
-        model.compile(loss=loss, metrics=metrics, 
+        model.compile(loss=loss, metrics=metrics,
                       optimizer=Adam(learning_rate))
 
-        history = model.fit(training_generator, 
+        history = model.fit(training_generator,
                             validation_data=validation_generator,
                             steps_per_epoch=training_generator.batches,
                             validation_steps=validation_generator.batches,
                             epochs=epochs, callbacks=callbacks)
-        
+
         with open(os.path.join(destination, 'history.json'), 'w') as f:
             json.dump(json_serialize_object(history.history), f)
 
@@ -151,7 +151,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
             decoded_validation_predictions = \
                 label.revert(validation_predictions)
             decoded_validation_labels = label.revert(validation_labels)
-                                                                
+
         if model.type == ModelType.REGRESSION:
             training_predictions = np.squeeze(training_predictions)
             validation_predictions = np.squeeze(validation_predictions)
@@ -164,11 +164,11 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
 
             training_mae = np.mean(np.abs(training_predictions - \
                                           training_labels))
-            print(f'Training MAE: {round(training_mae, 4)}')
+            logger.info(f'Training MAE: {round(training_mae, 4)}')
 
             validation_mae = np.mean(np.abs(validation_predictions - \
                                             validation_labels))
-            print(f'Validation MAE: {round(validation_mae, 4)}')
+            logger.info(f'Validation MAE: {round(validation_mae, 4)}')
 
             results = {
                 'training_mae': training_mae,
@@ -191,12 +191,12 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
                 decoded_training_mae = \
                     np.mean(np.abs(decoded_training_predictions - \
                                    decoded_training_labels))
-                print(f'Decoded training MAE: {decoded_training_mae}')
+                logger.info(f'Decoded training MAE: {decoded_training_mae}')
 
                 decoded_validation_mae = \
                     np.mean(np.abs(decoded_validation_predictions - \
                                    decoded_validation_labels))
-                print(f'Decoded validation MAE: {decoded_validation_mae}')
+                logger.info(f'Decoded validation MAE: {decoded_validation_mae}')
 
                 results['decoded_training_mae'] = decoded_training_mae
                 results['decoded_validation_mae'] = decoded_validation_mae
@@ -211,7 +211,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
             with open(os.path.join(destination, 'results.json'), 'w') as f:
                 json.dump(results, f)
 
-            training_df.to_csv(os.path.join(destination, 
+            training_df.to_csv(os.path.join(destination,
                                             'training_predictions.csv'),
                             index=False)
             validation_df.to_csv(os.path.join(destination,
@@ -221,7 +221,7 @@ def fit_model(*, model: str, model_kwargs: str = '{}', training: List[str],
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Fits a model on the given dataset')
 
-    parser.add_argument('-m', '--model', required=True, 
+    parser.add_argument('-m', '--model', required=True,
                         choices=get_model_names(),
                         help='Name of the model that is used')
     parser.add_argument('-mk', '--model_kwargs', required=False, default='{}',
@@ -243,19 +243,19 @@ if __name__ == '__main__':
                         help='Loss function used for optimizing the model')
     parser.add_argument('-e', '--metrics', required=False, default=None,
                         help='Metrics logged during model training')
-    parser.add_argument('-lr', '--learning_rate_schedule', required=False, 
+    parser.add_argument('-lr', '--learning_rate_schedule', required=False,
                         default=1e-3, help='Learning rate used by optimizer')
     parser.add_argument('-n', '--epochs', required=True, type=int,
                         help='Number of epochs to run training for')
     parser.add_argument('-d', '--destination', required=True,
                         help='Folder where results are stored')
-                            
+
     args = parser.parse_args()
 
-    fit_model(model=args.model, model_kwargs=args.model_kwargs, 
-              training=args.training, validation=args.validation, 
-              target=args.target, batch_size=args.batch_size, 
-              num_threads=args.num_threads, loss=args.loss, 
-              metrics=args.metrics, 
-              learning_rate_schedule=args.learning_rate_schedule, 
+    fit_model(model=args.model, model_kwargs=args.model_kwargs,
+              training=args.training, validation=args.validation,
+              target=args.target, batch_size=args.batch_size,
+              num_threads=args.num_threads, loss=args.loss,
+              metrics=args.metrics,
+              learning_rate_schedule=args.learning_rate_schedule,
               epochs=args.epochs, destination=args.destination)

@@ -19,43 +19,43 @@ def test_binary_label_is_fitted():
     assert label.is_fitted, \
         'BinaryLabel does not report as being fitted after calling fit'
 
-def test_binary_label_fit_encoding():
+def test_binary_label_fit_mapping():
     label = BinaryLabel('test')
     values = np.asarray(['B', 'A', 'B', 'A', 'B'])
     label.fit(values)
 
-    assert label.encoding is not None, \
-        'BinaryLabel does not have an encoding after calling fit'
-    assert {'A': 0, 'B': 1} == label.encoding, \
+    assert label.mapping is not None, \
+        'BinaryLabel does not have an mapping after calling fit'
+    assert {'A': 0, 'B': 1} == label.mapping, \
         'BinaryLabel does not encode values correctly'
 
-def test_binary_label_given_encoding():
-    label = BinaryLabel('test', encoding={'B': 0, 'A': 1})
+def test_binary_label_given_mapping():
+    label = BinaryLabel('test', mapping={'B': 0, 'A': 1})
     values = np.asarray(['B', 'A', 'B', 'A', 'B'])
     label.fit(values)
 
-    assert {'B': 0, 'A': 1} == label.encoding, \
-        'BinaryLabel does not use explicitly given encoding'
+    assert {'B': 0, 'A': 1} == label.mapping, \
+        'BinaryLabel does not use explicitly given mapping'
 
 def test_binary_label_allowed_values():
     label = BinaryLabel('test', allowed=set(['A', 'B']))
     values = np.asarray(['B', 'A', 'C', 'A', 'B'])
     label.fit(values)
 
-    assert {'A': 0, 'B': 1} == label.encoding, \
-        ('BinaryLabel does not use correct encoding given a set of allowed '
+    assert {'A': 0, 'B': 1} == label.mapping, \
+        ('BinaryLabel does not use correct mapping given a set of allowed '
          'values')
 
 def test_binary_label_transform_before_fit():
-    label = BinaryLabel('test', encoding={'A': 0, 'B': 1})
+    label = BinaryLabel('test', mapping={'A': 0, 'B': 1})
     values = np.asarray(['B', 'A', 'B', 'A', 'B'])
 
     assert_exception(label.transform, args=[values], exception=ValueError,
                      message=('Calling transform on an unfitted BinaryLabel '
                               'does not raise an exception'))
 
-def test_binary_label_encoding():
-    label = BinaryLabel('test', encoding={'A': 0, 'B': 1})
+def test_binary_label_mapping():
+    label = BinaryLabel('test', mapping={'A': 0, 'B': 1})
     values = np.asarray(['B', 'A', 'B', 'A', 'B'])
     label.fit(values)
     values = label.transform(values)
@@ -64,7 +64,7 @@ def test_binary_label_encoding():
         'BinaryLabel does not encode values correctly'
 
 def test_binary_label_fit_transform():
-    label = BinaryLabel('test', encoding={'A': 0, 'B': 1})
+    label = BinaryLabel('test', mapping={'A': 0, 'B': 1})
     values = np.asarray(['B', 'A', 'B', 'A', 'B'])
     values = label.fit_transform(values)
 
@@ -74,28 +74,28 @@ def test_binary_label_fit_transform():
 def test_binary_label_fit_excessive_levels():
     label = BinaryLabel('test')
     values = np.asarray(['A', 'B', 'C'])
-    
+
     assert_exception(label.fit, args=[values], exception=AssertionError,
                      message=('Calling fit on a BinaryLabel with >2 levels '
                               'and not explicitly setting allowed values or '
-                              'encoding does not raise an error'))
+                              'mapping does not raise an error'))
 
 def test_binary_label_fit_excessive_allowed_levels():
-    assert_exception(BinaryLabel, args=['test'], 
-                     kwargs={'allowed': set(['A', 'B', 'C'])}, 
+    assert_exception(BinaryLabel, args=['test'],
+                     kwargs={'allowed': set(['A', 'B', 'C'])},
                      exception=AssertionError,
                      message=('Instantiating a BinaryLabel with >2 allowed '
                               'levels does not raise an error'))
 
-def test_binary_label_fit_excessive_encoding_levels():
-    assert_exception(BinaryLabel, args=['test'], 
-                     kwargs={'encoding': {'A': 0, 'B': 1, 'C': 2}}, 
+def test_binary_label_fit_excessive_mapping_levels():
+    assert_exception(BinaryLabel, args=['test'],
+                     kwargs={'mapping': {'A': 0, 'B': 1, 'C': 2}},
                      exception=AssertionError,
-                     message=('Instantiating a BinaryLabel with >2 encoding '
+                     message=('Instantiating a BinaryLabel with >2 mapping '
                               'levels does not raise an error'))
 
-def test_binary_label_unknown_values_encoding():
-    label = BinaryLabel('test', encoding={'A': 0, 'B': 1})
+def test_binary_label_unknown_values_mapping():
+    label = BinaryLabel('test', mapping={'A': 0, 'B': 1})
     values = np.asarray(['A', 'B', 'C'])
     values = label.fit_transform(values)
 
@@ -131,7 +131,7 @@ def test_binary_label_frequencies_with_unknowns():
         'BinaryLabel does not report the correct frequencies'
 
 def test_binary_label_missing_strategy_allow():
-    label = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.ALLOW)
     values = np.asarray(['C', 'B', 'A', 'C', 'B', 'A', 'B', 'C'])
     values = label.fit_transform(values)
@@ -142,7 +142,7 @@ def test_binary_label_missing_strategy_allow():
         'BinaryLabel with allow strategy does not allow NAs'
 
 def test_binary_label_missing_strategy_mean_fill():
-    label = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
     values = np.asarray(['C', 'B', 'A', 'C', 'B', 'A', 'B', 'C'])
     values = label.fit_transform(values)
@@ -153,7 +153,7 @@ def test_binary_label_missing_strategy_mean_fill():
         'BinaryLabel with mean_fill strategy does not correctly encode NAs'
 
 def test_binary_label_missing_strategy_mean_fill():
-    label = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.CENTRE_FILL)
     values = np.asarray(['C', 'B', 'A', 'C', 'B', 'A', 'B', 'C'])
     values = label.fit_transform(values)
@@ -176,20 +176,20 @@ def test_binary_label_json():
         'BinaryLabel.json contains the wrong missing strategy'
 
 def test_binary_label_json_fit():
-    label = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
     label.fit(np.asarray(['A', 'B', 'C', 'B', 'B']))
 
     assert 'fit' in label.json, \
         'Fitted BinaryLabel.json does not contain a field for the fit'
-    
+
     fit = label.json['fit']
 
-    assert 'encoding' in fit, \
+    assert 'mapping' in fit, \
         ('Fitted BinaryLabel.json does not contain a field for the fitted '
-         'encoding')
-    assert {'A': 0, 'B': 1} == fit['encoding'], \
-        'Fitted BinaryLabel.json contains the wrong encoding'
+         'mapping')
+    assert {'A': 0, 'B': 1} == fit['mapping'], \
+        'Fitted BinaryLabel.json contains the wrong mapping'
     assert 'frequencies' in fit, \
         ('Fitted BinaryLabel.json does not contain a field for the fitted '
          'frequencies')
@@ -197,46 +197,46 @@ def test_binary_label_json_fit():
         'Fitted BinaryLabel.json contains the wrong frequencies'
 
 def test_binary_label_equality():
-    label1 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
-    label2 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label2 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
 
     assert label1 == label2, 'Equal BinaryLabels are not considered equal'
 
 def test_binary_label_unequal_name():
-    label1 = BinaryLabel('test1', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test1', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
-    label2 = BinaryLabel('test2', allowed=set(['A', 'B']), 
+    label2 = BinaryLabel('test2', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
 
     assert label1 != label2, \
         'BinaryLabels with different names are considered equal'
 
 def test_binary_label_unequal_name():
-    label1 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
-    label2 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label2 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.ALLOW)
 
     assert label1 != label2, \
         'BinaryLabels with different missing strategies are considered equal'
 
 def test_binary_label_unequal_fit():
-    label1 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
     label1.fit(np.asarray(['A', 'B']))
-    label2 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label2 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
 
     assert label1 != label2, \
         'BinaryLabels where one is fit and one is not fit is considered equal'
 
 def test_binary_label_unequal_fit_values():
-    label1 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
     label1.fit(np.asarray(['A', 'B', 'B']))
-    label2 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label2 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
     label2.fit(np.asarray(['A', 'A', 'B']))
 
@@ -244,25 +244,25 @@ def test_binary_label_unequal_fit_values():
         'BinaryLabels fit with different values are considered equal'
 
 def test_binary_label_unequal_allowed():
-    label1 = BinaryLabel('test', allowed=set(['A', 'B']), 
+    label1 = BinaryLabel('test', allowed=set(['A', 'B']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
-    label2 = BinaryLabel('test', allowed=set(['A', 'C']), 
+    label2 = BinaryLabel('test', allowed=set(['A', 'C']),
                         missing_strategy=MissingStrategy.MEAN_FILL)
 
     assert label1 != label2, \
         'BinaryLabels with different allowed values are considered equal'
 
 def test_binary_label_unequal_allowed():
-    label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+    label1 = BinaryLabel('test', mapping={'A': 0, 'B': 1},
                         missing_strategy=MissingStrategy.MEAN_FILL)
-    label2 = BinaryLabel('test', encoding={'A': 1, 'B': 0}, 
+    label2 = BinaryLabel('test', mapping={'A': 1, 'B': 0},
                         missing_strategy=MissingStrategy.MEAN_FILL)
 
     assert label1 != label2, \
-        'BinaryLabels with different encodings are considered equal'
+        'BinaryLabels with different mappings are considered equal'
 
 def test_binary_label_to_from_json():
-    label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+    label1 = BinaryLabel('test', mapping={'A': 0, 'B': 1},
                         missing_strategy=MissingStrategy.MEAN_FILL)
     label2 = BinaryLabel.from_json(label1.json)
 
@@ -270,7 +270,7 @@ def test_binary_label_to_from_json():
         'BinaryLabel to and from json does not produce an equivalent object'
 
 def test_fitted_binary_label_to_from_json():
-    label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+    label1 = BinaryLabel('test', mapping={'A': 0, 'B': 1},
                         missing_strategy=MissingStrategy.MEAN_FILL)
     values1 = label1.fit_transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
     label2 = BinaryLabel.from_json(label1.json)
@@ -284,7 +284,7 @@ def test_fitted_binary_label_to_from_json():
         'BinaryLabel to and from json does not produce the same encoded values'
 
 def test_fitted_binary_label_to_from_jsonstring():
-    label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+    label1 = BinaryLabel('test', mapping={'A': 0, 'B': 1},
                         missing_strategy=MissingStrategy.MEAN_FILL)
     values1 = label1.fit_transform(np.asarray(['A', 'B', 'B', 'C', 'B']))
     label2 = BinaryLabel.from_jsonstring(label1.jsonstring)
@@ -299,7 +299,7 @@ def test_fitted_binary_label_to_from_jsonstring():
 
 def test_binary_label_save_load():
     try:
-        label1 = BinaryLabel('test', encoding={'A': 0, 'B': 1}, 
+        label1 = BinaryLabel('test', mapping={'A': 0, 'B': 1},
                             missing_strategy=MissingStrategy.MEAN_FILL)
         label1.save('tmp.json')
         label2 = load_label_from_jsonfile('tmp.json')
@@ -318,9 +318,9 @@ def test_binary_label_reinitialization():
         label = BinaryLabel('test')
         label.fit(['A', 'B'])
 
-        assert_exception(BinaryLabel, args=['test'], 
-                         kwargs={'encoding': {'B': 0, 'A': 1}, 
-                                 'fit': label._fit}, 
+        assert_exception(BinaryLabel, args=['test'],
+                         kwargs={'mapping': {'B': 0, 'A': 1},
+                                 'fit': label._fit},
                          exception=ValueError,
                          message=('Initializing a BinaryLabel with a '
                                   'previous fit and new configuration does '
