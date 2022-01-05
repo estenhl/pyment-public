@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 from .model import Model
 from .model_type import ModelType
-from .utils import restrict_range, WeightRepository
+from .utils import restrict_range
 
 
 class RegressionSFCN(Model):
@@ -14,8 +14,8 @@ class RegressionSFCN(Model):
     def type(self) -> ModelType:
         return ModelType.REGRESSION
 
-    def __init__(self, *, input_shape: Tuple[int, int, int] = (167, 212, 160), 
-                 dropout: float = .0, weight_decay: float = .0, 
+    def __init__(self, *, input_shape: Tuple[int, int, int] = (167, 212, 160),
+                 dropout: float = .0, weight_decay: float = .0,
                  activation: str = 'relu', include_top: bool = True,
                  depths: List[int] = [32, 64, 128, 256, 256, 64],
                  prediction_range: Tuple[float, float] = (3, 95),
@@ -41,7 +41,7 @@ class RegressionSFCN(Model):
             x = MaxPooling3D((2, 2, 2), name=f'{name}/block{i+1}/pool')(x)
 
         x = Conv3D(depths[-1], (1, 1, 1), padding='SAME', activation=None,
-                   kernel_regularizer=regularizer, 
+                   kernel_regularizer=regularizer,
                    bias_regularizer=regularizer, name=f'{name}/top/conv')(x)
         x = BatchNormalization(name=f'{name}/top/norm')(x)
         x = Activation(activation, name=f'{name}/top/{activation}')(x)
@@ -59,4 +59,3 @@ class RegressionSFCN(Model):
 
         super().__init__(inputs, x, weights=weights, include_top=include_top,
                          name=name)
-

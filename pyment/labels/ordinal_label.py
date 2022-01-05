@@ -28,8 +28,8 @@ class OrdinalLabel(Label):
     @property
     def mapping(self) -> Dict[Any, float]:
         return {key: np.mean(self.ranges[key]) for key in self.ranges}
-    
-    def __init__(self, name: str, ranges: Dict[str, Any] = None, 
+
+    def __init__(self, name: str, ranges: Dict[str, Any] = None,
                  standardize: bool = False, mu: float = 0, sigma: float = 1,
                  missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
                  fit: Dict[str, Any] = None):

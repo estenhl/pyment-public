@@ -4,6 +4,7 @@ import sys
 from typing import Any, Dict
 
 from .binary_label import BinaryLabel
+from .categorical_label import CategoricalLabel
 from .continuous_label import ContinuousLabel
 from .label import Label
 from .missing_strategy import MissingStrategy
@@ -12,6 +13,7 @@ from .ordinal_label import OrdinalLabel
 
 _label_types = {
     'binary': BinaryLabel,
+    'categorical': CategoricalLabel,
     'continuous': ContinuousLabel,
     'ordinal': OrdinalLabel
 }

@@ -17,7 +17,7 @@ def test_nifti_generator_batches():
     labels = {
         'y1': [0, 1, 2, 3]
     }
-    dataset = NiftiDataset(paths, labels, target='y1')
+    dataset = NiftiDataset(paths, labels=labels, target='y1')
 
     generator = NiftiGenerator(dataset, batch_size=2)
 
@@ -29,7 +29,7 @@ def test_nifti_generator_batches_uneven():
     labels = {
         'y1': [0, 1, 2, 3, 4]
     }
-    dataset = NiftiDataset(paths, labels, target='y1')
+    dataset = NiftiDataset(paths, labels=labels, target='y1')
 
     generator = NiftiGenerator(dataset, batch_size=2)
 
@@ -37,13 +37,13 @@ def test_nifti_generator_batches_uneven():
         'NiftiGenerator does not report correct number of batches'
 
 def test_nifti_generator_get_image():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=2)
         image = generator.get_image(2)
@@ -56,7 +56,7 @@ def test_nifti_generator_get_label():
     labels = {
         'y1': [0, 1, 2, 3]
     }
-    dataset = NiftiDataset(paths, labels, target='y1')
+    dataset = NiftiDataset(paths, labels=labels, target='y1')
 
     generator = NiftiGenerator(dataset, batch_size=2)
     label = generator.get_label(2)
@@ -65,13 +65,13 @@ def test_nifti_generator_get_label():
         'NiftiGenerator.get_image returns wrong label'
 
 def test_nifti_generator_get_datapoint():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=2)
         datapoint = generator.get_datapoint(1)
@@ -86,20 +86,20 @@ def test_nifti_generator_get_datapoint():
             'NiftiGenerator.get_image returns wrong label'
 
 def test_nifti_generator_get_batch():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=2)
         batch = generator.get_batch(1, 3)
 
         assert len(batch) == 2, \
             'NiftiGenerator.get_batch does not return a tuple with two entries'
-        
+
         X, y = batch
 
         assert 2 == len(X), \
@@ -113,28 +113,28 @@ def test_nifti_generator_get_batch():
             'NiftiGenerator.get_batch does not return the correct labels'
 
 def test_nifti_generator_uninitialized():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3]
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=2)
-    
+
         assert_exception(lambda: next(generator), exception=RuntimeError,
                          message=('Calling next on an NiftiGenerator without '
                                   'initializing it does not raise an error'))
 
 def test_nifti_generator_next():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=2)
         iter(generator)
@@ -142,7 +142,7 @@ def test_nifti_generator_next():
 
         assert len(batch) == 2, \
             'NiftiGenerator.get_batch does not return a tuple with two entries'
-        
+
         X, y = batch
 
         assert 2 == len(X), \
@@ -156,16 +156,16 @@ def test_nifti_generator_next():
             'NiftiGenerator.get_batch does not return the correct labels'
 
 def test_nifti_generator_additional_inputs():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['a', 'b', 'c', 'd']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
-        generator = NiftiGenerator(dataset, batch_size=2, 
+        generator = NiftiGenerator(dataset, batch_size=2,
                                    additional_inputs=['additional'])
 
         datapoint = generator.get_datapoint(1)
@@ -184,20 +184,20 @@ def test_nifti_generator_additional_inputs():
              'return correct value for the additional inputs')
 
 def test_nifti_generator_next_additional_inputs():
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['a', 'b', 'c', 'd']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=3,
                                    additional_inputs=['additional'])
         iter(generator)
         batch = next(generator)
-        
+
         X, _ = batch
 
         assert 2 == len(X), \
@@ -217,14 +217,14 @@ def test_nifti_generator_next_additional_inputs():
 def test_nifti_generator_next_additional_inputs_shuffle():
     np.random.seed(42)
 
-    with patch('pyment.data.io.nifti_loader.NiftiLoader.load', 
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
             'y1': [0, 1, 2, 3],
             'additional': ['0', '1', '2', '3']
         }
-        dataset = NiftiDataset(paths, labels, target='y1')
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
 
         generator = NiftiGenerator(dataset, batch_size=3, shuffle=True,
                                    additional_inputs=['additional'])
@@ -238,7 +238,3 @@ def test_nifti_generator_next_additional_inputs_shuffle():
             assert str(int(X[i][0][0][0])) == additional[i], \
                 ('NiftiGenerator.get_batch with shuffle does not retain '
                  'relationship between image and additional inputs')
-
-
-
-

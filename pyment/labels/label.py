@@ -13,16 +13,20 @@ from ..utils.decorators import json_serialized_property
 
 
 class Label(ABC, JSONSerializable):
+    """Interface class for labels. Labels typically represent target
+    variables for a model, and their main task is to encode the
+    target vector according to a given set of rules"""
+
     @abstractproperty
     def is_fitted(self) -> bool:
-        """Returns true if the variable is fitted and ready for use 
-        (e.g. if fit() has been called, or the label was instantiated 
+        """Returns true if the variable is fitted and ready for use
+        (e.g. if fit() has been called, or the label was instantiated
         with a previous fit"""
         return self._fit is not None
-    
+
     @abstractproperty
     def applicable_missing_strategies(self) -> List[MissingStrategy]:
-        """Returns a list of all applicable missing strategies for 
+        """Returns a list of all applicable missing strategies for
         the given object"""
         pass
 
@@ -34,7 +38,7 @@ class Label(ABC, JSONSerializable):
     def missing_strategy(self, strategy: Union[str, MissingStrategy]) -> None:
         if isinstance(strategy, str):
             strategy = MissingStrategy(strategy)
-    
+
         if strategy not in self.applicable_missing_strategies:
             raise ValueError(('Illegal strategy for missing values '
                               f'{strategy} for {self.__class__.__name__}'))
@@ -51,7 +55,7 @@ class Label(ABC, JSONSerializable):
         obj['fit'] = self._fit
 
         return obj
-    
+
     @property
     def jsonstring(self) -> str:
         """Returns a json string representing the label"""
@@ -60,7 +64,7 @@ class Label(ABC, JSONSerializable):
 
     @classmethod
     def from_json(cls, obj: Dict[str, Any]) -> Label:
-        """Instantiates a Label of the given class from the provided 
+        """Instantiates a Label of the given class from the provided
         object. Properties of the object must match the corresponding
         constructor"""
         return cls(**obj)
@@ -73,49 +77,49 @@ class Label(ABC, JSONSerializable):
 
     def save(self, path: str) -> bool:
         save_object_as_json(self, path)
-    
-    def __init__(self, name: str, 
+
+    def __init__(self, name: str,
                 missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
                 fit: Dict[str, Any] = None) -> Label:
         if fit is None:
             fit = {}
-        
+
         self.name = name
         self.missing_strategy = missing_strategy
 
         self._fit = fit
 
-    def _encode_missing(values: np.ndarray, 
+    def _encode_missing(self, values: np.ndarray,
                         strategy: MissingStrategy) -> np.ndarray:
         if strategy == MissingStrategy.ALLOW:
             return values
-        else: 
+        else:
             raise ValueError(f'Illegal strategy for missing values {strategy}')
 
     @abstractmethod
     def fit(self, values: np.ndarray) -> None:
         """Fits eventual preprocessing steps based on given values.
         This would typically mean finding min and max for a continuous
-        variable that will be normalized, finding an encoding table 
+        variable that will be normalized, finding an encoding table
         for binary or categorical variables, etc"""
         pass
 
     @abstractmethod
     def transform(self, values: np.ndarray) -> np.ndarray:
-        """Transforms a list of values according to the rules set and 
-        the previous fit. Will raise an error if the label is not 
+        """Transforms a list of values according to the rules set and
+        the previous fit. Will raise an error if the label is not
         fitted"""
         pass
 
     @abstractmethod
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
-        """Convenience-function for combining fit and transform in a 
+        """Convenience-function for combining fit and transform in a
         single call"""
         pass
 
     @abstractmethod
     def revert(self, values: np.ndarray) -> np.ndarray:
-        """Reverts the operations applied in transform, effectively 
+        """Reverts the operations applied in transform, effectively
         decoding the values back to their original format"""
         pass
 

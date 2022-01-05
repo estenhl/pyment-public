@@ -6,8 +6,10 @@ import numpy as np
 
 from typing import Any, Dict, List, Union
 
+from pyment.utils.io.json import encode_object_as_json
+
 from .dataset import Dataset
-from ...labels import load_label_from_json, Label, load_label_from_jsonfile
+from ...labels import load_label_from_json, load_label_from_jsonfile, Label
 from ...utils.decorators import json_serialized_property
 
 
@@ -65,33 +67,17 @@ class MultiLabelDataset(Dataset):
         Raises:
             ValueError: If the given value is not a valid target
         """
-        if isinstance(value, str) and os.path.isfile(value):
-            value = load_label_from_jsonfile(value)
-        elif isinstance(value, dict):
-            value = load_label_from_json(value)
-
-        if value is None or isinstance(value, str) or isinstance(value, Label):
-            self._validate_and_set_target(value)
+        if value is None or isinstance(value, str):
+            if not value in self.targets:
+                raise ValueError(f'Invalid target {value}')
         elif isinstance(value, list):
-            # If either of the values given as files, a Label
-            # instance is loaded from that file
-            for i in range(len(value)):
-                if isinstance(value[i], str) and os.path.isfile(value[i]):
-                    value[i] = load_label_from_jsonfile(value[i])
-                elif isinstance(value[i], dict):
-                    value[i] = load_label_from_json(value[i])
-
-            if len(value) == 0:
-                self._target = None
-            elif len(value) == 1:
-                self._validate_and_set_target(value[0])
-            else:
-                for v in value:
-                    self._validate_target(v)
-
-                self._target = value
+            for v in value:
+                if not v in self.targets:
+                    raise ValueError(f'Invalid target {v}')
         else:
-            raise ValueError(f'Invalid target type {type(value)}')
+            raise ValueError(f'Invalid target data type {type(value)}')
+
+        self._target = value
 
     @property
     def labels(self) -> Dict[str, np.ndarray]:
@@ -100,36 +86,35 @@ class MultiLabelDataset(Dataset):
 
     @property
     def y(self) -> np.ndarray:
-        if self.target is None:
-            return np.asarray([None] * len(self))
-        elif isinstance(self.target, list):
-            return np.column_stack([self._get_target_vector(key) \
-                                    for key in self.target])
-        else:
-            return self._get_target_vector(self.target)
+        if isinstance(self.target, list):
+            return np.column_stack([self.get_property(target) \
+                                    for target in self.target])
+
+        return self.get_property(self.target)
 
     @json_serialized_property
     def json(self) -> str:
+        encoders = {key: encode_object_as_json(self.encoders[key]) \
+                    for key in self.encoders}
+
         return {
             'labels': self.labels,
-            'target': self.target
+            'target': self.target,
+            'encoders': encoders
         }
 
     @classmethod
     def from_json(cls, obj: Dict[str, Any]) -> Label:
-        if 'target' in obj and isinstance(obj['target'], dict):
-            obj['target'] = load_label_from_json(obj['target'])
-
         return cls(**obj)
 
-    def __init__(self, labels: Dict[str, np.ndarray] = None,
-                 target: str = None) -> MultiLabelDataset:
+    def __init__(self, labels: Dict[str, np.ndarray] = None, *,
+                 target: str = None,
+                 encoders: Dict[str, Label] = None) -> MultiLabelDataset:
         if isinstance(labels, dict):
             for key in labels:
                 if isinstance(labels[key], list):
                     labels[key] = np.asarray(labels[key])
                 elif not isinstance(labels[key], np.ndarray):
-                    print(labels[key])
                     raise ValueError('Dataset labels must be numpy arrays')
         elif labels is not None:
             raise ValueError(('Dataset labels must be either None or a '
@@ -137,36 +122,36 @@ class MultiLabelDataset(Dataset):
 
         self._labels = labels
         self.target = target
+        self.encoders = {}
 
-    def _validate_target(self, value: Any) -> None:
-        if isinstance(value, Label):
-            value = value.name
+        if encoders is not None:
+            for key in encoders:
+                self._add_encoder(key, encoders[key])
 
-        if value not in self.targets:
-            raise ValueError((f'Unable to set target {value}. '
-                            f'Must be in {self.targets}'))
+    def _add_encoder(self, key: str,
+                     encoder: Union[str, Dict[str, Any], Label]) -> None:
+        if isinstance(encoder, Label):
+            self.encoders[key] = encoder
+        elif isinstance(encoder, dict):
+            self.encoders[key] = load_label_from_json(encoder)
+        elif isinstance(encoder, str) and os.path.isfile(encoder):
+            self.encoders[key] = load_label_from_jsonfile(encoder)
+        else:
+            raise ValueError(f'Unable to add encoder of type {type(encoder)}')
 
-    def _validate_and_set_target(self, value: Any) -> None:
-        self._validate_target(value)
+    def get_property(self, target: str, index: int = None) -> np.ndarray:
+        if target is None:
+            labels = np.asarray([None] * len(self))
+        else:
+            labels = self.labels[target]
 
-        self._target = value
+        if target in self.encoders:
+            labels = self.encoders[target].transform(labels)
 
-    def _get_target_vector(self, target: Union[str, Label]) -> np.ndarray:
-        if isinstance(target, str):
-            return self._labels[target]
-        elif isinstance(target, Label):
-            values = self._labels[target.name]
+        if index is not None:
+            return labels[index]
 
-            if target.is_fitted:
-                values = target.transform(values)
-            else:
-                logger.warning((f'Using unfitted {target.__class__.__name__} '
-                                'as target'))
-
-            return values
-
-        raise ValueError(('Unable to retrieve target vector for target with '
-                          f'type {type(target)}'))
+        return labels
 
     def __eq__(self, other: MultiLabelDataset) -> bool:
         if not isinstance(other, MultiLabelDataset):
