@@ -4,34 +4,34 @@ import logging
 import numpy as np
 
 from collections import Counter
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set
 
 from pyment.labels.missing_strategy import MissingStrategy
 
 from .label import Label
 from .missing_strategy import MissingStrategy
 
-logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=logformat, level=logging.INFO)
+LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class BinaryLabel(Label):
     @property
     def is_fitted(self) -> bool:
-        return 'encoding' in self._fit and \
+        return 'mapping' in self._fit and \
                'frequencies' in self._fit
 
     @property
-    def encoding(self) -> Dict[Any, int]:
-        if 'encoding' not in self._fit:
-            raise ValueError(f'Unfitted BinaryLabel does not have an encoding')
+    def mapping(self) -> Dict[Any, int]:
+        if 'mapping' not in self._fit:
+            raise ValueError('Unfitted BinaryLabel does not have a mapping')
 
-        return self._fit['encoding']
+        return self._fit['mapping']
 
     @property
     def frequencies(self) -> Dict[Any, float]:
         if 'frequencies' not in self._fit:
-            raise ValueError(f'Unfitted BinaryLabel does not have frequencies')
+            raise ValueError('Unfitted BinaryLabel does not have frequencies')
 
         return self._fit['frequencies']
 
@@ -41,7 +41,7 @@ class BinaryLabel(Label):
             raise ValueError('The mean of an unfitted binary label is unknown')
 
         frequencies = self.frequencies
-        total = np.sum([self.encoding[key] * frequencies[key] \
+        total = np.sum([self.mapping[key] * frequencies[key] \
                          for key in frequencies])
         count = np.sum(list(frequencies.values()))
 
@@ -53,15 +53,15 @@ class BinaryLabel(Label):
                 MissingStrategy.MEAN_FILL]
 
     def __init__(self, name: str, allowed: List[Any] = None,
-                 encoding: Set[Any, int] = None, 
+                 mapping: Dict[Any, int] = None,
                  missing_strategy: MissingStrategy = MissingStrategy.ALLOW,
                  fit: Dict[str, Any] = None) -> BinaryLabel:
         super().__init__(name, missing_strategy=missing_strategy, fit=fit)
 
         # Validate that object is not initialized both with a previous
-        # fit and a new configuration 
+        # fit and a new configuration
         params = [
-            (encoding, None, 'encoding')
+            (mapping, None, 'mapping')
         ]
 
         for var, default, key in params:
@@ -71,21 +71,21 @@ class BinaryLabel(Label):
                                   f'{key}={var}'))
 
         if allowed is not None:
-            if encoding is not None:
-                raise ValueError(f'Use either allowed or encoding')
-            
+            if mapping is not None:
+                raise ValueError('Use either allowed or mapping')
+
             assert len(allowed) == 2, \
                 'List of allowed values for binary label must have length 2'
             values = sorted(list(allowed))
-            encoding = {values[i]: i for i in range(len(values))}
+            mapping = {values[i]: i for i in range(len(values))}
 
-        if encoding is not None:
-            assert len(encoding) == 2, \
-                'List of encoding for binary label must have length 2'
+        if mapping is not None:
+            assert len(mapping) == 2, \
+                'Mapping for binary label must have length 2'
 
-            self._fit['encoding'] = encoding
+            self._fit['mapping'] = mapping
 
-    def _encode_missing(self, values: np.ndarray, 
+    def _encode_missing(self, values: np.ndarray,
                         strategy: MissingStrategy) -> np.ndarray:
         if strategy == MissingStrategy.ALLOW:
             pass
@@ -103,23 +103,23 @@ class BinaryLabel(Label):
         counts = Counter(values)
         unique = sorted(list(counts.keys()))
 
-        if 'encoding' in self._fit:
-            encoding = self._fit['encoding']
+        if 'mapping' in self._fit:
+            mapping = self._fit['mapping']
         else:
-            encoding = {unique[i]: i for i in range(len(unique))}
+            mapping = {unique[i]: i for i in range(len(unique))}
 
-            assert len(encoding) == 2, \
+            assert len(mapping) == 2, \
                 'Values provided for fitting binary label has >2 levels'
 
-        frequencies = {key: counts[key] for key in counts if key in encoding}
+        frequencies = {key: counts[key] for key in counts if key in mapping}
         total = np.sum(list(frequencies.values()))
         frequencies = {key: frequencies[key] / total for key in frequencies}
 
         logger.info((f'Configured binary variable \'{self.name}\' with '
-                     f'encoding {encoding} and frequencies {frequencies}'))
+                     f'mapping {mapping} and frequencies {frequencies}'))
 
         self._fit = {
-            'encoding': encoding,
+            'mapping': mapping,
             'frequencies': frequencies
         }
 
@@ -131,9 +131,9 @@ class BinaryLabel(Label):
         encoded = np.empty(len(values))
         encoded[:] = np.nan
 
-        for key in self.encoding:
-            encoded[np.where(values == key)] = self.encoding[key]
-        
+        for key in self.mapping:
+            encoded[np.where(values == key)] = self.mapping[key]
+
         encoded = self._encode_missing(encoded, strategy=self.missing_strategy)
 
         return encoded
@@ -141,9 +141,9 @@ class BinaryLabel(Label):
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
         self.fit(values)
         return self.transform(values)
-    
+
     def revert(self, values: np.ndarray) -> np.ndarray:
-        return values
+        raise NotImplementedError()
 
     def __eq__(self, other: BinaryLabel) -> bool:
         if not isinstance(other, BinaryLabel):

@@ -62,7 +62,7 @@ class NiftiDataset(MultiLabelDataset):
         logger.debug((f'Creating {cls.__name__} with {len(df)} datapoints and '
                       f'labels {variables}'))
 
-        return cls(paths, labels, **kwargs)
+        return cls(paths, labels=labels, **kwargs)
 
     @property
     def paths(self) -> np.ndarray:
@@ -103,13 +103,13 @@ class NiftiDataset(MultiLabelDataset):
 
         return obj
 
-    def __init__(self, paths: np.ndarray,
+    def __init__(self, paths: np.ndarray, *,
                  labels: Dict[str, np.ndarray] = None,
-                 target: str = None) -> NiftiDataset:
+                 **kwargs) -> NiftiDataset:
         self._paths = paths if isinstance(paths, np.ndarray) \
                       else np.asarray(paths)
 
-        super().__init__(labels, target)
+        super().__init__(labels=labels, **kwargs)
 
     def stratified_folds(self, k: int, variables: List[str]) -> NiftiDataset:
         """Returns a stratified copy of the dataset, using the variables
@@ -138,7 +138,7 @@ class NiftiDataset(MultiLabelDataset):
         paths = [df.loc[df['fold'] == i, 'path'].values \
                  for i in range(k)]
 
-        return [NiftiDataset(paths[i], labels[i], target=self.target) \
+        return [NiftiDataset(paths[i], labels=labels[i], target=self.target) \
                 for i in range(k)]
 
     def _slice_labels(self, idx: Any) -> Dict[str, np.ndarray]:
@@ -178,7 +178,7 @@ class NiftiDataset(MultiLabelDataset):
                             f'with different targets {self.target} and '
                             f'{other.target}. Resorting to None'))
 
-        return NiftiDataset(paths, labels, target=target)
+        return NiftiDataset(paths, labels=labels, target=target)
 
     def __eq__(self, other: NiftiDataset) -> bool:
         if not isinstance(other, NiftiDataset):
@@ -195,4 +195,4 @@ class NiftiDataset(MultiLabelDataset):
         labels = self._slice_labels(idx)
         target = self.target
 
-        return self.__class__(paths, labels, target)
+        return self.__class__(paths, labels=labels, target=target)
