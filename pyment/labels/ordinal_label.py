@@ -1,3 +1,5 @@
+"""Contains the class representing ordinal labels."""
+
 import logging
 import numpy as np
 
@@ -8,11 +10,13 @@ from .label import Label
 from .missing_strategy import MissingStrategy
 
 
-logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=logformat, level=logging.INFO)
+LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class OrdinalLabel(Label):
+    """Class representing a ordinal label."""
+
     @property
     def is_fitted(self) -> bool:
         return self.ranges is not None
@@ -23,10 +27,17 @@ class OrdinalLabel(Label):
 
     @property
     def ranges(self) -> Dict[str, Any]:
+        """Returns the ranges used by the label. The ranges are used as
+        bins such that all values which fall within a range is encoded
+        as the same value during transform.
+        """
         return self._fit['ranges']
 
     @property
     def mapping(self) -> Dict[Any, float]:
+        """Returns the mapping used by the label to map from original
+        to encoded values.
+        """
         return {key: np.mean(self.ranges[key]) for key in self.ranges}
 
     def __init__(self, name: str, ranges: Dict[str, Any] = None,
@@ -47,9 +58,9 @@ class OrdinalLabel(Label):
                                   'with a previous fit and non-default '
                                   f'{key}={var}'))
 
-        if not 'mu' in self._fit:
+        if 'mu' not in self._fit:
             self._fit['mu'] = mu
-        if not 'sigma' in self._fit:
+        if 'sigma' not in self._fit:
             self._fit['sigma'] = sigma
 
         if ranges is not None:
@@ -71,8 +82,9 @@ class OrdinalLabel(Label):
             self._fit['mu'] = np.nanmean(values)
             self._fit['sigma'] = np.nanstd(values)
 
-        logger.info((f'Configured ordinal variable \'{self.name}\' with '
-                     f'{self.mapping} and frequencies {frequencies}'))
+        logger.info(('Configured ordinal variable \'%s\' with '
+                     '%s and frequencies %s'), self.name,
+                     str(self.mapping), str(frequencies))
 
     def transform(self, values: np.ndarray) -> np.ndarray:
         if not self.is_fitted:
@@ -89,10 +101,6 @@ class OrdinalLabel(Label):
         encoded = encoded / self._fit['sigma']
 
         return encoded
-
-    def fit_transform(self, values: np.ndarray) -> np.ndarray:
-        self.fit(values)
-        return self.transform(values)
 
     def revert(self, values: np.ndarray) -> np.ndarray:
         raise NotImplementedError()

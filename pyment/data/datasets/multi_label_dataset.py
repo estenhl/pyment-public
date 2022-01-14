@@ -107,6 +107,13 @@ class MultiLabelDataset(Dataset):
     def from_json(cls, obj: Dict[str, Any]) -> Label:
         return cls(**obj)
 
+    @property
+    def _inheritable_keyword_arguments(self) -> Dict[str, Any]:
+        kwargs = self.json
+
+        return {key: kwargs[key] for key in kwargs \
+                  if key not in ['labels', 'paths']}
+
     def __init__(self, labels: Dict[str, np.ndarray] = None, *,
                  target: str = None,
                  encoders: Dict[str, Label] = None) -> MultiLabelDataset:
@@ -126,10 +133,10 @@ class MultiLabelDataset(Dataset):
 
         if encoders is not None:
             for key in encoders:
-                self._add_encoder(key, encoders[key])
+                self.add_encoder(key, encoders[key])
 
-    def _add_encoder(self, key: str,
-                     encoder: Union[str, Dict[str, Any], Label]) -> None:
+    def add_encoder(self, key: str,
+                    encoder: Union[str, Dict[str, Any], Label]) -> None:
         if isinstance(encoder, Label):
             self.encoders[key] = encoder
         elif isinstance(encoder, dict):

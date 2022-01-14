@@ -1,4 +1,3 @@
-from .extended_regression_sfcn import ExtendedRegressionSFCN
 from .model import Model
 from .model_type import ModelType
 from .ranking_sfcn import RankingSFCN
@@ -13,8 +12,6 @@ def get(model_name: str, **kwargs) -> Model:
         return SoftClassificationSFCN(**kwargs)
     elif model_name.lower() in ['rankingsfcn', 'sfcn-rank']:
         return RankingSFCN(**kwargs)
-    elif model_name.lower() in ['esfcn-reg']:
-        return ExtendedRegressionSFCN(**kwargs)
     else:
         raise ValueError(f'Unknown model {model_name}')
 

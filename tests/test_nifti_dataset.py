@@ -1,3 +1,5 @@
+"""Contains tests for testing the NiftiDataset."""
+
 import json
 import os
 import numpy as np
@@ -6,7 +8,7 @@ from collections import Counter
 from shutil import rmtree
 
 from pyment.data import load_dataset_from_jsonfile, NiftiDataset
-from pyment.labels import BinaryLabel
+from pyment.labels import BinaryLabel, CategoricalLabel
 from pyment.utils.io import encode_object_as_json
 
 from utils import assert_exception
@@ -677,3 +679,58 @@ def test_dataset_binary_label_to_from_file():
     finally:
         if os.path.isfile('tmp.json'):
             os.remove('tmp.json')
+
+def test_nifti_dataset_slicing_inherits_encoders():
+    encoder = CategoricalLabel('y2', encoding='index')
+    encoder.fit(['A', 'A', 'B', 'B', 'C'])
+    paths = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+
+    data = NiftiDataset(paths, labels=labels, target='y1',
+                        encoders={'y2': encoder})
+    data = data[:2]
+
+    assert 'y2' in data.encoders
+
+def test_nifti_dataset_slicing_get_single_item():
+    paths = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+
+    data = NiftiDataset(paths, labels=labels, target='y1')
+    assert data[1, 'y1'] == 2, \
+        ('Slicing a NiftiDataset with a tuple where the first element is an '
+         'index does not return the correct value')
+
+def test_nifti_dataset_slicing_get_single_item():
+    paths = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+
+    data = NiftiDataset(paths, labels=labels, target='y1')
+    assert np.array_equal(data[np.arange(2), 'y1'], np.arange(1, 3)), \
+        ('Slicing a NiftiDataset with a tuple where the first element is an '
+         'array does not return the correct value')
+
+def test_nifti_dataset_slicing_applies_encoder():
+    encoder = CategoricalLabel('test', encoding='index')
+    encoder.fit(['A', 'B', 'C'])
+    paths = ['path1.nii.gz', 'path2.nii.gz', 'path3.nii.gz']
+    labels = {
+        'y1': np.asarray([1, 2, 3], dtype=np.int64),
+        'y2': np.asarray(['A', 'B', 'C'])
+    }
+
+    data = NiftiDataset(paths, labels=labels, target='y1',
+                        encoders={'y2': encoder})
+    assert data[1, 'y2'] == 1, \
+        'Slicing a NiftiDataset does not apply the given encoding'
+
+
