@@ -8,13 +8,14 @@ from typing import Any, Dict, Tuple
 from .nifti_generator import NiftiGenerator
 
 
-format = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=format, level=logging.INFO)
+LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AsyncNiftiGenerator(NiftiGenerator):
-    def __init__(self, *args, threads: int, 
-                 avoid_singular_batches: bool = False, **kwargs):
+    def __init__(self, *args, threads: int,
+                 avoid_singular_batches: bool = False, initialize: bool = True,
+                 **kwargs):
         super().__init__(*args, **kwargs)
 
         if threads < 2:
@@ -26,6 +27,7 @@ class AsyncNiftiGenerator(NiftiGenerator):
 
         self._exception = None
         self._next_batch = None
+
         self._initialize()
 
     def reset(self) -> None:
@@ -57,6 +59,9 @@ class AsyncNiftiGenerator(NiftiGenerator):
         end = min(self.index + self.batch_size, len(self.dataset))
         idx = np.arange(start, end)
 
+        self._preload_next_batch_from_indexes(idx)
+
+    def _preload_next_batch_from_indexes(self, idx: np.ndarray) -> None:
         if len(idx) == 1 and self.avoid_singular_batches:
             idx = np.concatenate([idx, [np.random.randint(len(self))]])
 
@@ -65,18 +70,18 @@ class AsyncNiftiGenerator(NiftiGenerator):
         X = [result['image'] for result in results]
         y = [result['label'] for result in results]
 
-        if len(self.additional_inputs) > 0:
-            X = [X] + [[datapoint[key] for datapoint in results] \
-                       for key in self.additional_inputs]
-
         X = np.asarray(X)
         y = np.asarray(y)
+
+        if len(self.additional_inputs) > 0:
+            X = [X] + [np.asarray([datapoint[key] for datapoint in results]) \
+                                   for key in self.additional_inputs]
 
         self._next_batch = X, y
 
     def _preload(self) -> None:
         if self._next_batch is not None:
-            raise RuntimeError((f'Unable to start loading next batch before '
+            raise RuntimeError(('Unable to start loading next batch before '
                                 'the previous batch is fetched'))
 
         self.threadpool.submit(self._preload_next_batch)
@@ -84,7 +89,7 @@ class AsyncNiftiGenerator(NiftiGenerator):
     def release(self) -> None:
         self.threadpool.shutdown(wait=True)
 
-    def __next__(self) -> Tuple[np.ndarray, np.ndarray]:
+    def __next__(self) -> Tuple[np.ndarray]:
         if self.index >= len(self.dataset):
             raise StopIteration()
 
@@ -104,7 +109,11 @@ class AsyncNiftiGenerator(NiftiGenerator):
                    'Got different number of images and labels'
 
         self._next_batch = None
-        self.index += len(X)
+
+        if len(self.additional_inputs) > 0:
+            self.index += len(X[0])
+        else:
+            self.index += len(X)
 
         if self.index >= len(self.dataset) and self.infinite:
             super()._initialize()

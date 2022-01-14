@@ -219,3 +219,25 @@ def test_nifti_generator_next_additional_inputs_shuffle():
             assert str(int(X[i][0][0][0])) == additional[i], \
                 ('NiftiGenerator.get_batch with shuffle does not retain '
                   'relationship between image and additional inputs')
+
+def test_nifti_generator_additional_inputs_length():
+    with patch('pyment.data.io.nifti_loader.NiftiLoader.load',
+               wraps=mock_read):
+        paths = [f'{x}.nii.gz' for x in range(30)]
+        labels = {
+            'y1': np.arange(30),
+            'additional': np.arange(30)
+        }
+        dataset = NiftiDataset(paths, labels=labels, target='y1')
+
+        generator = AsyncNiftiGenerator(dataset, batch_size=4, threads=2,
+                                        additional_inputs=['additional'])
+
+        seen = None
+
+        for X, y in generator:
+            seen = y if seen is None else np.concatenate([seen, y])
+
+        assert len(seen) == 30, \
+            ('AsyncNiftiGenerator with additional inputs does not '
+             'contain the correct number of datapoints')
