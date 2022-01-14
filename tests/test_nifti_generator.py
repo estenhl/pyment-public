@@ -188,8 +188,8 @@ def test_nifti_generator_next_additional_inputs():
                wraps=mock_read):
         paths = ['0.nii.gz', '1.nii.gz', '2.nii.gz', '3.nii.gz']
         labels = {
-            'y1': [0, 1, 2, 3],
-            'additional': ['a', 'b', 'c', 'd']
+            'y1': np.asarray([0, 1, 2, 3]),
+            'additional': np.asarray(['a', 'b', 'c', 'd'])
         }
         dataset = NiftiDataset(paths, labels=labels, target='y1')
 
@@ -238,3 +238,4 @@ def test_nifti_generator_next_additional_inputs_shuffle():
             assert str(int(X[i][0][0][0])) == additional[i], \
                 ('NiftiGenerator.get_batch with shuffle does not retain '
                  'relationship between image and additional inputs')
+

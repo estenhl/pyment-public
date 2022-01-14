@@ -1,9 +1,11 @@
+"""Contains the interface for encoding labels."""
+
 from __future__ import annotations
 
 import json
 import numpy as np
 
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Union
 
 from .missing_strategy import MissingStrategy
@@ -17,14 +19,16 @@ class Label(ABC, JSONSerializable):
     variables for a model, and their main task is to encode the
     target vector according to a given set of rules"""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def is_fitted(self) -> bool:
         """Returns true if the variable is fitted and ready for use
         (e.g. if fit() has been called, or the label was instantiated
         with a previous fit"""
         return self._fit is not None
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def applicable_missing_strategies(self) -> List[MissingStrategy]:
         """Returns a list of all applicable missing strategies for
         the given object"""
@@ -32,6 +36,7 @@ class Label(ABC, JSONSerializable):
 
     @property
     def missing_strategy(self) -> str:
+        """Returns the missing strategy enforced by the label."""
         return self._missing_strategy
 
     @missing_strategy.setter
@@ -47,6 +52,7 @@ class Label(ABC, JSONSerializable):
 
     @json_serialized_property
     def json(self) -> Dict[str, Any]:
+        """Returns a json-representation of the label."""
         obj = {
             'name': self.name,
             'missing_strategy': self.missing_strategy
@@ -58,7 +64,7 @@ class Label(ABC, JSONSerializable):
 
     @property
     def jsonstring(self) -> str:
-        """Returns a json string representing the label"""
+        """Returns a json string representing the label."""
         return json.dumps(self.json, indent=4)
 
 
@@ -76,6 +82,7 @@ class Label(ABC, JSONSerializable):
         return cls.from_json(json.loads(jsonstring))
 
     def save(self, path: str) -> bool:
+        """Write a json-representation of the object to a file."""
         save_object_as_json(self, path)
 
     def __init__(self, name: str,
@@ -111,11 +118,12 @@ class Label(ABC, JSONSerializable):
         fitted"""
         pass
 
-    @abstractmethod
     def fit_transform(self, values: np.ndarray) -> np.ndarray:
         """Convenience-function for combining fit and transform in a
         single call"""
-        pass
+        self.fit(values)
+
+        return self.transform(values)
 
     @abstractmethod
     def revert(self, values: np.ndarray) -> np.ndarray:

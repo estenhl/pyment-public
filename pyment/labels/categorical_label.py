@@ -1,36 +1,70 @@
+"""Contains the class representing categorical labels."""
+
 from __future__ import annotations
 
 import logging
 import numpy as np
 
 from enum import Enum
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 from pyment.labels.missing_strategy import MissingStrategy
 
 from .label import Label
 from .missing_strategy import MissingStrategy
+from ..utils.decorators import json_serialized_property
 
 LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
 logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CategoricalLabel(Label):
+    """Class representing a categorical label."""
+
     class Encoding(Enum):
+        """Enum for the different categorical encoding possibilities"""
         ONEHOT = 'onehot'
         INDEX = 'index'
 
     @property
     def is_fitted(self) -> bool:
+        """A boolean representing whether the label has been fitted or
+        not.
+        """
         return self.mapping is not None
 
     @property
     def encoding(self) -> CategoricalLabel.Encoding:
+        """Returns the encoding used by the label."""
         return self._encoding
 
     @property
+    def frequencies(self) -> Dict[Any, int]:
+        """Returns the frequencies which were seen during fit."""
+        if not self.is_fitted:
+            return None
+
+        return self._fit['frequencies']
+
+    @property
+    def reference(self) -> Any:
+        """Returns the reference level (e.g. the most frequent level
+        seen during fit.
+        """
+        if not self.is_fitted:
+            return None
+
+        frequencies = self.frequencies
+        frequencies = [(key, frequencies[key]) for key in frequencies]
+        frequencies = sorted(frequencies)
+
+        return frequencies[-1][0]
+    @property
     def applicable_missing_strategies(self) -> List[MissingStrategy]:
-        return [MissingStrategy.ALLOW]
+        """Returns a list of the missing strategies which is allowed
+        for the label.
+        """
+        return [MissingStrategy.ALLOW, MissingStrategy.REFERENCE_FILL]
 
     @encoding.setter
     def encoding(self, value: Union[str, CategoricalLabel.Encoding]) -> None:
@@ -49,10 +83,21 @@ class CategoricalLabel(Label):
 
     @property
     def mapping(self) -> Dict[Any, Any]:
-        if not 'mapping' in self._fit:
+        """Returns the mapping used by the label. If the label is not
+        fitted, returns None.
+        """
+        if 'mapping' not in self._fit:
             return None
 
         return self._fit['mapping']
+
+    @json_serialized_property
+    def json(self) -> Dict[str, Any]:
+        obj = super().json
+
+        obj['encoding'] = self.encoding
+
+        return obj
 
     def __init__(self, name: str,
                  encoding: Union[str, CategoricalLabel.Encoding],
@@ -67,13 +112,43 @@ class CategoricalLabel(Label):
             self._fit['mapping'] = mapping
 
     def fit(self, values: np.ndarray) -> None:
-        raise NotImplementedError()
+        values = np.asarray([x for x in values if (isinstance(x, str) and
+                                                   x != 'nan') or \
+                                                  (not isinstance(x, str) and
+                                                   not np.isnan(x))])
+        values, counts = np.unique(values, return_counts=True)
+        values = sorted(values)
+
+        self._fit['mapping'] = {values[i]: i for i in range(len(values))}
+        self._fit['frequencies'] = {values[i]: counts[i] \
+                                    for i in range(len(values))}
+
+        logger.info(('Fitted categorical label with mapping %s and '
+                     'frequencies %s'), str(self.mapping),
+                     str(self.frequencies))
 
     def transform(self, values: np.ndarray) -> None:
-        raise NotImplementedError()
+        if not self.is_fitted:
+            raise ValueError(('Unable to call revert on an unfitted '
+                              'CategoricalLabel'))
+        elif self.encoding == CategoricalLabel.Encoding.INDEX:
+            encoded = np.repeat(-1, len(values))
 
-    def fit_transform(self, values: np.ndarray) -> np.ndarray:
-        raise NotImplementedError()
+            for key in self.mapping:
+                encoded[np.where(values == key)] = self.mapping[key]
+
+            if self.missing_strategy == MissingStrategy.REFERENCE_FILL:
+                if values.dtype.type is np.str_:
+                    nan_idx = [x == 'nan' for x in values]
+                else:
+                    nan_idx = np.where(values == -1)
+                encoded[nan_idx] = self.mapping[self.reference]
+
+            return encoded.astype(np.int32)
+        elif self.encoding == CategoricalLabel.Encoding.ONEHOT:
+            raise NotImplementedError()
+        else:
+            raise ValueError(f'Invalid encoding {self.encoding}')
 
     def revert(self, values: np.ndarray) -> np.ndarray:
         raise NotImplementedError()

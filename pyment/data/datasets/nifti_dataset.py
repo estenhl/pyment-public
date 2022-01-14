@@ -138,7 +138,8 @@ class NiftiDataset(MultiLabelDataset):
         paths = [df.loc[df['fold'] == i, 'path'].values \
                  for i in range(k)]
 
-        return [NiftiDataset(paths[i], labels=labels[i], target=self.target) \
+        return [NiftiDataset(paths[i], labels=labels[i],
+                             **self._inheritable_keyword_arguments) \
                 for i in range(k)]
 
     def _slice_labels(self, idx: Any) -> Dict[str, np.ndarray]:
@@ -171,14 +172,13 @@ class NiftiDataset(MultiLabelDataset):
         labels = None if len(labels) == 0 else labels
         target = None
 
-        if self.target == other.target:
-            target = self.target
-        elif not self.target == other.target == None:
+        if self.target != other.target and self.target is not None:
             logger.warning(('Unable to inherit target from two NiftiDatasets '
                             f'with different targets {self.target} and '
                             f'{other.target}. Resorting to None'))
 
-        return NiftiDataset(paths, labels=labels, target=target)
+        return NiftiDataset(paths, labels=labels,
+                            **self._inheritable_keyword_arguments)
 
     def __eq__(self, other: NiftiDataset) -> bool:
         if not isinstance(other, NiftiDataset):
@@ -191,8 +191,41 @@ class NiftiDataset(MultiLabelDataset):
         return len(self.paths)
 
     def __getitem__(self, idx: Any) -> NiftiDataset:
-        paths = self.paths[idx]
-        labels = self._slice_labels(idx)
-        target = self.target
+        if isinstance(idx, np.ndarray) or isinstance(idx, slice):
+            paths = self.paths[idx]
+            labels = self._slice_labels(idx)
 
-        return self.__class__(paths, labels=labels, target=target)
+            return self.__class__(paths, labels=labels,
+                                  **self._inheritable_keyword_arguments)
+        elif isinstance(idx, tuple):
+            variable = idx[1]
+            idx = idx[0]
+
+            if not variable in self.labels:
+                raise ValueError(f'Dataset does not have variable {variable}')
+
+            value = self.labels[variable][idx]
+
+            if variable in self.encoders:
+                if isinstance(idx, (int, np.int32, np.int64)):
+                    value = np.asarray([value])
+
+                value = self.encoders[variable].transform(value)
+
+                if isinstance(idx, (int, np.int32, np.int64)):
+                    value = value[0]
+
+            return value
+        elif isinstance(idx, str):
+            if idx in self.variables:
+                values = self.labels[idx]
+
+                if idx in self.encoders:
+                    values = self.encoders[idx].transform(values)
+
+                return values
+            else:
+                raise ValueError()
+        else:
+            raise ValueError(('Unable to slice NiftiDataset with '
+                              f'{idx.__class__.__name__}'))

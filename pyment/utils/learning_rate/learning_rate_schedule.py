@@ -25,7 +25,7 @@ class LearningRateSchedule:
             raise KeyError(('JSON object used for instantiating '
                             'LearningRateSchedule must contain a schedule '
                             'field'))
-    
+
         obj['schedule'] = {int(key): float(obj['schedule'][key]) \
                            for key in obj['schedule']}
 
@@ -66,3 +66,6 @@ class LearningRateSchedule:
                 return self.schedule[keys[i-1]]
 
         return self.schedule[np.amax(keys)]
+
+    def __str__(self) -> str:
+        return f'LearningRateSchedule({self.jsonstring})'
