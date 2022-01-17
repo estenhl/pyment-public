@@ -225,7 +225,9 @@ class NiftiDataset(MultiLabelDataset):
 
                 return values
             else:
-                raise ValueError()
+                raise ValueError(('Unable to slice a dataset on a variable '
+                                  f'it does not have ({idx} is not in '
+                                  f'{self.variables})'))
         else:
             raise ValueError(('Unable to slice NiftiDataset with '
                               f'{idx.__class__.__name__}'))
