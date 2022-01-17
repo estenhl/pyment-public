@@ -117,8 +117,7 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
         checkpoints = os.path.join(destination, 'checkpoints')
 
         callbacks = [Resetter(training_generator),
-                     ModelCheckpoint(checkpoints, save_best_only=True),
-                     EarlyStopping(patience=5, restore_best_weights=True)]
+                     ModelCheckpoint(checkpoints)]
 
         learning_rate = learning_rate_schedule
 
@@ -172,7 +171,7 @@ if __name__ == '__main__':
                         default=1e-3, help='Learning rate used by optimizer')
     parser.add_argument('-n', '--epochs', required=True, type=int,
                         help='Number of epochs to run training for')
-    parser.add_argument('-o', '--domain', required=False, default=False,
+    parser.add_argument('-o', '--domain', required=False, default=None,
                         help=('Optional variable encoding domain. If used, '
                               'this variable is passed as input to the model '
                               'together with the regular images'))
