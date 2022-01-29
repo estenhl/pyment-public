@@ -11,14 +11,19 @@ from ...callbacks import Resettable
 
 
 class NiftiGenerator(Iterator, Resettable):
+    """Class for serving batches of nifti images"""
+
     @property
     def batches(self) -> int:
+        """Returns the number of batches in the generator"""
         return int(math.ceil(len(self) / self.batch_size))
 
-    def __init__(self, dataset, *, loader: Callable[str, np.ndarray] = None,
-                 preprocessor: Callable[np.ndarray, np.ndarray] = None,
-                 batch_size: int, infinite: bool = False, 
-                 shuffle: bool = False, 
+    def __init__(self, dataset, *, loader: Callable[[str], np.ndarray] = None,
+                 preprocessor: Callable[[np.ndarray], np.ndarray] = None,
+                 augmenter: Callable[[np.ndarray], np.ndarray] = None,
+                 additional_inputs: List[str] = None,
+                 batch_size: int, infinite: bool = False,
+                 shuffle: bool = False,
                  name: str = 'NiftiGenerator') -> NiftiGenerator:
         if loader is None:
             loader = NiftiLoader()
@@ -26,9 +31,18 @@ class NiftiGenerator(Iterator, Resettable):
         if preprocessor is None:
             preprocessor = lambda x: x
 
+        if augmenter is None:
+            augmenter = lambda x: x
+
+        if additional_inputs is None:
+            additional_inputs = []
+
         self.dataset = dataset
         self.loader = loader
         self.preprocessor = preprocessor
+        self.augmenter = augmenter
+
+        self.additional_inputs = additional_inputs
 
         self.batch_size = batch_size
         self.infinite = infinite
@@ -45,11 +59,12 @@ class NiftiGenerator(Iterator, Resettable):
         path = self.dataset.paths[idx]
         image = self.loader.load(path)
         image = self.preprocessor(image)
+        image = self.augmenter(image)
 
         return image
 
     def get_label(self, idx: int) -> np.ndarray:
-        """Returns a single image identified by the given index"""
+        """Returns a single label identified by the given index."""
         if idx > len(self.dataset):
             raise ValueError((f'Index {idx} out of bounds for generator with '
                              f'{len(self.dataset)} data points'))
@@ -57,30 +72,37 @@ class NiftiGenerator(Iterator, Resettable):
         return self.dataset.y[idx]
 
     def get_datapoint(self, idx: int) -> Dict[str, Any]:
-        """Returns an image and a label identified by the given index"""
+        """Returns an image and a label identified by the given index."""
         datapoint = {
             'image': self.get_image(idx),
             'label': self.get_label(idx)
         }
 
+        for key in self.additional_inputs:
+            if not key in self.dataset.variables:
+                raise ValueError((f'Additional input {key} does not exist in '
+                                  'the dataset'))
+            datapoint[key] = self.dataset[idx, key]
+
         return datapoint
 
     def get_batch(self, start: int, end: int) -> Tuple[np.ndarray]:
         """Returns a batch of images and labels, in two separate numpy
-        arrays"""
+        arrays. If the object has additional inputs, these are paired
+        with the images into a tuple.
+        """
         if end > len(self.dataset):
-            raise ValueError((f'End index {i} out of bounds for generator '
-                              f'with {len(dataset)} data points'))
+            raise ValueError((f'End index {end} out of bounds for generator '
+                              f'with {len(self.dataset)} data points'))
 
-        X = []
-        y = []
+        datapoints = [self.get_datapoint(i) for i in range(start, end)]
+        X = np.asarray([datapoint['image'] for datapoint in datapoints])
+        y = np.asarray([datapoint['label'] for datapoint in datapoints])
 
-        for i in range(start, end):
-            X.append(self.get_image(i))
-            y.append(self.get_label(i))
-
-        X = np.asarray(X)
-        y = np.asarray(y)
+        if len(self.additional_inputs) > 0:
+            X = [X] + [np.asarray([datapoint[key] \
+                                   for datapoint in datapoints]) \
+                       for key in self.additional_inputs]
 
         return X, y
 
@@ -88,9 +110,11 @@ class NiftiGenerator(Iterator, Resettable):
         self.index = 0
 
         if self.shuffle:
-            self.dataset = self.dataset.shuffled()
+            idx = np.random.permutation(np.arange(len(self.dataset)))
+            self.dataset = self.dataset[idx]
 
     def reset(self) -> None:
+        """Resets the generator"""
         self._initialize()
 
     def __iter__(self) -> NiftiGenerator:

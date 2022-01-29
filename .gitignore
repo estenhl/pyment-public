@@ -5,3 +5,4 @@ pyment.egg-info/**/*
 .coverage
 **/*.nii.gz
 **/*.mgz
+papers

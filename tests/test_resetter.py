@@ -9,8 +9,8 @@ def test_resetter_invalid_object():
     except Exception:
         exception = True
 
-    assert exception, ('Resetter does not throw an exception if object is not '
-                       'Resettable')
+    assert exception, \
+        'Resetter does not throw an exception if object is not Resettable'
 
 
 def test_resetter_resets():
@@ -25,5 +25,5 @@ def test_resetter_resets():
     resetter = Resetter(obj)
     resetter.on_epoch_end()
 
-    assert 1 == obj.call_count, ('Resetter does not call obj.reset() on epoch '
-                                 'end')
+    assert 1 == obj.call_count, \
+        'Resetter does not call obj.reset() on epoch end'
