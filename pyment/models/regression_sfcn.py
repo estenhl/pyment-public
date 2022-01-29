@@ -47,8 +47,11 @@ class RegressionSFCN(Model):
             if domains is None:
                 x = BatchNormalization(name=f'{name}/block{i+1}/norm')(x)
             else:
-                x = AdaptiveBatchNormalization(domains=num_domains)([x,
-                                                                     domains])
+                x = AdaptiveBatchNormalization(
+                    domains=num_domains,
+                    beta_regularizer=regularizer,
+                    gamma_regularizer=regularizer
+                )([x, domains])
 
             x = Activation(activation,
                            name=f'{name}/block{i+1}/{activation}')(x)
@@ -61,8 +64,11 @@ class RegressionSFCN(Model):
         if domains is None:
             x = BatchNormalization(name=f'{name}/top/norm')(x)
         else:
-            x = AdaptiveBatchNormalization(domains=num_domains)([x,
-                                                                 domains])
+            x = AdaptiveBatchNormalization(
+                domains=num_domains,
+                beta_regularizer=regularizer,
+                gamma_regularizer=regularizer
+            )([x, domains])
 
         x = Activation(activation, name=f'{name}/top/{activation}')(x)
         x = GlobalAveragePooling3D(name=f'{name}/top/pool')(x)
