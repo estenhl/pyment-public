@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -24,6 +25,7 @@ from pyment.data.augmenters import NiftiAugmenter
 from pyment.data.generators import AsyncNiftiGenerator, \
     SingleDomainAsyncNiftiGenerator
 from pyment.data.preprocessors import NiftiPreprocessor
+from pyment.utils.decorators import json_serialize_object
 from pyment.utils.learning_rate import LearningRateSchedule
 
 
@@ -39,10 +41,24 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
     set_seed(42)
 
     with tf.distribute.MirroredStrategy().scope():
+        checkpoints = os.path.join(destination, 'checkpoints')
+
         if os.path.isdir(destination):
-            raise ValueError(f'Folder {destination} already exists')
+            if not model.startswith(destination):
+                raise ValueError(f'Folder {destination} already exists')
+        else:
+            os.mkdir(destination)
+            os.mkdir(checkpoints)
+
+        initial_epoch = 0
+        match = re.fullmatch('epoch=(\d+).*', model)
+
+        if match:
+            initial_epoch = int(match.groups(0)[0])
 
         model = load_model(model)
+
+
 
         training = [load_dataset_from_jsonfile(filename) \
                     for filename in training]
@@ -113,11 +129,17 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                 infinite=True
             )
 
-        os.mkdir(destination)
-        checkpoints = os.path.join(destination, 'checkpoints')
+        checkpoints = os.path.join(checkpoints,
+                                   'epoch={epoch:d}-' + \
+                                   'loss={loss:.3f}-' + \
+                                   '-'.join([metric + '={' + f'{metric}:.3f' + '}' \
+                                             for metric in metrics]) + '-' + \
+                                   'val_loss={val_loss:.3f}-' + \
+                                   '-'.join(['val_' + metric + '={' + f'val_{metric}:.3f' + '}' \
+                                             for metric in metrics]))
 
         callbacks = [Resetter(training_generator),
-                     ModelCheckpoint(checkpoints)]
+                     ModelCheckpoint(checkpoints, save_best_only=True)]
 
         learning_rate = learning_rate_schedule
 
@@ -138,10 +160,12 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                             validation_data=validation_generator,
                             steps_per_epoch=training_generator.batches,
                             validation_steps=validation_generator.batches,
-                            epochs=epochs, callbacks=callbacks)
+                            epochs=epochs, callbacks=callbacks,
+                            initial_epoch=initial_epoch)
+        history = json_serialize_object(history.history)
 
         with open(os.path.join(destination, 'history.json'), 'w') as f:
-            json.dump(history.history, f, indent=4)
+            json.dump(history, f, indent=4)
 
 
 if __name__ == '__main__':
@@ -165,7 +189,8 @@ if __name__ == '__main__':
                               'in the generators'))
     parser.add_argument('-l', '--loss', required=True,
                         help='Loss function used for optimizing the model')
-    parser.add_argument('-e', '--metrics', required=False, default=None,
+    parser.add_argument('-e', '--metrics', required=False, default=[],
+                        nargs='+',
                         help='Metrics logged during model training')
     parser.add_argument('-lr', '--learning_rate_schedule', required=False,
                         default=1e-3, help='Learning rate used by optimizer')
@@ -183,5 +208,7 @@ if __name__ == '__main__':
     fit_model(args.model, training=args.training, validation=args.validation,
               preprocessor=args.preprocessor, augmenter=args.augmenter,
               batch_size=args.batch_size, num_threads=args.num_threads,
-              loss=args.loss, metrics=args.metrics, epochs=args.epochs,
-              domain=args.domain, destination=args.destination)
+              loss=args.loss, metrics=args.metrics,
+              learning_rate_schedule=args.learning_rate_schedule,
+              epochs=args.epochs, domain=args.domain,
+              destination=args.destination)
