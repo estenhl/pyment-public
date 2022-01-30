@@ -14,7 +14,7 @@ from .utils import WeightRepository
 class Model(KerasModel):
     @abstractproperty
     def type(self) -> ModelType:
-        """Returns the type of the model, as defined by the ModelType 
+        """Returns the type of the model, as defined by the ModelType
         enum"""
         pass
 
@@ -22,7 +22,7 @@ class Model(KerasModel):
     def input_shape(self) -> Tuple[int]:
         return self.layers[0].input.shape
 
-    def __init__(self, *args, weights: str = None, include_top: bool = True, 
+    def __init__(self, *args, weights: str = None, include_top: bool = True,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -30,10 +30,10 @@ class Model(KerasModel):
         if weights is not None:
             if not os.path.isfile(weights):
                 weights = WeightRepository.get_path(
-                    model=self.__class__.__name__, 
-                    weights=weights, 
+                    model=self.__class__.__name__,
+                    weights=weights,
                     include_top=include_top)
-        
+
             self.load_weights(weights)
 
     def predict(self, data: Any, *, return_labels: bool = False, **kwargs):
