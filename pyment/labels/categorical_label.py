@@ -99,6 +99,40 @@ class CategoricalLabel(Label):
 
         return obj
 
+    @classmethod
+    def index_encode(cls, values: np.ndarray, *, mapping: Dict[Any, int],
+                     reference: Any,
+                     missing_strategy: MissingStrategy) -> np.ndarray:
+        encoded = np.repeat(-1, len(values))
+
+        for key in mapping:
+            encoded[np.where(values == key)] = mapping[key]
+
+        if missing_strategy == MissingStrategy.REFERENCE_FILL:
+            if values.dtype.type is np.str_:
+                nan_idx = [x == 'nan' for x in values]
+            else:
+                nan_idx = np.where(values == -1)
+            encoded[nan_idx] = mapping[reference]
+
+        return encoded.astype(np.int32)
+
+    @classmethod
+    def onehot_encode(cls, values: np.ndarray, *, mapping: Dict[Any, int],
+                      reference: Any,
+                      missing_strategy: MissingStrategy) -> np.ndarray:
+        index_encoded=cls.index_encode(values, mapping=mapping,
+                                       reference=reference,
+                                       missing_strategy=missing_strategy)
+
+        max_value = np.amax(list(mapping.values()))
+        encoded = np.zeros((len(index_encoded), max_value+1))
+
+        for i in range(len(encoded)):
+            encoded[i][index_encoded[i]] = 1
+
+        return encoded
+
     def __init__(self, name: str,
                  encoding: Union[str, CategoricalLabel.Encoding],
                  mapping: Dict[Any, Any] = None,
@@ -132,21 +166,13 @@ class CategoricalLabel(Label):
             raise ValueError(('Unable to call revert on an unfitted '
                               'CategoricalLabel'))
         elif self.encoding == CategoricalLabel.Encoding.INDEX:
-            encoded = np.repeat(-1, len(values))
-
-            for key in self.mapping:
-                encoded[np.where(values == key)] = self.mapping[key]
-
-            if self.missing_strategy == MissingStrategy.REFERENCE_FILL:
-                if values.dtype.type is np.str_:
-                    nan_idx = [x == 'nan' for x in values]
-                else:
-                    nan_idx = np.where(values == -1)
-                encoded[nan_idx] = self.mapping[self.reference]
-
-            return encoded.astype(np.int32)
+            return self.index_encode(values, mapping=self.mapping,
+                                     reference=self.reference,
+                                     missing_strategy=self.missing_strategy)
         elif self.encoding == CategoricalLabel.Encoding.ONEHOT:
-            raise NotImplementedError()
+            return self.onehot_encode(values, mapping=self.mapping,
+                                      reference=self.reference,
+                                      missing_strategy=self.missing_strategy)
         else:
             raise ValueError(f'Invalid encoding {self.encoding}')
 

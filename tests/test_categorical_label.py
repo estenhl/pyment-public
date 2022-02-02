@@ -114,3 +114,22 @@ def test_categorical_label_fill_with_reference():
     assert np.array_equal([1, 2, 2, 0, 1, 2, 2], transformed), \
         ('CategoricalLabel does not properly fill nans with the '
          'reference level')
+
+def test_categorical_label_fit_transform_onehot():
+    """Tests that a CategoricalLabel is able to transform a set of
+    values using onehot encoding.
+    """
+    label = CategoricalLabel('test', encoding='onehot')
+    values = np.asarray(['B', 'C', 'C', 'A', 'B'])
+    transformed = label.fit_transform(values)
+
+    expected = np.asarray([
+        [0, 1, 0],
+        [0, 0, 1],
+        [0, 0, 1],
+        [1, 0, 0],
+        [0, 1, 0]
+    ])
+
+    assert np.array_equal(expected, transformed), \
+        'CategoricalLabel does not properly onehot encode variables'
