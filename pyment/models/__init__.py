@@ -4,6 +4,7 @@ from .ranking_sfcn import RankingSFCN
 from .regression_sfcn import RegressionSFCN
 from .soft_classification_sfcn import SoftClassificationSFCN
 from .vit import RegressionVisionTransformerMini, VisionTransformer
+from .regression_vgg11 import RegressionVGG11
 
 
 def get(model_name: str, **kwargs) -> Model:
@@ -16,6 +17,8 @@ def get(model_name: str, **kwargs) -> Model:
     elif model_name.lower() in ['regressionvisiontransformermini',
                                 'vis-mini-reg']:
         return RegressionVisionTransformerMini(**kwargs)
+    elif model_name.lower() in ['regressionvgg11']:
+        return RegressionVGG11(**kwargs)
     else:
         raise ValueError(f'Unknown model {model_name}')
 
