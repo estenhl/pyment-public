@@ -23,4 +23,5 @@ def get(model_name: str, **kwargs) -> Model:
         raise ValueError(f'Unknown model {model_name}')
 
 def get_model_names() -> str:
-    return ['sfcn-reg', 'sfcn-sm', 'sfcn-rank', 'vis-mini-reg']
+    return ['sfcn-reg', 'sfcn-sm', 'sfcn-rank', 'vis-mini-reg',
+            'regressionvgg11']
