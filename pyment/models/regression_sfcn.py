@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-from adabn import AdaptiveBatchNormalization
 from tensorflow.keras.layers import Activation, BatchNormalization, Conv3D, \
                                     Dense, Dropout, GlobalAveragePooling3D, \
                                     Input, MaxPooling3D, Reshape
@@ -26,6 +25,9 @@ class RegressionSFCN(Model):
                  domains: int = None):
         if isinstance(input_shape, list):
             input_shape = tuple(input_shape)
+
+        if domains is not None:
+            from adabn import AdaptiveBatchNormalization
 
         regularizer = l2(weight_decay) if weight_decay is not None else None
 
