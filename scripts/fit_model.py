@@ -8,7 +8,7 @@ import pandas as pd
 import tensorflow as tf
 
 from functools import reduce
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.python.keras.callbacks import LearningRateScheduler
@@ -57,8 +57,6 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
             initial_epoch = int(match.groups(0)[0])
 
         model = load_model(model)
-
-
 
         training = [load_dataset_from_jsonfile(filename) \
                     for filename in training]
@@ -167,6 +165,7 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
         with open(os.path.join(destination, 'history.json'), 'w') as f:
             json.dump(history, f, indent=4)
 
+    return history
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Fits a model on the given dataset')
