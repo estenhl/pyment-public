@@ -1,15 +1,15 @@
 """Configures a keras model.
 
-Example run:
+Example usage:
     python scripts/configure_model.py \
         -m regressionvgg11 \
-        -k "{\"input_shape\": [43, 54, 41],
-             \"dropout\": 0.5,
-             \"weight_decay\": 1e-3}"
-        -c "{\"loss\": \"mse\",
-             \"optimizer\": \"sgd\",
-             \"metrics\": [\"mae\"]}"
-        -d /path/to/model
+        -k "{\"input_shape\": [43, 54, 41], \
+             \"dropout\": 0.5, \
+             \"weight_decay\": 1e-3}" \
+        -c "{\"loss\": \"mse\", \
+             \"optimizer\": \"sgd\", \
+             \"metrics\": [\"mae\"]}" \
+        -d /path/to/destination/folder
 """
 
 

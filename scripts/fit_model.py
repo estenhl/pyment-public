@@ -1,3 +1,22 @@
+""" Fits a model
+
+Example usage:
+    python scripts/fit_model.py \
+        --model /path/to/model \
+        --training /path/to/training/fold_0.json \
+                   /path/to_training/fold_1.json \
+        --validation /path/to/validation.json \
+        --preprocessor /path/to/preprocessor.json \
+        --augmenter /path/to/augmenter.json \
+        --batch_size 32 \
+        -num_threads 8 \
+        --loss mse \
+        --metrics mae \
+        --learning_rate /path/to/schedule.json \
+        -epochs 5 \
+        --d /path/to/destination/folder
+"""
+
 import argparse
 import json
 import logging
