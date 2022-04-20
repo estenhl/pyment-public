@@ -20,10 +20,10 @@ class CyclicalLearningRateSchedule(LearningRateSchedule):
 
             return lr
 
-        epochs = np.arange(cutoff)
+        epochs = np.arange(cutoff).astype(int)
         lrs = [_compute(epoch) for epoch in epochs]
 
         steps = {epochs[i]: lrs[i] for i in range(len(lrs))}
-        steps[cutoff] = minimum
+        steps[int(cutoff)] = minimum
 
         super().__init__(steps)

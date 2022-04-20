@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 import os
+import nibabel as nib
 import numpy as np
 import pandas as pd
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from .multi_label_dataset import MultiLabelDataset
 from ...utils.decorators import json_serialized_property
@@ -102,6 +103,10 @@ class NiftiDataset(MultiLabelDataset):
         obj['paths'] = self.paths
 
         return obj
+
+    @property
+    def image_size(self) -> Tuple[int, int, int]:
+        return nib.load(self.paths[0]).get_fdata().shape
 
     def __init__(self, paths: np.ndarray, *,
                  labels: Dict[str, np.ndarray] = None,

@@ -27,12 +27,12 @@ import pandas as pd
 import tensorflow as tf
 
 from functools import reduce
+from tensorflow.data import Dataset
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.python.keras.callbacks import LearningRateScheduler
-from tensorflow.random import set_seed
-from typing import Any, List
+from typing import Any, Dict, List
 
 from utils import configure_environment
 
@@ -56,8 +56,13 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
               preprocessor: str, augmenter: str, batch_size: int,
               num_threads: int, loss: str, metrics: str,
               learning_rate_schedule: Any = 1e-3, epochs: int,
-              domain: str, destination: str):
-    set_seed(42)
+              domain: str = None, destination: str) -> Dict[str, Any]:
+    np.random.seed(42)
+    tf.random.set_seed(42)
+
+    options = tf.data.Options()
+    options.experimental_distribute.auto_shard_policy = \
+        tf.data.experimental.AutoShardPolicy.OFF
 
     with tf.distribute.MirroredStrategy().scope():
         checkpoints = os.path.join(destination, 'checkpoints')
@@ -133,7 +138,7 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                 batch_size=batch_size,
                 threads=num_threads,
                 shuffle=True,
-                infinite=True
+                infinite=False
             )
 
             validation_generator = SingleDomainAsyncNiftiGenerator(
@@ -143,7 +148,7 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                 batch_size=batch_size,
                 threads=num_threads,
                 shuffle=False,
-                infinite=True
+                infinite=False
             )
 
         checkpoints = os.path.join(checkpoints,
@@ -173,10 +178,29 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
         model.compile(loss=loss, metrics=metrics,
                       optimizer=Adam(learning_rate))
 
+        output_shapes = (None,) + training_generator.image_size
+        output_signature = (
+            tf.TensorSpec(shape=output_shapes, dtype=tf.float32),
+            tf.TensorSpec(shape=(None,1), dtype=tf.float32)
+        )
+
+        training_batches = training_generator.batches
+        validation_batches = validation_generator.batches
+        training_generator = Dataset.from_generator(
+            training_generator,
+            output_signature=output_signature
+        )
+        training_generator = training_generator.with_options(options)
+        validation_generator = Dataset.from_generator(
+            validation_generator,
+            output_signature=output_signature
+        )
+        validation_generator = validation_generator.with_options(options)
+
         history = model.fit(training_generator,
                             validation_data=validation_generator,
-                            steps_per_epoch=training_generator.batches,
-                            validation_steps=validation_generator.batches,
+                            steps_per_epoch=training_batches,
+                            validation_steps=validation_batches,
                             epochs=epochs, callbacks=callbacks,
                             initial_epoch=initial_epoch)
         history = json_serialize_object(history.history)
