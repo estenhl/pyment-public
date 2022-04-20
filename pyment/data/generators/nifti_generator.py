@@ -18,6 +18,10 @@ class NiftiGenerator(Iterator, Resettable):
         """Returns the number of batches in the generator"""
         return int(math.ceil(len(self) / self.batch_size))
 
+    @property
+    def image_size(self) -> Tuple[int, int, int]:
+        return self.dataset.image_size
+
     def __init__(self, dataset, *, loader: Callable[[str], np.ndarray] = None,
                  preprocessor: Callable[[np.ndarray], np.ndarray] = None,
                  augmenter: Callable[[np.ndarray], np.ndarray] = None,
@@ -145,3 +149,6 @@ class NiftiGenerator(Iterator, Resettable):
 
     def __len__(self) -> int:
         return len(self.dataset)
+
+    def __call__(self) -> NiftiGenerator:
+        return self
