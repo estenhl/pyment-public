@@ -2,11 +2,11 @@
 
 Example usage:
     python scripts/learning_rate_sweep.py \
-        --model /path/to/model \
+        --model /path/to/model/folder \
         --learning_rates 1e-6 1 \
         --steps 5000 \
         --dataset /path/to/dataset \
-        --preprocessor /path/to/preprocessor \
+        --preprocessor /path/to/preprocessor.json \
         --batch_size 32 \
         --folder /path/to/results/folder
 """
