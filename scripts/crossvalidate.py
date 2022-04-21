@@ -87,6 +87,9 @@ def crossvalidate(*, models: List[str], folds: List[str],
         fold_results = []
 
         for j in range(len(configurations)):
+            logger.info((f'Fitting configuration {j+1}/{len(configurations)} '
+                         f'on fold {i+1}/{len(folds)}'))
+
             configuration = configurations[j]
             run_destination = os.path.join(fold_destination, f'run_{j}')
 
@@ -122,7 +125,10 @@ def crossvalidate(*, models: List[str], folds: List[str],
         }
 
         with open(os.path.join(fold_destination, 'results.json'), 'w') as f:
-            json.dump(fold_results, f)
+            json.dump(fold_results, f, indent=4)
+
+        with open(os.path.join(fold_destination, 'configuration.json'), 'w') as f:
+            json.dump(configuration, f, indent=4)
 
         results.append(fold_results)
 
@@ -142,7 +148,7 @@ def crossvalidate(*, models: List[str], folds: List[str],
     }
 
     with open(os.path.join(destination, 'results.json'), 'w') as f:
-        json.dump(json_serialize_object(results), f)
+        json.dump(json_serialize_object(results), f, indent=4)
 
     return results
 
