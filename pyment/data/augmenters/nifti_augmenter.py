@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import numpy as np
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from ...utils.decorators import json_serialized_property
 
@@ -33,6 +33,10 @@ class NiftiAugmenter:
                   for i in range(len(flips))]
         image = image[tuple(slices)]
 
+        return image
+
+    @staticmethod
+    def zoom(image: np.ndarray, ratios: List[float]) -> np.ndarray:
         return image
 
     @json_serialized_property
