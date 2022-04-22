@@ -13,7 +13,8 @@ def test_find_latest_weights():
         folders = [
             'epoch=1-loss=1.23-val_loss=123',
             'epoch=15-loss=2.34-val_loss=234',
-            'epoch=105-loss=0.12-val_loss=12'
+            'epoch=105-loss=0.12-val_loss=12',
+            'random_folder'
         ]
 
         for folder in folders:
