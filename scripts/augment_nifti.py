@@ -34,11 +34,12 @@ def augment_nifti(augmenter: str, image: str, iterations: int = 1):
 
     fig, ax = plt.subplots(iterations + 1, len(means), figsize=(15, 10*(iterations + 1)))
     for i in range(len(means)):
-        ax[0][i].imshow(np.take(image, means[i], axis=i))
+        ax[0][i].imshow(np.take(image, means[i], axis=i), cmap='Greys_r')
         ax[0][i].axis('off')
 
         for j in range(len(augmentations)):
-            ax[1+j][i].imshow(np.take(augmentations[j], means[i], axis=i))
+            ax[1+j][i].imshow(np.take(augmentations[j], means[i], axis=i),
+                              cmap='Greys_r')
             ax[1+j][i].axis('off')
 
     plt.show()
