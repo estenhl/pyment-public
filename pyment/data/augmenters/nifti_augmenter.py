@@ -79,14 +79,12 @@ class NiftiAugmenter:
         return rotation_matrix, offset
 
     @staticmethod
-    def shear(image: np.ndarray, shears: List[int]) -> Tuple[np.ndarray]:
+    def shear(shears: List[int]) -> Tuple[np.ndarray]:
         rotation_matrix = np.asarray([
             [1, shears[0], shears[0]],
             [shears[1], 1, shears[1]],
             [shears[2], shears[2], 1]
         ])
-
-        print(rotation_matrix)
 
         return rotation_matrix, np.zeros(3)
 
@@ -235,7 +233,7 @@ class NiftiAugmenter:
             if self.shear_ranges is not None:
                 shears = self._resolve_ranges(self.shear_ranges)
                 shear_matrix, shear_offset = \
-                    self.shear(image, shears)
+                    self.shear(shears)
                 translation_matrix = translation_matrix.dot(shear_matrix)
                 offset += shear_offset
 
