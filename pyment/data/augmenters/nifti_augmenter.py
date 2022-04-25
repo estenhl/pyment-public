@@ -135,7 +135,8 @@ class NiftiAugmenter:
             'shift_ranges': self.shift_ranges,
             'zoom_ranges': self.zoom_ranges,
             'rotation_ranges': self.rotation_ranges,
-            'shear_ranges': self.shear_ranges
+            'shear_ranges': self.shear_ranges,
+            'noise_threshold': self.noise_threshold
         }
 
     @property
@@ -165,12 +166,14 @@ class NiftiAugmenter:
                  shift_ranges: List[int] = None,
                  zoom_ranges: List[float] = None,
                  rotation_ranges: List[int] = None,
-                 shear_ranges: List[int] = None):
+                 shear_ranges: List[int] = None,
+                 noise_threshold: float = None):
         self.flip_probabilities = flip_probabilities
         self.shift_ranges = shift_ranges
         self.zoom_ranges = zoom_ranges
         self.rotation_ranges = rotation_ranges
         self.shear_ranges = shear_ranges
+        self.noise_threshold = noise_threshold
 
     def save(self, path: str) -> bool:
         """Saves a json-representation of the augmenter to file."""
@@ -237,7 +240,13 @@ class NiftiAugmenter:
                 translation_matrix = translation_matrix.dot(shear_matrix)
                 offset += shear_offset
 
-            image = affine_transform(image, translation_matrix, offset=offset, order=2)
+            image = affine_transform(image, translation_matrix, offset=offset,
+                                     order=2)
+
+        if self.noise_threshold is not None:
+            image = image * np.random.uniform(1 - self.noise_threshold,
+                                              1 + self.noise_threshold,
+                                              image.shape)
 
         return image
 

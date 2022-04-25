@@ -23,12 +23,14 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                               zoom_ranges: List[float] = None,
                               rotation_ranges: List[int] = None,
                               shear_ranges: List[float] = None,
+                              noise_threshold: float = None,
                               destination: str) -> NiftiAugmenter:
     augmenter = NiftiAugmenter(flip_probabilities=flip_probabilities,
                                shift_ranges=shift_ranges,
                                zoom_ranges=zoom_ranges,
                                rotation_ranges=rotation_ranges,
-                               shear_ranges=shear_ranges)
+                               shear_ranges=shear_ranges,
+                               noise_threshold=noise_threshold)
 
     augmenter.save(destination)
 
@@ -70,6 +72,12 @@ if __name__ == '__main__':
                               'describing the fraction of shearing allwed '
                               'both in the positive and negativ direction '
                               'of the given axis'))
+    parser.add_argument('-n', '--noise_threshold', required=False,
+                        default=None, type=float,
+                        help=('Noise threshold used by the augmenter. If '
+                             'used, the entire image is multiplied by a '
+                             'uniform distribution from '
+                             '[1-threshold, 1+threshold]'))
     parser.add_argument('-d', '--destination', required=True,
                         help='Path where augmenter is stored')
 
@@ -80,4 +88,5 @@ if __name__ == '__main__':
                               zoom_ranges=args.zoom_ranges,
                               rotation_ranges=args.rotation_ranges,
                               shear_ranges=args.shear_ranges,
+                              noise_threshold=args.noise_threshold,
                               destination=args.destination)
