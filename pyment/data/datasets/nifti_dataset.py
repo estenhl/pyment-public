@@ -27,7 +27,7 @@ class NiftiDataset(MultiLabelDataset):
         images = os.path.join(root, images)
         labels = os.path.join(root, labels)
 
-        df = pd.read_csv(labels, index_col=None)
+        df = pd.read_csv(labels, index_col=None, dtype={'id': 'str'})
 
         assert 'id' in df.columns, 'labels is missing id column'
 
