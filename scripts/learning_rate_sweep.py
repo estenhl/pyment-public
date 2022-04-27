@@ -55,6 +55,7 @@ def learning_rate_sweep(*, model: str, loss: str, learning_rates: Tuple[float],
     generator = AsyncNiftiGenerator(dataset,
                                     preprocessor=preprocessor,
                                     batch_size=batch_size,
+                                    shuffle=True,
                                     infinite=True,
                                     threads=num_threads,
                                     avoid_singular_batches=True)
@@ -68,7 +69,7 @@ def learning_rate_sweep(*, model: str, loss: str, learning_rates: Tuple[float],
     lrs = []
     losses = []
 
-    for step in tqdm(range(steps)):
+    for step in tqdm(range(steps * window)):
         X, y = next(generator)
         batch_loss = model.train_on_batch(X, y)
         batch.append(batch_loss)
