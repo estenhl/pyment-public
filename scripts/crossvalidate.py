@@ -1,4 +1,3 @@
-# python scripts/crossvalidate.py -m ~/projects/crossvalidation/models/dropout\=0.5-weight_decay\=1e-3/ ~/projects/crossvalidation/models/dropout\=0.5-weight_decay\=1e-4 -f ~/projects/crossvalidation/data/fold_0.json ~/projects/crossvalidation/data/fold_1.json ~/projects/crossvalidation/data/fold_2.json -p ~/projects/crossvalidation/preprocessor.json -a ~/projects/crossvalidation/augmenter.json -b 32 -nt 8 -l mse -e mse -lr ~/projects/crossvalidation/cyclical_learning_rate.json ~/projects/crossvalidation/stepwise_learning_rate_schedule.json -n 5 -d ~/projects/crossvalidation/crossvalidation
 """Performs crossvalidation across a given set of models, configurations
 and folds.
 
