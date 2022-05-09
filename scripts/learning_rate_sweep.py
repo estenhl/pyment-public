@@ -2,11 +2,13 @@
 
 Example usage:
     python scripts/learning_rate_sweep.py \
-        --model /path/to/model \
+        --model /path/to/model/folder \
+        --loss mse \
         --learning_rates 1e-6 1 \
         --steps 5000 \
-        --dataset /path/to/dataset \
-        --preprocessor /path/to/preprocessor \
+        --dataset /path/to/dataset1.json \
+                  /path/to/dataset2.json \
+        --preprocessor /path/to/preprocessor.json \
         --batch_size 32 \
         --folder /path/to/results/folder
 """
@@ -17,6 +19,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from functools import reduce
 from multiprocessing import cpu_count
 from tensorflow.keras.models import load_model
 from typing import Tuple
@@ -31,8 +34,8 @@ from pyment.data.preprocessors import NiftiPreprocessor
 from pyment.data.generators import AsyncNiftiGenerator
 
 
-def learning_rate_sweep(*, model: str, learning_rates: Tuple[float],
-                        steps: int, window: int = 1, dataset: str,
+def learning_rate_sweep(*, model: str, loss: str, learning_rates: Tuple[float],
+                        steps: int, window: int = 1, datasets: str,
                         preprocessor: str = None, batch_size: int,
                         num_threads: int = None, folder: str):
     if os.path.isdir(folder):
@@ -41,8 +44,10 @@ def learning_rate_sweep(*, model: str, learning_rates: Tuple[float],
     os.mkdir(folder)
 
     model = load_model(model)
+    model.compile(loss=loss, optimizer='SGD')
 
-    dataset = load_dataset_from_jsonfile(dataset)
+    datasets = [load_dataset_from_jsonfile(dataset) for dataset in datasets]
+    dataset = reduce(lambda x, y: x + y, datasets)
     preprocessor = NiftiPreprocessor.from_file(preprocessor) \
                    if preprocessor is not None else None
     num_threads = num_threads if num_threads is not None \
@@ -50,6 +55,7 @@ def learning_rate_sweep(*, model: str, learning_rates: Tuple[float],
     generator = AsyncNiftiGenerator(dataset,
                                     preprocessor=preprocessor,
                                     batch_size=batch_size,
+                                    shuffle=True,
                                     infinite=True,
                                     threads=num_threads,
                                     avoid_singular_batches=True)
@@ -63,9 +69,9 @@ def learning_rate_sweep(*, model: str, learning_rates: Tuple[float],
     lrs = []
     losses = []
 
-    for step in tqdm(range(steps)):
+    for step in tqdm(range(steps * window)):
         X, y = next(generator)
-        batch_loss, _ = model.train_on_batch(X, y)
+        batch_loss = model.train_on_batch(X, y)
         batch.append(batch_loss)
 
         if len(batch) == window:
@@ -95,6 +101,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-m', '--model', required=True,
                         help='Path to saved model')
+    parser.add_argument('-l', '--loss', required=True,
+                        help='Loss used by the model')
     parser.add_argument('-lr', '--learning_rates', nargs=2, type=float,
                         help='Min and max learning rates to test')
     parser.add_argument('-s', '--steps', required=True, type=int,
@@ -103,7 +111,7 @@ if __name__ == '__main__':
                         type=int,
                         help=('The number of batches which is combined into '
                               'each iteration'))
-    parser.add_argument('-d', '--dataset', required=True,
+    parser.add_argument('-d', '--datasets', required=True, nargs='+',
                         help='JSON file containing the dataset')
     parser.add_argument('-p', '--preprocessor', required=False, default=None,
                         help='JSON file containing a NiftiPreprocessor')
@@ -119,10 +127,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     learning_rate_sweep(model=args.model,
+                        loss=args.loss,
                         learning_rates=args.learning_rates,
                         steps=args.steps,
                         window=args.window,
-                        dataset=args.dataset,
+                        datasets=args.datasets,
                         preprocessor=args.preprocessor,
                         batch_size=args.batch_size,
                         num_threads=args.num_threads,
