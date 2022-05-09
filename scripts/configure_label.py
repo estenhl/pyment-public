@@ -1,6 +1,6 @@
 """Configures a label (typically by fitting an encoding)
 
-Example run:
+Example usage:
     python scripts/configure_label.py \
         -n scanner \
         -t categorical \

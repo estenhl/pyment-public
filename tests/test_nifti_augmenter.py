@@ -6,32 +6,32 @@ import numpy as np
 from pyment.data.augmenters import NiftiAugmenter
 
 
-def test_mni_sagittal_flip():
+def test_mni_y_flip():
     """Tests that the augmenter applies a saggital flip (in MNI152
     space).
     """
     X = np.arange(3**3).reshape((3, 3, 3))
-    flipped = NiftiAugmenter.flip(X, [1, 0, 0])
+    flipped = NiftiAugmenter.fast_flip(X, [1, 0, 0])
 
     assert np.array_equal(X[::-1,:,:], flipped), \
         'NiftiAugmenter does not correctly flip in the saggital axis'
 
-def test_mni_coronal_flip():
+def test_mni_x_flip():
     """Tests that the augmenter applies a coronal flip (in MNI152
     space).
     """
     X = np.arange(3**3).reshape((3, 3, 3))
-    flipped = NiftiAugmenter.flip(X, [0, 1, 0])
+    flipped = NiftiAugmenter.fast_flip(X, [0, 1, 0])
 
     assert np.array_equal(X[:,::-1,:], flipped), \
         'NiftiAugmenter does not correctly flip in the coronal axis'
 
-def test_mni_axial_flip():
+def test_mni_z_flip():
     """Tests that the augmenter applies a axial flip (in MNI152
     space).
     """
     X = np.arange(3**3).reshape((3, 3, 3))
-    flipped = NiftiAugmenter.flip(X, [0, 0, 1])
+    flipped = NiftiAugmenter.fast_flip(X, [0, 0, 1])
 
     assert np.array_equal(X[:,:,::-1], flipped), \
         'NiftiAugmenter does not correctly flip in the axial axis'

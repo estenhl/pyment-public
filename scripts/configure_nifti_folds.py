@@ -1,15 +1,15 @@
 """Configures a set of nifti folds necessary for training a model.
 
-Example run:
+Example usage:
     python scripts/configure_nifti_folds.py \
-        -f /path/to/dataset1 \
-           /path/to/dataset2 \
+        -f /path/to/dataset1/folder \
+           /path/to/dataset2/folder \
         -t age \
         -s age sex scanner \
         -k 5 \
         -p 0.2 \
-        -e /path/to/encoder \
-        -d /path/to/destination
+        -e /path/to/encoder.json \
+        -d /path/to/destination/folder
 """
 
 import argparse
