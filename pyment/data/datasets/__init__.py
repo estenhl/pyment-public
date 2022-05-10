@@ -3,6 +3,7 @@ import sys
 
 from .dataset import Dataset
 from .nifti_dataset import NiftiDataset
+from .multisample_nifti_dataset import MultisampleNiftiDataset
 
 def load_dataset_from_jsonfile(path: str) -> Dataset:
     with open(path, 'r') as f:
