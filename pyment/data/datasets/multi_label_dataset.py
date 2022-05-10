@@ -6,11 +6,11 @@ import numpy as np
 
 from typing import Any, Dict, List, Union
 
-from pyment.utils.io.json import encode_object_as_json
 
 from .dataset import Dataset
 from ...labels import load_label_from_json, load_label_from_jsonfile, Label
 from ...utils.decorators import json_serialized_property
+from ...utils.io.json import encode_object_as_json
 
 
 LOGFORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
@@ -106,13 +106,6 @@ class MultiLabelDataset(Dataset):
     @classmethod
     def from_json(cls, obj: Dict[str, Any]) -> Label:
         return cls(**obj)
-
-    @property
-    def _inheritable_keyword_arguments(self) -> Dict[str, Any]:
-        kwargs = self.json
-
-        return {key: kwargs[key] for key in kwargs \
-                  if key not in ['labels', 'paths']}
 
     def __init__(self, labels: Dict[str, np.ndarray] = None, *,
                  target: str = None,
