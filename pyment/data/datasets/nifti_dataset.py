@@ -29,11 +29,28 @@ class NiftiDataset(MultiLabelDataset):
 
         df = pd.read_csv(labels, index_col=None, dtype={'id': 'str'})
 
+        assert 'id' in df.columns, \
+            (f'{labels} should contain a field named \'id\' which contains '
+            'the image ids used in the dataset')
+        if 'path' in df.columns:
+            logger.warning((f'{labels} should not contain a field named '
+                            '\'path\' as this is used internally. This column '
+                            'will be dropped'))
+
+        image_ids = set([filename.split('.')[0] \
+                         for filename in os.listdir(images)])
+
+        return cls.from_image_ids_and_df(image_ids=image_ids, df=df,
+                                         image_folder=images, suffix=suffix,
+                                         **kwargs)
+
+    @classmethod
+    def from_image_ids_and_df(cls, *, image_ids: List[str], df: pd.DataFrame,
+                              image_folder: str, suffix: str = 'nii.gz',
+                              **kwargs) -> NiftiDataset:
         assert 'id' in df.columns, 'labels is missing id column'
 
         label_ids = set(df['id'].astype(str))
-        image_ids = set([filename.split('.')[0] \
-                         for filename in os.listdir(images)])
 
         missing_images = label_ids - image_ids
         missing_labels = image_ids - label_ids
@@ -47,12 +64,9 @@ class NiftiDataset(MultiLabelDataset):
 
         df = df[df['id'].isin(complete)]
 
-        if 'path' in df.columns:
-            logger.warning((f'{labels} should not contain a field named '
-                            '\'path\' as this is used internally. This column '
-                            'will be dropped'))
 
-        create_path = lambda x: os.path.join(images, f'{x}.{suffix}')
+
+        create_path = lambda x: os.path.join(image_folder, f'{x}.{suffix}')
 
         df['path'] = df['id'].apply(create_path)
 
@@ -100,13 +114,26 @@ class NiftiDataset(MultiLabelDataset):
     def json(self) -> str:
         obj = super().json
 
-        obj['paths'] = self.paths
+        obj['paths'] = self._paths
 
         return obj
 
     @property
+    def _inheritable_keyword_arguments(self) -> Dict[str, Any]:
+        kwargs = self.json
+
+        return {key: kwargs[key] for key in kwargs \
+                  if key not in ['labels', 'paths']}
+
+    @property
     def image_size(self) -> Tuple[int, int, int]:
         return nib.load(self.paths[0]).get_fdata().shape
+
+    @property
+    def shuffled(self) -> NiftiDataset:
+        idx = np.random.permutation(np.arange(len(self)))
+
+        return self[idx]
 
     def __init__(self, paths: np.ndarray, *,
                  labels: Dict[str, np.ndarray] = None,
@@ -170,12 +197,11 @@ class NiftiDataset(MultiLabelDataset):
             for key in other.labels:
                 self_values = self.labels[key] if self.labels is not None \
                                                     and key in self.labels \
-                               else np.repeat(np.nan, len(other))
+                               else np.repeat(np.nan, len(self))
                 labels[key] = np.concatenate([self_values,
                                               other.labels[key]])
 
         labels = None if len(labels) == 0 else labels
-        target = None
 
         if self.target != other.target and self.target is not None:
             logger.warning(('Unable to inherit target from two NiftiDatasets '
@@ -197,7 +223,7 @@ class NiftiDataset(MultiLabelDataset):
 
     def __getitem__(self, idx: Any) -> NiftiDataset:
         if isinstance(idx, np.ndarray) or isinstance(idx, slice):
-            paths = self.paths[idx]
+            paths = self._paths[idx]
             labels = self._slice_labels(idx)
 
             return self.__class__(paths, labels=labels,
