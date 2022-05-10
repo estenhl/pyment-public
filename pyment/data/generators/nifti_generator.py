@@ -114,8 +114,7 @@ class NiftiGenerator(Iterator, Resettable):
         self.index = 0
 
         if self.shuffle:
-            idx = np.random.permutation(np.arange(len(self.dataset)))
-            self.dataset = self.dataset[idx]
+            self.dataset = self.dataset.shuffled
 
     def reset(self) -> None:
         """Resets the generator"""
