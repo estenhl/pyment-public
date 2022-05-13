@@ -30,7 +30,7 @@ from functools import reduce
 from tensorflow.data import Dataset
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import load_model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import SGD
 from tensorflow.python.keras.callbacks import LearningRateScheduler
 from typing import Any, Dict, List
 
@@ -176,7 +176,7 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                     learning_rate = schedule(0)
 
         model.compile(loss=loss, metrics=metrics,
-                      optimizer=Adam(learning_rate))
+                      optimizer=SGD(learning_rate))
 
         output_shapes = (None,) + training_generator.image_size
         output_signature = (

@@ -118,6 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs', '--batch_size', required=True, type=int,
                         help='Batch sized used by the generator')
     parser.add_argument('-nt', '--num_threads', required=False, default=None,
+                        type=int,
                         help=('Number of threads used by the generator to '
                               'load data. If not set, the available number '
                               'of cores is used'))
