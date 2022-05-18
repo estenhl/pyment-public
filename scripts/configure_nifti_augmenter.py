@@ -24,13 +24,19 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                               rotation_ranges: List[int] = None,
                               shear_ranges: List[float] = None,
                               noise_threshold: float = None,
+                              intensity_threshold: float = None,
+                              blur_threshold: float = None,
+                              blur_probability: float = None,
                               destination: str) -> NiftiAugmenter:
     augmenter = NiftiAugmenter(flip_probabilities=flip_probabilities,
                                shift_ranges=shift_ranges,
                                zoom_ranges=zoom_ranges,
                                rotation_ranges=rotation_ranges,
                                shear_ranges=shear_ranges,
-                               noise_threshold=noise_threshold)
+                               noise_threshold=noise_threshold,
+                               intensity_threshold=intensity_threshold,
+                               blur_threshold=blur_threshold,
+                               blur_probability=blur_probability)
 
     augmenter.save(destination)
 
@@ -78,6 +84,23 @@ if __name__ == '__main__':
                              'used, the entire image is multiplied by a '
                              'uniform distribution from '
                              '[1-threshold, 1+threshold]'))
+    parser.add_argument('-i', '--intensity_threshold', required=False,
+                        default=None, type=float,
+                        help=('Intensity threshold used by the augmenter. If '
+                              'used, changes the intensity of the image by a '
+                              'factor of [1+threshold, 1-threshold]'))
+    parser.add_argument('-b', '--blur_threshold', required=False,
+                        default=None, type=float,
+                        help=('Blur sigma threshold used by the augmenter. If '
+                              'used, blurs the image by a sigma in the range '
+                              '[0, blur_threshold] with a probability given '
+                              'by blur_probability'))
+    parser.add_argument('-bp', '--blur_probability', required=False,
+                        default=None, type=float,
+                        help=('Sets the blur probability of the augmenter. If '
+                              'used, defines the probability that a blur, '
+                              'according to the blur_threshold, is applied. '
+                              'If used without blur_threshold, has no effect'))
     parser.add_argument('-d', '--destination', required=True,
                         help='Path where augmenter is stored')
 
@@ -89,4 +112,7 @@ if __name__ == '__main__':
                               rotation_ranges=args.rotation_ranges,
                               shear_ranges=args.shear_ranges,
                               noise_threshold=args.noise_threshold,
+                              intensity_threshold=args.intensity_threshold,
+                              blur_threshold=args.blur_threshold,
+                              blur_probability=args.blur_probability,
                               destination=args.destination)

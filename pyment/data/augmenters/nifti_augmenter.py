@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import numpy as np
 
-from scipy.ndimage import affine_transform, zoom
+from scipy.ndimage import affine_transform, gaussian_filter
 from typing import  Any, Dict, List, Tuple
 
 from ...utils.decorators import json_serialized_property
@@ -136,7 +136,10 @@ class NiftiAugmenter:
             'zoom_ranges': self.zoom_ranges,
             'rotation_ranges': self.rotation_ranges,
             'shear_ranges': self.shear_ranges,
-            'noise_threshold': self.noise_threshold
+            'noise_threshold': self.noise_threshold,
+            'intensity_threshold': self.intensity_threshold,
+            'blur_threshold': self.blur_threshold,
+            'blur_probability': self.blur_probability
         }
 
     @property
@@ -167,13 +170,19 @@ class NiftiAugmenter:
                  zoom_ranges: List[float] = None,
                  rotation_ranges: List[int] = None,
                  shear_ranges: List[int] = None,
-                 noise_threshold: float = None):
+                 noise_threshold: float = None,
+                 intensity_threshold: float = None,
+                 blur_threshold: float = None,
+                 blur_probability: float = 0.5):
         self.flip_probabilities = flip_probabilities
         self.shift_ranges = shift_ranges
         self.zoom_ranges = zoom_ranges
         self.rotation_ranges = rotation_ranges
         self.shear_ranges = shear_ranges
         self.noise_threshold = noise_threshold
+        self.intensity_threshold = intensity_threshold
+        self.blur_threshold = blur_threshold
+        self.blur_probability = blur_probability
 
     def save(self, path: str) -> bool:
         """Saves a json-representation of the augmenter to file."""
@@ -247,6 +256,16 @@ class NiftiAugmenter:
             image = image * np.random.uniform(1 - self.noise_threshold,
                                               1 + self.noise_threshold,
                                               image.shape)
+
+        if self.intensity_threshold is not None:
+            image = image * np.random.uniform(1 - self.intensity_threshold,
+                                              1 + self.intensity_threshold)
+
+        if self.blur_threshold is not None:
+            if np.random.uniform(0, 1) < self.blur_probability:
+                sigma = np.random.randint(0, self.blur_threshold)
+                if sigma > 0:
+                    image = gaussian_filter(image, sigma)
 
         return image
 
