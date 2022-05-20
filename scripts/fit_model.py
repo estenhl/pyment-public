@@ -86,8 +86,6 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
                     for filename in training]
         training = reduce(lambda x, y: x + y, training)
 
-        training = training[np.where(~np.isnan(training.y))[0]]
-
         logger.info((f'Training on dataset with {len(training)} samples with '
                     f'y ranging from {round(np.amin(training.y), 2)} '
                     f'to {round(np.amax(training.y), 2)} '
@@ -96,8 +94,6 @@ def fit_model(model: str, *, training: List[str], validation: List[str],
         validation = [load_dataset_from_jsonfile(filename) \
                     for filename in validation]
         validation = reduce(lambda x, y: x + y, validation)
-
-        validation = validation[np.where(~np.isnan(validation.y))[0]]
 
         logger.info((f'Validating on dataset with {len(validation)} samples '
                     f'with y ranging from {round(np.amin(validation.y), 2)} '

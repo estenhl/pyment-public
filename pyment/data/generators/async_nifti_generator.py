@@ -120,4 +120,7 @@ class AsyncNiftiGenerator(NiftiGenerator):
 
         self._preload()
 
+        if len(y.shape == 1):
+            y = np.reshape(y, (-1, 1))
+
         return X, y
