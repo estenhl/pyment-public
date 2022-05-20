@@ -99,6 +99,10 @@ def validate(*, models: List[str], training: List[str], validation: str,
                             epochs=epochs,
                             destination=run_destination)
 
+        with open(os.path.join(run_destination, 'configuration.json'),
+                  'w') as f:
+            json.dump(configuration, f)
+
         val_losses = history['val_loss']
         best_val_loss = np.amin(val_losses)
         losses.append(best_val_loss)
