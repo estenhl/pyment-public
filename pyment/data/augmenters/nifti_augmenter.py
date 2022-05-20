@@ -139,7 +139,8 @@ class NiftiAugmenter:
             'noise_threshold': self.noise_threshold,
             'intensity_threshold': self.intensity_threshold,
             'blur_threshold': self.blur_threshold,
-            'blur_probability': self.blur_probability
+            'blur_probability': self.blur_probability,
+            'crop_box_sides': self.crop_box_sides
         }
 
     @property
@@ -173,7 +174,8 @@ class NiftiAugmenter:
                  noise_threshold: float = None,
                  intensity_threshold: float = None,
                  blur_threshold: float = None,
-                 blur_probability: float = 0.5):
+                 blur_probability: float = 0.5,
+                 crop_box_sides: int = None):
         self.flip_probabilities = flip_probabilities
         self.shift_ranges = shift_ranges
         self.zoom_ranges = zoom_ranges
@@ -183,6 +185,7 @@ class NiftiAugmenter:
         self.intensity_threshold = intensity_threshold
         self.blur_threshold = blur_threshold
         self.blur_probability = blur_probability
+        self.crop_box_sides = crop_box_sides
 
     def save(self, path: str) -> bool:
         """Saves a json-representation of the augmenter to file."""
@@ -266,6 +269,22 @@ class NiftiAugmenter:
                 sigma = np.random.randint(0, self.blur_threshold)
                 if sigma > 0:
                     image = gaussian_filter(image, sigma)
+
+        if self.crop_box_sides is not None:
+            image = image.copy()
+
+            height = np.random.randint(0, self.crop_box_sides)
+            width = np.random.randint(0, self.crop_box_sides)
+            depth = np.random.randint(0, self.crop_box_sides)
+
+            ymin = np.random.randint(0, image.shape[0] - (height + 1))
+            xmin = np.random.randint(0, image.shape[1] - (width + 1))
+            zmin = np.random.randint(0, image.shape[2] - (depth + 1))
+
+            image[ymin:ymin + height, xmin:xmin + width, zmin:zmin + depth] = \
+                np.random.uniform(np.amin(image), np.amax(image),
+                                  (height, width, depth))
+
 
         return image
 

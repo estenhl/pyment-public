@@ -27,6 +27,7 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                               intensity_threshold: float = None,
                               blur_threshold: float = None,
                               blur_probability: float = None,
+                              crop_box_sides: int = None,
                               destination: str) -> NiftiAugmenter:
     augmenter = NiftiAugmenter(flip_probabilities=flip_probabilities,
                                shift_ranges=shift_ranges,
@@ -36,7 +37,8 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                                noise_threshold=noise_threshold,
                                intensity_threshold=intensity_threshold,
                                blur_threshold=blur_threshold,
-                               blur_probability=blur_probability)
+                               blur_probability=blur_probability,
+                               crop_box_sides=crop_box_sides)
 
     augmenter.save(destination)
 
@@ -75,7 +77,7 @@ if __name__ == '__main__':
                         type=float, nargs='+',
                         help=('Shear ranges used by the augmenter. If used, '
                               'should be a list of three floats, each '
-                              'describing the fraction of shearing allwed '
+                              'describing the fraction of shearing allowed '
                               'both in the positive and negativ direction '
                               'of the given axis'))
     parser.add_argument('-n', '--noise_threshold', required=False,
@@ -101,6 +103,13 @@ if __name__ == '__main__':
                               'used, defines the probability that a blur, '
                               'according to the blur_threshold, is applied. '
                               'If used without blur_threshold, has no effect'))
+    parser.add_argument('-c', '--crop_box_sides', required=False, default=None,
+                        type=int,
+                        help=('Maxmimum sides of the lengths of the boxes '
+                              'which are cropped by the augmenter. If set, '
+                              'the augmenter will randomly crop out a '
+                              'cuboid with sides [0-c, 0-c, 0-c] from each '
+                              'image and fill it with noise'))
     parser.add_argument('-d', '--destination', required=True,
                         help='Path where augmenter is stored')
 
@@ -115,4 +124,5 @@ if __name__ == '__main__':
                               intensity_threshold=args.intensity_threshold,
                               blur_threshold=args.blur_threshold,
                               blur_probability=args.blur_probability,
+                              crop_box_sides=args.crop_box_sides,
                               destination=args.destination)
