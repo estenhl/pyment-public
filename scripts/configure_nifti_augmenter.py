@@ -98,7 +98,7 @@ if __name__ == '__main__':
                               '[0, blur_threshold] with a probability given '
                               'by blur_probability'))
     parser.add_argument('-bp', '--blur_probability', required=False,
-                        default=None, type=float,
+                        default=0.5, type=float,
                         help=('Sets the blur probability of the augmenter. If '
                               'used, defines the probability that a blur, '
                               'according to the blur_threshold, is applied. '
