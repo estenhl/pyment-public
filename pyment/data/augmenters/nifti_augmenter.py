@@ -64,16 +64,17 @@ class NiftiAugmenter:
         return np.eye(3), shifts
 
     @staticmethod
-    def zoom(ratios: List[float]) -> Tuple[np.ndarray]:
+    def zoom(image: np.ndarray, ratios: List[float]) -> Tuple[np.ndarray]:
         zoom_matrix = np.eye(3) * ratios
+        offset = (np.asarray(image.shape) * (1 - np.asarray(ratios))) / 2
 
-        return zoom_matrix, np.zeros(3)
+        return zoom_matrix, offset
 
     @staticmethod
     def rotate(image: np.ndarray, rotations: List[int]) -> Tuple[np.ndarray]:
         rotation_matrix = NiftiAugmenter._generate_rotation_matrix(rotations)
-        center= np.asarray(image.shape) / 2
-        offset=center - center.dot(rotation_matrix.T)
+        center = np.asarray(image.shape) / 2
+        offset = center - center.dot(rotation_matrix.T)
 
 
         return rotation_matrix, offset
@@ -234,7 +235,7 @@ class NiftiAugmenter:
             if self.zoom_ranges is not None:
                 zooms = self._resolve_ranges(self.zoom_ranges)
                 zooms = [1 + zoom for zoom in zooms]
-                zoom_matrix, zoom_offset = self.zoom(zooms)
+                zoom_matrix, zoom_offset = self.zoom(image, zooms)
                 translation_matrix = translation_matrix.dot(zoom_matrix)
                 offset += zoom_offset
 
