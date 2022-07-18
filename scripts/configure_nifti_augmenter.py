@@ -27,6 +27,7 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                               intensity_threshold: float = None,
                               blur_threshold: float = None,
                               blur_probability: float = None,
+                              contrast_gamma: float = None,
                               crop_box_sides: int = None,
                               destination: str) -> NiftiAugmenter:
     augmenter = NiftiAugmenter(flip_probabilities=flip_probabilities,
@@ -38,6 +39,7 @@ def configure_nifti_augmenter(*, flip_probabilities: List[float] = None,
                                intensity_threshold=intensity_threshold,
                                blur_threshold=blur_threshold,
                                blur_probability=blur_probability,
+                               contrast_gamma=contrast_gamma,
                                crop_box_sides=crop_box_sides)
 
     augmenter.save(destination)
@@ -103,6 +105,11 @@ if __name__ == '__main__':
                               'used, defines the probability that a blur, '
                               'according to the blur_threshold, is applied. '
                               'If used without blur_threshold, has no effect'))
+    parser.add_argument('-cg', '--contrast_gamma', required=False,
+                        default=None, type=float,
+                        help=('Sets the contrast gamma of the augmenter. If '
+                              'set, images are adjusted by a factor in the '
+                              'range [1-contrast_gamma, 1+contrast_gamma]'))
     parser.add_argument('-c', '--crop_box_sides', required=False, default=None,
                         type=int,
                         help=('Maxmimum sides of the lengths of the boxes '
@@ -124,5 +131,6 @@ if __name__ == '__main__':
                               intensity_threshold=args.intensity_threshold,
                               blur_threshold=args.blur_threshold,
                               blur_probability=args.blur_probability,
+                              contrast_gamma=args.contrast_gamma,
                               crop_box_sides=args.crop_box_sides,
                               destination=args.destination)
