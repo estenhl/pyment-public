@@ -141,6 +141,7 @@ class NiftiAugmenter:
             'intensity_threshold': self.intensity_threshold,
             'blur_threshold': self.blur_threshold,
             'blur_probability': self.blur_probability,
+            'contrast_gamma': self.contrast_gamma,
             'crop_box_sides': self.crop_box_sides
         }
 
@@ -176,6 +177,7 @@ class NiftiAugmenter:
                  intensity_threshold: float = None,
                  blur_threshold: float = None,
                  blur_probability: float = 0.5,
+                 contrast_gamma: float = None,
                  crop_box_sides: int = None):
         self.flip_probabilities = flip_probabilities
         self.shift_ranges = shift_ranges
@@ -186,6 +188,7 @@ class NiftiAugmenter:
         self.intensity_threshold = intensity_threshold
         self.blur_threshold = blur_threshold
         self.blur_probability = blur_probability
+        self.contrast_gamma = contrast_gamma
         self.crop_box_sides = crop_box_sides
 
     def save(self, path: str) -> bool:
@@ -270,6 +273,17 @@ class NiftiAugmenter:
                 sigma = np.random.randint(0, self.blur_threshold)
                 if sigma > 0:
                     image = gaussian_filter(image, sigma)
+
+        if self.contrast_gamma is not None:
+            max_value = np.amax(image)
+            min_value = np.amin(image)
+            image = (image - min_value) / max_value
+            factor = np.random.uniform(1 - self.contrast_gamma, 1 + self.contrast_gamma)
+            image = image ** factor
+            image = image * max_value
+            image = image + min_value
+            image[np.where(image > max_value)] = max_value
+            image[np.where(image < min_value)] = min_value
 
         if self.crop_box_sides is not None:
             image = image.copy()
