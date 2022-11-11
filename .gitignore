@@ -5,3 +5,5 @@ pyment.egg-info/**/*
 .coverage
 **/*.nii.gz
 **/*.mgz
+dist
+pyment_public.egg-info

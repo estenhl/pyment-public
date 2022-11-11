@@ -1,9 +1,23 @@
 from distutils.core import setup
 
-setup(name='pyment',
-      version='1.0',
-      description='Deep learning models for neuroimaging data',
-      author='Esten H. Leonardsen',
-      author_email='estenhl@psykologi.uio.no',
-      url='https://github.com/estenhl/pyment-public',
-      packages=['pyment'])
+setup(
+    name="pyment-public",
+    version="1.0.1",
+    author="Esten Høyland Leonardsen",
+    author_email="estenleonardsen@gmail.com",
+    packages=["pyment"],
+    url="https://github.com/estenhl/pyment-public",
+    install_requires=[
+        "jupyterlab",
+        "matplotlib",
+        "mock",
+        "nibabel",
+        "numpy",
+        "pandas",
+        "pytest",
+        "requests",
+        "scikit-learn",
+        "tqdm",
+        "xlrd"
+    ]
+)
