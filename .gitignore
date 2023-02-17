@@ -6,3 +6,5 @@ pyment.egg-info/**/*
 **/*.nii.gz
 **/*.mgz
 **/.ipynb_checkpoints
+dist
+pyment_public.egg-info
