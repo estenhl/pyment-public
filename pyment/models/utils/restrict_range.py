@@ -8,6 +8,6 @@ def restrict_range(x: tf.Tensor, lower: int, upper: int,
     assert upper > lower, 'upper must be greater than lower'
 
     x = ReLU(max_value=upper - lower, name=f'{name}/relu')(x)
-    x = tf.add(x, lower, name=f'{name}/add')
+    x = Add(name=f'{name}/add')([x, tf.constant([[lower]], dtype=tf.float32)])
 
     return x

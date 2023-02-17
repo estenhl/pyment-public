@@ -1,6 +1,10 @@
 import argparse
 import pandas as pd
 
+from utils import configure_environment
+
+configure_environment()
+
 from pyment.data import AsyncNiftiGenerator, NiftiDataset
 from pyment.models import get as get_model, ModelType
 

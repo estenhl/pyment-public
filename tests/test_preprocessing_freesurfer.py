@@ -17,8 +17,8 @@ def test_autorecon1(mock):
         cmd = mock.call_args[0][0]
         expected_cmd = ('recon-all -s mock -sd tmp -i mock.nii.gz '
                         '-autorecon1 -no-isrunning')
-        assert expected_cmd == cmd, ('autorecon1 does not call run with '
-                                     'correct command')
+        assert expected_cmd == cmd, \
+            'autorecon1 does not call run with correct command'
     finally:
         rmtree('tmp')
 
@@ -31,8 +31,9 @@ def test_autorecon1_disable_noisrunning(mock):
 
         cmd = mock.call_args[0][0]
         expected_cmd = 'recon-all -s mock -sd tmp -i mock.nii.gz -autorecon1'
-        assert expected_cmd == cmd, ('autorecon1 noisrunning does not toggle '
-                                     '-noisrunning in freesurfer call')
+        assert expected_cmd == cmd, \
+            ('autorecon1 noisrunning does not toggle -noisrunning in '
+             'freesurfer call')
     finally:
         rmtree('tmp')
 
@@ -43,9 +44,8 @@ def test_autorecon1_disable_silence(mock):
         autorecon1('mock.nii.gz', subject='mock', subjects_dir='tmp',
                    silence=False)
 
-        assert not mock.call_args[1]['silence'], ('autorecon1 silence kwargs '
-                                                  'does not affect run '
-                                                  'arguments')
+        assert not mock.call_args[1]['silence'], \
+            'autorecon1 silence kwargs does not affect run arguments'
     finally:
         rmtree('tmp')
 
@@ -63,11 +63,11 @@ def test_autorecon1_folder(mock):
 
         autorecon1_folder(src, dest)
 
-        assert os.path.isdir(dest), ('autorecon1_folder does not create '
-                                     'destination folder')
+        assert os.path.isdir(dest), \
+            'autorecon1_folder does not create destination folder'
 
-        assert 5 == mock.call_count, ('autorecon1_folder does not call run '
-                                      'for every subject')
+        assert 5 == mock.call_count, \
+            'autorecon1_folder does not call run for every subject'
     finally:
         rmtree('tmp')
 
@@ -75,12 +75,12 @@ def test_autorecon1_folder(mock):
 def test_convert_mgz_to_nii_gz(mock):
     convert_mgz_to_nii_gz('src.mgz', 'dest.nii.gz')
 
-    assert 1 == mock.call_count, ('convert_mgz_to_nii_gz does not call '
-                                    'run function')
+    assert 1 == mock.call_count, \
+        'convert_mgz_to_nii_gz does not call run function'
     cmd = mock.call_args[0][0]
     expected_cmd = 'mri_convert src.mgz dest.nii.gz -ot nii'
-    assert expected_cmd == cmd, ('autorecon1 does not call run with '
-                                    'correct command')
+    assert expected_cmd == cmd, \
+        'autorecon1 does not call run with correct command'
 
 @patch('pyment.utils.preprocessing.freesurfer.run')
 def test_convert_mgz_to_nii_gz_invalid_file(mock):
@@ -91,8 +91,9 @@ def test_convert_mgz_to_nii_gz_invalid_file(mock):
     except Exception as e:
         exception = True
 
-    assert exception, ('Calling convert_mgz_to_nii_gz with a non-mgz file '
-                       'does not raise an error')
+    assert exception, \
+        ('Calling convert_mgz_to_nii_gz with a non-mgz file does not raise an '
+         'error')
 
 @patch('pyment.utils.preprocessing.freesurfer.run')
 def test_convert_mgz_to_nii_gz_folder(mock):
@@ -108,10 +109,10 @@ def test_convert_mgz_to_nii_gz_folder(mock):
 
         convert_mgz_to_nii_gz_folder(src, dest)
 
-        assert os.path.isdir(dest), ('convert_mgz_to_nii_gz_folder does not '
-                                     'create destination folder')
+        assert os.path.isdir(dest), \
+            'convert_mgz_to_nii_gz_folder does not create destination folder'
 
-        assert 5 == mock.call_count, ('convert_mgz_to_nii_gz_folder does not '
-                                      'call run for every subject')
+        assert 5 == mock.call_count, \
+            'convert_mgz_to_nii_gz_folder does not call run for every subject'
     finally:
         rmtree('tmp')
