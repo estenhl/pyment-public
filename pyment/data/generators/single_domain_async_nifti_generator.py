@@ -39,8 +39,12 @@ class SingleDomainAsyncNiftiGenerator(AsyncNiftiGenerator):
 
     def _configure_batches(self) -> None:
         domains = self.dataset[self.domain]
-        indexes = np.asarray([np.where(domains == domain)[0] \
-                              for domain in np.unique(domains)])
+        for domain in np.unique(domains):
+            print(domain)
+            print(np.where(domains == domain))
+            print(np.where(domains == domain)[0])
+        indexes = [np.where(domains == domain)[0] \
+                   for domain in np.unique(domains)]
 
         if self.shuffle:
             indexes = [np.random.permutation(index) for index in indexes]
@@ -53,7 +57,8 @@ class SingleDomainAsyncNiftiGenerator(AsyncNiftiGenerator):
         batches = reduce(lambda x, y: x + y, batches)
 
         if self.shuffle:
-            batches = np.random.permutation(batches)
+            idx = np.random.permutation(len(batches))
+            batches = [batches[i] for i in idx]
 
         self._batches = batches
 
