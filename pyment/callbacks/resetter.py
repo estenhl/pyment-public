@@ -21,5 +21,5 @@ class Resetter(Callback):
 
         self.obj = obj
 
-    def on_epoch_end(self, *args, **kwargs) -> None:
+    def on_epoch_end(self, *_) -> None:
         self.obj.reset()
