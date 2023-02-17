@@ -2,7 +2,6 @@ jupyterlab
 matplotlib
 mock
 nibabel
-=======
 numpy
 pandas
 pytest
