@@ -57,6 +57,8 @@ def test_generator_batches_are_singular():
                 ('SingleDomainAsyncNiftiGenerator mixes up relationship '
                  'between images and labels')
 
+        seen = seen.squeeze()
+
         assert Counter(labels['y']) == Counter(seen), \
             'SingleDomainAsyncNiftiGenerator does not return all datapoints'
 
@@ -93,6 +95,8 @@ def test_single_domain_generator_shuffle():
 
                 runs[i] = y if runs[i] is None \
                           else np.concatenate([runs[i], y])
+
+            runs[i] = runs[i].squeeze()
 
         assert Counter(labels['y']) == Counter(runs[0]) == Counter(runs[1]), \
             ('SingleDomainAsyncNiftiGenerator with shuffle set does not '

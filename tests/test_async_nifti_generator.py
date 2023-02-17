@@ -125,13 +125,14 @@ def test_generator_shuffle_infinite():
                         ('AsyncNiftiGenerator mixes up images and labels when '
                          'shuffle=True')
                     epochs[epoch].append(y[i])
+            epochs[epoch] = np.asarray(epochs[epoch]).flatten()
             generator.reset()
 
         assert set(epochs[0]) == set(epochs[1]) == set([1, 2, 3, 4]), \
             ('AsyncNiftiGenerator with infinite=True and shuffle=True does '
              'not return all images for epochs split by reset()')
 
-        assert epochs[0] != epochs[1], \
+        assert not np.array_equal(epochs[0], epochs[1]), \
             ('AsyncNiftiGenerator with infinite=True and shuffle=True does '
              'not shuffle batches between epochs')
 
