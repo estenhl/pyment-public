@@ -30,7 +30,7 @@ While the models adhere to the Keras [Model](https://www.tensorflow.org/api_docs
       ├── image2.nii.gz
      ...
       └── imageN.nii.gz
-``` 
+```
 where ```labels.csv``` is a csv-file with column ```id``` (corresponding to image1, image2, etc) and column ```age```.
 
 ## Preprocessing
@@ -48,3 +48,24 @@ A full example which downloads the IXI dataset and preprocesses it can be found 
 Estimating brain age using the trained brain age model from the paper consists of downloading the weights, instantiating the model with said weights, and calling [Model.fit()](https://www.tensorflow.org/api_docs/python/tf/keras/Model#predict) with an appropriate generator. A full tutorial (which relies on having a prepared dataset) can be found in the [Python prediction tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Encode%20dataset%20as%20feature%20vectors.ipynb)
 
 Instructions for downloading, building and using our docker containers for brain age predictions can be found in the [docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder
+
+# License
+The code and models in this repo is released under the CC-BY-NC license.
+
+# Citation
+If you use code or models from this repo, please cite
+```
+@article{leonardsen_deep_2022,
+	title = {Deep neural networks learn general and clinically relevant representations of the ageing brain},
+	volume = {256},
+	rights = {All rights reserved},
+	issn = {1053-8119},
+	url = {https://www.sciencedirect.com/science/article/pii/S1053811922003342},
+	doi = {10.1016/j.neuroimage.2022.119210},
+	pages = {119210},
+	journaltitle = {{NeuroImage}},
+	shortjournal = {{NeuroImage}},
+	author = {Leonardsen, Esten H. and Peng, Han and Kaufmann, Tobias and Agartz, Ingrid and Andreassen, Ole A. and Celius, Elisabeth Gulowsen and Espeseth, Thomas and Harbo, Hanne F. and Høgestøl, Einar A. and Lange, Ann-Marie de and Marquand, Andre F. and Vidal-Piñeiro, Didac and Roe, James M. and Selbæk, Geir and Sørensen, Øystein and Smith, Stephen M. and Westlye, Lars T. and Wolfers, Thomas and Wang, Yunpeng},
+	date = {2022-08-01},
+}
+```
