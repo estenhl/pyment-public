@@ -1,71 +1,34 @@
-Repository containing code, models and tutorials for the paper [Deep neural networks learn general and clinically relevant representations of the ageing brain](https://www.medrxiv.org/content/10.1101/2021.10.29.21265645v1)
+Following (pending) release v3.0.0 (and onwards) this repository serves solely as a model zoo for pretrained neuroimaging models from various publications (see list below). This means that a lot of the utilities that was previously packaged alongside the models (for e.g. training) has been stripped to avoid bloating the repository. If you are interested in specific code for a specific paper either check out the previous releases or email me at [estenhl@uio.no](mailto:estenhl@uio.no)
 
-# Installation (via terminal and Anaconda)
+### Publications
+This is an overview of the publications from where the pretrained models originate. The shorthand-column denotes the name that is used to refer to the publications below. Note that the corresponding author is not necessarily equivalent as for the publication, but instead the author in charge of the modelling.
+| Title | Shorthand title | Publication year | Corresponding author |
+| --- | --- | --- | --- |
+| [Deep neural networks learn general and clinically relevant representations of the ageing brain](10.1016/j.neuroimage.2022.119210) | brain-age-general | 2022 | [E.H. Leonardsen](mailto:estenhl@uio.no) |
+| [Genetic architecture of brain age and its causal relations with brain and mental disorders](https://doi.org/10.1038/s41380-023-02087-y) | brain-age-genetics | 2023 | [E.H. Leonardsen](mailto:estenhl@uio.no) |
+| [Constructing personalized characterizations of structural brain aberrations in patients with dementia and mild cognitive impairment using explainable artificial intelligence](https://doi.org/10.1101/2023.06.22.23291592) | dementia-explainable | 2024 | [E.H. Leonardsen](mailto:estenhl@uio.no) |
 
-1. Clone the github repo<br />
-```git clone git@github.com:estenhl/pyment-public.git```
-2. Enter the folder<br />
-```cd pyment-public```
-3. Create a conda environment<br />
-```conda create --name pyment python=3.9```
-4. Activate environment<br />
-```conda activate pyment```
-5. Install required packages<br />
-```pip install -r requirements.txt```
-6. Install Tensorflow<br />
-a. Tensorflow for GPU<br />
-```pip install tensorflow-gpu```<br />
-b. Tensorflow for CPU<br />
-```pip install tensorflow```
-6. Source the package<br />
-```conda develop .```
+### Architectures
+This is an overview of the model architectures used in the pretrained models.
+| Name | Type | Publications |
+| --- | --- | --- |
+| SFCN-reg | Regression | brain-age-general, brain-age-genetics |
+| SFCN-rank | Ranking | brain-age-general |
+| SFCN-sm | Soft classification | brain-age-general |
+| SFCN-bin | Binary classification | dementia-explainable |
 
-# Preparing data
-While the models adhere to the Keras [Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model) interface and can thus be used however one wants, we have provided [Dataset](https://github.com/estenhl/pyment-public/blob/main/pyment/data/datasets/nifti_dataset.py)/[Generator](https://github.com/estenhl/pyment-public/blob/main/pyment/data/generators/async_nifti_generator.py)-classes for nifti-files which are used in the tutorials. For these classes to work off-the-shelf the Nifti-data has to be organized in the following folder structure:
-```
-.
-├── labels.csv
-└── images
-      ├── image1.nii.gz
-      ├── image2.nii.gz
-     ...
-      └── imageN.nii.gz
-```
-where ```labels.csv``` is a csv-file with column ```id``` (corresponding to image1, image2, etc) and column ```age```.
+### Models
+This is an overview of the actual pretrained models. The names are what should be used in the python-code to load the correct weights. Note that the names are not necessarily unique, but the tuple (name, architecture) is. The training set size refers to _samples_, not _participants_, and can thus have multiple session per participant.
+| Name | Architecture | Publication | Description | Training set size | Expected out-of-sample performance |
+| --- | --- | --- | --- | --- | --- |
+| brain-age-2022 | SFCN-reg | brain-age-general | Brain age regression model trained on heterogeneous dataset | 34,285 | MAE=3.9 |
+| brain-age-2022 | SFCN-rank | brain-age-general | Brain age ranking model trained on heterogeneous dataset | 34,285 | MAE=5.92 |
+| brain-age-2022 | SFCN-sm | brain-age-general | Brain age soft classification model trained on heterogeneous dataset | 34,285 | MAE=5.04 |
+| brain-age-2023-fold-1 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 1 from the data split used in the publication held out of training) | | |
+| brain-age-2023-fold-2 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 2 from the data split used in the publication held out of training) | | |
+| brain-age-2023-fold-3 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 3 from the data split used in the publication held out of training) | | |
+| brain-age-2023-fold-4 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 4 from the data split used in the publication held out of training) | | |
+| brain-age-2023-fold-5 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 5 from the data split used in the publication held out of training) | | |
+| dementia-2024-fold-1 | SFCN-bin | dementia-explainable | Dementia classification model trained on multiple datasets. Contains mostly patients with probable AD, but also other aetiologies (fold 1 from the data split used in the publication held out of training) | | |
 
-## Preprocessing
-Before training the models all images were ran through the following preprocessing pipeline:
 
-1. Extract brainmask with ```recon-all -autorecon1``` (FreeSurfer)
-2. Transform to *.nii.gz with ```mri_convert``` (FreeSurfer)
-3. Translate to FSL space with ```fslreorient2std``` (FSL)
-4. Register to MNI space with ```flirt -dof 6``` (FSL, linear registration), and the standard FSL template ```MNI152_T1_1mm_brain.nii.gz```
-5. Crop away borders of ```[6:173,2:214,0:160]```
-
-A full example which downloads the IXI dataset and preprocesses it can be found in the [Preprocessing tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Download%20and%20preprocess%20IXI.ipynb)
-
-# Estimating brain age in Python
-Estimating brain age using the trained brain age model from the paper consists of downloading the weights, instantiating the model with said weights, and calling [Model.fit()](https://www.tensorflow.org/api_docs/python/tf/keras/Model#predict) with an appropriate generator. A full tutorial (which relies on having a prepared dataset) can be found in the [Python prediction tutorial](https://github.com/estenhl/pyment-public/blob/main/notebooks/Encode%20dataset%20as%20feature%20vectors.ipynb)
-
-Instructions for downloading, building and using our docker containers for brain age predictions can be found in the [docker](https://github.com/estenhl/pyment-public/tree/main/docker)-folder
-
-# License
-The code and models in this repo is released under the CC-BY-NC license.
-
-# Citation
-If you use code or models from this repo, please cite
-```
-@article{leonardsen_deep_2022,
-	title = {Deep neural networks learn general and clinically relevant representations of the ageing brain},
-	volume = {256},
-	rights = {All rights reserved},
-	issn = {1053-8119},
-	url = {https://www.sciencedirect.com/science/article/pii/S1053811922003342},
-	doi = {10.1016/j.neuroimage.2022.119210},
-	pages = {119210},
-	journaltitle = {{NeuroImage}},
-	shortjournal = {{NeuroImage}},
-	author = {Leonardsen, Esten H. and Peng, Han and Kaufmann, Tobias and Agartz, Ingrid and Andreassen, Ole A. and Celius, Elisabeth Gulowsen and Espeseth, Thomas and Harbo, Hanne F. and Høgestøl, Einar A. and Lange, Ann-Marie de and Marquand, Andre F. and Vidal-Piñeiro, Didac and Roe, James M. and Selbæk, Geir and Sørensen, Øystein and Smith, Stephen M. and Westlye, Lars T. and Wolfers, Thomas and Wang, Yunpeng},
-	date = {2022-08-01},
-}
-```
