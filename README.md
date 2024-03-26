@@ -19,16 +19,12 @@ This is an overview of the model architectures used in the pretrained models.
 
 ### Models
 This is an overview of the actual pretrained models. The names are what should be used in the python-code to load the correct weights. Note that the names are not necessarily unique, but the tuple (name, architecture) is. The training set size refers to _samples_, not _participants_, and can thus have multiple session per participant.
-| Name | Architecture | Publication | Description | Training set size | Expected out-of-sample performance |
-| --- | --- | --- | --- | --- | --- |
-| brain-age-2022 | SFCN-reg | brain-age-general | Brain age regression model trained on heterogeneous dataset | 34,285 | MAE=3.9 |
-| brain-age-2022 | SFCN-rank | brain-age-general | Brain age ranking model trained on heterogeneous dataset | 34,285 | MAE=5.92 |
-| brain-age-2022 | SFCN-sm | brain-age-general | Brain age soft classification model trained on heterogeneous dataset | 34,285 | MAE=5.04 |
-| brain-age-2023-fold-1 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 1 from the data split used in the publication held out of training) | | |
-| brain-age-2023-fold-2 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 2 from the data split used in the publication held out of training) | | |
-| brain-age-2023-fold-3 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 3 from the data split used in the publication held out of training) | | |
-| brain-age-2023-fold-4 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 4 from the data split used in the publication held out of training) | | |
-| brain-age-2023-fold-5 | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold 5 from the data split used in the publication held out of training) | | |
-| dementia-2024-fold-1 | SFCN-bin | dementia-explainable | Dementia classification model trained on multiple datasets. Contains mostly patients with probable AD, but also other aetiologies (fold 1 from the data split used in the publication held out of training) | | |
+| Name | Architecture | Publication | Description | Training set size | Expected out-of-sample performance | Download |
+| --- | --- | --- | --- | --- | --- | --- |
+| brain-age-2022 | SFCN-reg | brain-age-general | Brain age regression model trained on heterogeneous dataset | 34,285 | MAE=3.9 | (link)[https://api.github.com/repos/estenhl/pyment-public/git/blobs/54b7f9545f1120cb302ff7342aaa724513f75219] |
+| brain-age-2022 | SFCN-rank | brain-age-general | Brain age ranking model trained on heterogeneous dataset | 34,285 | MAE=5.92 | |
+| brain-age-2022 | SFCN-sm | brain-age-general | Brain age soft classification model trained on heterogeneous dataset | 34,285 | MAE=5.04 | |
+| brain-age-2023-fold-<1-5> | SFCN-reg | brain-age-genetics | Brain age regression model trained on heterogeneous dataset (fold <1-5> from the data split used in the publication held out of training) | 52,460 | | |
+| dementia-2024-fold-<1-5> | SFCN-bin | dementia-explainable | Dementia classification model trained on multiple datasets. Contains mostly patients with probable AD, but also other aetiologies (fold <1-5> from the data split used in the publication held out of training) | 1366 | | |
 
 
