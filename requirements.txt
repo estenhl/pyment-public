@@ -1,0 +1,7 @@
+jupyter==1.0.0
+pytest==8.1.1
+tqdm==4.66.2
+nibabel==5.2.1
+pandas==2.2.1
+xlrd==2.0.1
+plotly==5.20.0
