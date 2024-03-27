@@ -4,9 +4,13 @@ from .sfcn_sm import sfcn_sm_brain_age_2022
 
 
 _postprocessors = {
-    ('RegressionSFCN', 'brain-age-2022'): sfcn_reg_brain_age_2022,
     ('RankingSFCN', 'brain-age-2022'): sfcn_rank_brain_age_2022,
-    ('SoftClassificationSFCN', 'brain-age-2022'): sfcn_sm_brain_age_2022
+    ('RegressionSFCN', 'brain-age-2022'): sfcn_reg_brain_age_2022,
+    ('SoftClassificationSFCN', 'brain-age-2022'): sfcn_sm_brain_age_2022,
+    # Used by docker containers
+    ('RankingSFCN', '/code/weights.h5'): sfcn_rank_brain_age_2022,
+    ('RegressionSFCN', '/code/weights.h5'): sfcn_reg_brain_age_2022,
+    ('SoftClassificationSFCN', '/code/weights.h5'): sfcn_sm_brain_age_2022
 }
 
 def get_postprocessing(modelname: str, weights: str):
