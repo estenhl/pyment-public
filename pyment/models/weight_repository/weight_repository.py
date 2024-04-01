@@ -28,6 +28,30 @@ _weights = {
     ('SoftClassificationSFCN', True, 'brain-age-2022'): {
         'filename': 'soft_classification_sfcn_brain_age_weights.h5',
         'sha': '7b4f7bf4c989b80877b0bc0efe8b5125157788b5'
+    },
+    ('BinarySFCN', True, 'dementia-2024'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_0_weights.h5',
+        'sha': '1f43aafd2461d7e5b4f9ebb6d62e0f2ab363e1b8'
+    },
+    ('BinarySFCN', True, 'dementia-2024-fold-0'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_0_weights.h5',
+        'sha': '1f43aafd2461d7e5b4f9ebb6d62e0f2ab363e1b8'
+    },
+    ('BinarySFCN', True, 'dementia-2024-fold-1'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_1_weights.h5',
+        'sha': 'a0da6b724f3c1477ae2f461c49a91b7d2f46ac72'
+    },
+    ('BinarySFCN', True, 'dementia-2024-fold-2'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_2_weights.h5',
+        'sha': 'cec0eb79f043a3415f5ab13977dfda24e1f7dc30'
+    },
+    ('BinarySFCN', True, 'dementia-2024-fold-3'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_3_weights.h5',
+        'sha': 'c885fee44d4839d37d8bcdfd970391788ee85004'
+    },
+    ('BinarySFCN', True, 'dementia-2024-fold-4'): {
+        'filename': 'binary_sfcn_dementia_2024_fold_4_weights.h5',
+        'sha': '35d3b0343b83a9851a140cab7baed2dd36e35185'
     }
 }
 
