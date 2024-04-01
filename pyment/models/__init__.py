@@ -1,11 +1,14 @@
 from .sfcn import SFCN
+from .sfcn_bin import BinarySFCN
 from .sfcn_rank import RankingSFCN
 from .sfcn_reg import RegressionSFCN
 from .sfcn_sm import SoftClassificationSFCN
 
 
 def get_model_class(name: str):
-    if name.lower() in ['sfcn-rank', 'rankingsfcn']:
+    if name.lower() in ['sfcn-bin', 'binarysfcn']:
+        return BinarySFCN
+    elif name.lower() in ['sfcn-rank', 'rankingsfcn']:
         return RankingSFCN
     elif name.lower() in ['sfcn-reg', 'regressionsfcn']:
         return RegressionSFCN

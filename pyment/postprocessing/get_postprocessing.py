@@ -1,16 +1,22 @@
+import numpy as np
+
 from .sfcn_rank import sfcn_rank_brain_age_2022
-from .sfcn_reg import sfcn_reg_brain_age_2022
 from .sfcn_sm import sfcn_sm_brain_age_2022
 
 
+def squeeze(values: np.ndarray) -> np.ndarray:
+    return values[...,0]
+
 _postprocessors = {
     ('RankingSFCN', 'brain-age-2022'): sfcn_rank_brain_age_2022,
-    ('RegressionSFCN', 'brain-age-2022'): sfcn_reg_brain_age_2022,
+    ('RegressionSFCN', 'brain-age-2022'): squeeze,
     ('SoftClassificationSFCN', 'brain-age-2022'): sfcn_sm_brain_age_2022,
-    # Used by docker containers
-    ('RankingSFCN', '/code/weights.h5'): sfcn_rank_brain_age_2022,
-    ('RegressionSFCN', '/code/weights.h5'): sfcn_reg_brain_age_2022,
-    ('SoftClassificationSFCN', '/code/weights.h5'): sfcn_sm_brain_age_2022
+    ('BinarySFCN', 'dementia-2024'): squeeze,
+    ('BinarySFCN', 'dementia-2024-fold-0'): squeeze,
+    ('BinarySFCN', 'dementia-2024-fold-1'): squeeze,
+    ('BinarySFCN', 'dementia-2024-fold-2'): squeeze,
+    ('BinarySFCN', 'dementia-2024-fold-3'): squeeze,
+    ('BinarySFCN', 'dementia-2024-fold-4'): squeeze,
 }
 
 def get_postprocessing(modelname: str, weights: str):

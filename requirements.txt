@@ -5,3 +5,4 @@ nibabel==5.2.1
 pandas==2.2.1
 xlrd==2.0.1
 plotly==5.20.0
+scikit-learn==1.4.1
