@@ -14,7 +14,7 @@ class SFCN(Model):
     FILTERS = [32, 64, 128, 256, 256, 64]
 
     @classmethod
-    def prediction_head(cls, inputs: tf.Tensor) -> tf.Tensor:
+    def prediction_head(cls, *args, **kwargs) -> tf.Tensor:
         raise NotImplementedError('Base SFCN model has no prediction head and '
                                   'should not be initialized with '
                                   'include_top=True')
