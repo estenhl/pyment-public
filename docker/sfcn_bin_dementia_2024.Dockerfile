@@ -17,5 +17,4 @@ CMD ["predict.py", \
      "-w", "dementia-2024", \
      "-i", "/input", \
      "-p", "mri/cropped.nii.gz", \
-     "-d", "/output/predictions.csv", \
-     "-n", "5"]
+     "-d", "/output/predictions.csv"]
