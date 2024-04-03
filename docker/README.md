@@ -13,6 +13,6 @@ docker pull estenhl/sfcn_reg_brain_age_2022
 docker run --rm -it \
     -v </path/to/data>:/input \
     -v </path/where/outputs/are/stored>:/output \
-    sfcn_reg_brain_age_2022
+    estenhl/sfcn_reg_brain_age_2022
 ````
 
