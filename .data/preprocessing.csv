@@ -1,0 +1,2 @@
+name,path,description
+freesurfer+fsl,preprocessing/freesurfer_and_fsl.sh,"Performs skullstripping using FreeSurfer, registration to MNI152-space using FSL, and cropping of redundant voxels using Python"
