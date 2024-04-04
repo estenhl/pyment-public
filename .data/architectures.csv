@@ -1,0 +1,5 @@
+name,abbreviation,description
+RegressionSFCN,sfcn-reg,"Base SFCN with a regression prediction head"
+RankingSFCN,sfcn-rank,"Base SFCN with a ranking prediction head for regression problems"
+SoftClassificationSFCN,sfcn-sm,"Base SFCN with a softmax prediction head, as per the original SFCN"
+BinarySFCN,sfcn-bin,"Base SFCN with a binary prediction head for binary classification problems"
