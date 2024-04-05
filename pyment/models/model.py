@@ -7,6 +7,12 @@ from .weight_repository import WeightRepository
 from ..postprocessing import get_postprocessing
 
 class Model(KerasModel):
+    """ A model wrapper on top of the default keras Model class.
+    Contains two main additions to the standard funcionality: first,
+    allows the models implemented here to load weights via the
+    ModelRepository. Second, bundles the appropriate postprocessing
+    function with each model. """
+
     def __init__(self, *args, include_top: bool, weights: str, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -25,6 +31,22 @@ class Model(KerasModel):
         self.weight_name = weights
 
     def postprocess(self, values: np.ndarray) -> np.ndarray:
+        """ Applied the appropriate postprocessing to an array of
+        predictions. Which postprocessing function should be applied
+        is determined with a lookup based on the model class and the
+        weights that are used.
+
+        Parameters:
+        -----------
+        values : np.ndarray
+            Raw predictions.
+
+        Returns:
+        --------
+        np.ndarray
+            Processed predictions.
+        """
+
         f = get_postprocessing(modelname=self.__class__.__name__,
                                weights=self.weight_name)
 
