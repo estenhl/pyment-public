@@ -1,3 +1,7 @@
+""" A module containing implementations for the various model
+architectures. """
+
+from .model import Model
 from .sfcn import SFCN
 from .sfcn_bin import BinarySFCN
 from .sfcn_rank import RankingSFCN
@@ -5,7 +9,7 @@ from .sfcn_reg import RegressionSFCN
 from .sfcn_sm import SoftClassificationSFCN
 
 
-def get_model_class(name: str):
+def get_model_class(name: str) -> Model:
     if name.lower() in ['sfcn-bin', 'binarysfcn']:
         return BinarySFCN
     elif name.lower() in ['sfcn-rank', 'rankingsfcn']:
