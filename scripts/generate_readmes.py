@@ -201,6 +201,21 @@ def generate_main_readme(path: str, publications: pd.DataFrame,
     with open(path, 'w') as f:
         f.write('\n'.join(lines))
 
+def generate_images_table(table: pd.DataFrame):
+
+
+def generate_docker_readme(path: str, table: pd.DataFrame):
+    with open(path, 'r') as f:
+        lines = [line.strip() for line in f.readlines()]
+
+    images_section_start = _locate_section(lines, 'Images')
+
+    lines = replace_table(lines,
+                          start=images_section_start,
+                          end=len(lines),
+                          table=table,
+                          generator=generate_images_table)
+
 def generate_readmes(data: str, main_readme: str, docker_readme: str,
                      preprocessing_readme: str):
     tables = {name: pd.read_csv(os.path.join(data, f'{name}.csv')) \
@@ -209,6 +224,7 @@ def generate_readmes(data: str, main_readme: str, docker_readme: str,
 
     generate_main_readme(main_readme, tables['publications'],
                          tables['architectures'], tables['models'])
+    generate_docker_readme(docker_readme, tables['images'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Generates READMEs based on the current '

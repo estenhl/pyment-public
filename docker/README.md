@@ -1,6 +1,6 @@
-A collection of Dockerfiles used for building containers containing predictive models for neuroimaging data.
+A collection of Dockerfiles used for building containers with predictive models for neuroimaging data.
 
-### Containers
+### Images
 | Name | Model | Weights | Includes preprocessing |
 | --- | --- | --- | --- |
 | estenhl/sfcn_reg_brain_age_2022 | SFCN-reg | brain-age-2022 | No |
