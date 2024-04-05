@@ -20,7 +20,7 @@ class SoftClassificationSFCN(SFCN):
         return head
 
     def __init__(self, *args,
-                 prediction_range: Tuple[int],
+                 prediction_range: Tuple[int] = (3, 95),
                  include_top: bool = True,
                  name: str = 'sfcn-sm',
                  **kwargs):
