@@ -1,20 +1,24 @@
-import tensorflow as tf
-
+from tensorflow import Tensor
 from tensorflow.keras.layers import Activation, BatchNormalization, Conv3D, \
                                     Dropout, Input, MaxPooling3D, Reshape
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import Regularizer
-from typing import Callable, Tuple, Union
+from typing import Callable, List, Tuple, Union
 
 from .model import Model
 from .utils import get_global_pooling_layer
 
 
 class SFCN(Model):
+    """ Base Simple Fully Convolutional Network (SFCN) model. Adapted
+    from https://doi.org/10.1016/j.media.2020.101871. A simple, VGG-like
+    convolutional neural network for 3-dimensional neuroimaging data.
+    """
+
     FILTERS = [32, 64, 128, 256, 256, 64]
 
     @classmethod
-    def prediction_head(cls, *args, **kwargs) -> tf.Tensor:
+    def prediction_head(cls, *args, **kwargs) -> Tensor:
         raise NotImplementedError('Base SFCN model has no prediction head and '
                                   'should not be initialized with '
                                   'include_top=True')
@@ -26,6 +30,7 @@ class SFCN(Model):
                  dropout: float = 0.0,
                  regularizer: Regularizer = None,
                  activation: Union[str, Callable] = 'relu',
+                 filters: List[int] = FILTERS,
                  weights: str = None,
                  name: str = 'sfcn',
                  **kwargs):
@@ -38,7 +43,7 @@ class SFCN(Model):
             curr = Reshape(input_shape + (1,),
                            name=f'{name}_expand-dims')(curr)
 
-        for i in range(len(self.FILTERS) - 1):
+        for i in range(len(filters) - 1):
             block_name = f'{name}_block-{i}'
 
             curr = Conv3D(filters=self.FILTERS[i],
@@ -57,6 +62,7 @@ class SFCN(Model):
                       kernel_size=(1, 1, 1),
                       padding='SAME',
                       activation=None,
+                      kernel_regularizer=regularizer,
                       name=f'{name}_top_conv')(curr)
         curr = BatchNormalization(name=f'{name}_top_norm')(curr)
         curr = Activation(activation, name=f'{name}_top_{activation}')(curr)

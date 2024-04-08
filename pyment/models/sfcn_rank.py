@@ -8,6 +8,10 @@ from .sfcn import SFCN
 
 
 class RankingSFCN(SFCN):
+    """ An SFCN-variant for regression through ranking. See
+    https://doi.org/10.1109/CVPR.2017.86 for further details.
+    """
+
     @classmethod
     def prediction_head(cls, inputs: tf.Tensor, *,
                         prediction_range: Tuple[int], name: str):

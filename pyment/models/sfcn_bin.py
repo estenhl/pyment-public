@@ -6,8 +6,10 @@ from .sfcn import SFCN
 
 
 class BinarySFCN(SFCN):
+    """ An SFCN-variant for binary classification. """
+
     @classmethod
-    def prediction_head(cls, inputs: tf.Tensor, *, name: str):
+    def prediction_head(cls, inputs: tf.Tensor, *, name: str) -> tf.Tensor:
         head = Dense(1, activation='sigmoid',
                      name=f'{name}_predictions')(inputs)
 
