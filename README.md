@@ -1,6 +1,43 @@
-Following (pending) release v3.0.0 (and onwards) this repository will serve solely as a model zoo for pretrained neuroimaging models from various publications. This entails that the utilities that were previously packaged alongside the models (e.g. for training models) has been stripped, to avoid bloating the repository. If you are interested in specific code for a specific paper either check out the previous releases or email me at [estenhl@uio.no](mailto:estenhl@uio.no)
+This is a repository containing pretrained models for neuroimaging data used in various scientific publications. The publications are listed [here](#publications), and all the models are listed [here](#models). After version 3.0.0 the nature of this repo changed, a description of which can be found in the [changelog](CHANGELOG.md). The models posted here try to mimic the behaviour and interface of the [pretrained models in the Keras applications package](https://keras.io/api/applications/). Besides the possibility of importing this library in Python and interacting with the models as Python-objects, we demonstrate three use cases for interaction here:
+- [Jupyter notebooks](notebooks)
+- [Command-line scripts](scripts)
+- [Docker containers](docker)
 
-### Publications
+## Installation
+### Setup
+Prior to installing the package and its prerequisites, it is recommended to create a virtual environment. This can be done via Anaconda, which can be downloaded from [here](https://docs.anaconda.com/free/anaconda/install/). After installation, an environment is created as follows:
+```
+conda create --name pyment python=3.9
+```
+
+### Via pip
+Although the package is not currently available on PyPI, it is possible to install it via pip directly from git, using the following command:
+```
+pip install git+https://github.com/estenhl/pyment-public
+```
+
+### Manually
+It is also possible to download the package from git and manually install it (the following demonstrates how its done on a Unix-based OS).
+```
+git clone git@github.com:estenhl/pyment-public.git
+cd pyment-public
+pip install -r requirements.txt
+pip install -e .
+```
+
+### Verification
+There are two ways the installation can be verified. By running the unit-tests (while still in the pyment-public folder):
+```
+pytest tests
+```
+If this fails, it is probably the prerequisites that has not been installed properly, rerun
+the ```pip install -r requirements.txt```-command and monitor the output. You can also check that the package is properly installed on the system (not from the pyment-public folder):
+```
+python -c "import pyment"
+```
+If this fails, it is the ```pip install -e .```-command that failed, return to that and check for error messages.
+
+## Publications
 This is an overview of the publications from where the pretrained models originate. The shorthand-column denotes the name that is used to refer to the publications below. Note that the corresponding author is not necessarily equivalent to what is listed in the publication, but instead refers to the author in charge of the modelling.
 | Title | Abbreviation | Publication year | Corresponding author |
 | --- | :-: | :-: | :-: |
@@ -8,7 +45,7 @@ This is an overview of the publications from where the pretrained models origina
 | [Genetic architecture of brain age and its causal relations with brain and mental disorders](https://doi.org/10.1038/s41380-023-02087-y) | brain-age-genetics | 2023 | [Esten Høyland Leonardsen](mailto:estenhl@uio.no) |
 | [Constructing personalized characterizations of structural brain aberrations in patients with dementia and mild cognitive impairment using explainable artificial intelligence](https://doi.org/10.1101/2023.06.22.23291592) | explainable-dementia | 2024 | [Esten Høyland Leonardsen](mailto:estenhl@uio.no) |
 
-### Architectures
+## Architectures
 This is an overview of the model architectures used in the pretrained models.
 | Name | Abbreviation | Description |
 | --- | :-: | --- |
@@ -17,7 +54,7 @@ This is an overview of the model architectures used in the pretrained models.
 | SoftClassificationSFCN | sfcn-sm | Base SFCN with a softmax prediction head, as per the original SFCN |
 | BinarySFCN | sfcn-bin | Base SFCN with a binary prediction head for binary classification problems |
 
-### Models
+## Models
 This is an overview of the actual pretrained models. The names are what should be used in the python-code to load the correct weights. Note that the names are not necessarily unique, but the tuple (name, architecture) is. The training set size refers to _samples_, not _participants_, and can thus have multiple session per participant.
 | Name | Architecture | Source publication | Description | Training sample size | Expected out-of-sample error | URL |
 | :-: | :-: | :-: | --- | :-: | :-: | :-: |
