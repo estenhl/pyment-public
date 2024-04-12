@@ -3,10 +3,10 @@ A collection of Dockerfiles used for building containers with predictive models 
 ### Images
 | Name | Model | Weights | Includes preprocessing |
 | --- | --- | --- | --- |
-| estenhl/sfcn_reg_brain_age_2022 | SFCN-reg | brain-age-2022 | No |
+| estenhl/sfcn-reg_brain-age:2022 | SFCN-reg | brain-age-2022 | No |
 
 ### How to use
-#### estenhl/sfcn_reg_brain_age_2022
+#### estenhl/sfcn-reg_brain-age:2022
 NOTE: This container requires the data to be preprocessed
 ````
 docker pull estenhl/sfcn-reg_brain-age:2022
