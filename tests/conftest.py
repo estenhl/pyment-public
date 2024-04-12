@@ -6,7 +6,7 @@ from shutil import rmtree
 
 TESTS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 ROOT_FOLDER = os.path.join(TESTS_FOLDER, os.pardir)
-METADATA_FOLDER = os.path.join(ROOT_FOLDER, '.data')
+METADATA_FOLDER = os.path.join(ROOT_FOLDER, 'data')
 
 # Appends the root pyment directory to the path
 def pytest_configure(config):
