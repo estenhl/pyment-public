@@ -37,16 +37,25 @@ def _create_markup_table_heading(names: List[str], sep: List[str] = None):
 
     return [_to_markup_table_row(names), _to_markup_table_row(sep)]
 
-def generate_publications_table(table: pd.DataFrame):
+def generate_publications_table(table: pd.DataFrame, citations_folder: str,
+                                readme_path: str):
     lines = _create_markup_table_heading(['Title', 'Abbreviation',
                                           'Publication year',
-                                          'Corresponding author'],
-                                          ['---', ':-:', ':-:', ':-:'])
+                                          'Corresponding author', 'Citation'],
+                                          ['---', ':-:', ':-:', ':-:', ':-:'])
+
+    citations_folder = os.path.relpath(
+        os.path.normpath(citations_folder),
+        os.path.normpath(os.path.dirname(readme_path))
+    )
+    print(citations_folder)
 
     for _, row in table.iterrows():
         name = f'[{row["name"]}](https://doi.org/{row["doi"]})'
+        abbreviation = row['abbreviation']
         author = f'[{row["author"]}](mailto:{row["email"]})'
-        row = [name, row['abbreviation'], str(row['year']), author]
+        citation = f'[.bib]({citations_folder}/{abbreviation}.bib)'
+        row = [name, row['abbreviation'], str(row['year']), author, citation]
         lines.append(_to_markup_table_row(row))
 
     return lines
@@ -166,8 +175,29 @@ def validate_models_table(publications: pd.DataFrame,
         raise ValueError('Models table referring to unknown publications: '
                          f'{unknown_architectures}')
 
+def write_citations(lines: List[str], folder: str):
+    citations_section_start = _locate_section(lines, 'Citations')
+    lines = lines[:citations_section_start + 2]
+
+    for filename in os.listdir(folder):
+        name = filename.split('.')[0]
+
+        with open(os.path.join(folder, filename), 'r') as f:
+            citation = [line.replace('\n', '') for line in f.readlines()]
+
+        lines += [
+            '\n',
+            f'### {name}',
+            '```'
+        ] + citation + [
+            '```'
+        ]
+
+    return lines
+
 def generate_main_readme(path: str, publications: pd.DataFrame,
-                         architectures: pd.DataFrame, models: pd.DataFrame):
+                         architectures: pd.DataFrame, models: pd.DataFrame,
+                         citations_folder: str):
     with open(path, 'r') as f:
         lines = [line.strip() for line in f.readlines()]
 
@@ -175,11 +205,14 @@ def generate_main_readme(path: str, publications: pd.DataFrame,
     architectures_section_start = _locate_section(lines, 'Architectures')
     models_section_start = _locate_section(lines, 'Models')
 
+    publications_table_generator = \
+        lambda x: generate_publications_table(x, citations_folder, path)
+
     lines = replace_table(lines,
                           start=publications_section_start,
                           end=architectures_section_start,
                           table=publications,
-                          generator=generate_publications_table)
+                          generator=publications_table_generator)
     lines = replace_table(lines,
                           start=architectures_section_start,
                           end=models_section_start,
@@ -196,34 +229,81 @@ def generate_main_readme(path: str, publications: pd.DataFrame,
                           table=models,
                           generator=models_table_generator)
 
+    lines = write_citations(lines, citations_folder)
+
+    print(lines[-1])
 
     with open(path, 'w') as f:
         f.write('\n'.join(lines))
 
-# def generate_images_table(table: pd.DataFrame):
+def generate_images_table(table: pd.DataFrame):
+    lines = _create_markup_table_heading(['Name', 'Architecture', 'Weights',
+                                          'Includes preprocessing',
+                                          'Includes explainability'],
+                                          [':-:', ':-:', ':-:', ':-:', ':-:'])
 
+    for _, row in table.iterrows():
+        preprocessing = 'Yes' if row['preprocessing'] else 'No'
+        explainability = 'Yes' if row['explainability'] else 'No'
+        row = [row['name'], row['architecture'], row['weights'], preprocessing,
+               explainability]
+        lines.append(_to_markup_table_row(row))
 
-# def generate_docker_readme(path: str, table: pd.DataFrame):
-#     with open(path, 'r') as f:
-#         lines = [line.strip() for line in f.readlines()]
+    return lines
 
-#     images_section_start = _locate_section(lines, 'Images')
+def replace_usage(lines: List[str], table: pd.DataFrame):
+    usage_section_start = _locate_section(lines, 'Usage')
 
-#     lines = replace_table(lines,
-#                           start=images_section_start,
-#                           end=len(lines),
-#                           table=table,
-#                           generator=generate_images_table)
+    lines = lines[:usage_section_start + 1]
+
+    for _, row in table.iterrows():
+        name = row['name']
+        entry = [f'### {row["name"]}']
+
+        if not row['preprocessing']:
+            entry += ['<b>NOTE: This image requires preprocessed MRIs</b>']
+
+        entry += [
+            '```',
+            f'docker pull {name}',
+            'docker run --rm -it \\',
+            '    -v </path/to/data>:/input \\',
+            '    -v </path/where/outputs/are/stored>:/output \\',
+            f'    {name}',
+            '```'
+        ]
+
+        lines += entry
+
+    return lines
+
+def generate_docker_readme(path: str, table: pd.DataFrame):
+    with open(path, 'r') as f:
+        lines = [line.strip() for line in f.readlines()]
+
+    images_section_start = _locate_section(lines, 'Images')
+    usage_section_start = _locate_section(lines, 'Usage')
+
+    lines = replace_table(lines,
+                          start=images_section_start,
+                          end=usage_section_start,
+                          table=table,
+                          generator=generate_images_table)
+    lines = replace_usage(lines, table=table)
+
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines))
 
 def generate_readmes(data: str, main_readme: str, docker_readme: str,
-                     preprocessing_readme: str):
+                     preprocessing_readme: str, citations_folder: str):
     tables = {name: pd.read_csv(os.path.join(data, f'{name}.csv')) \
               for name in ['architectures', 'images', 'models',
                            'preprocessing', 'publications']}
 
-    generate_main_readme(main_readme, tables['publications'],
-                         tables['architectures'], tables['models'])
-    #generate_docker_readme(docker_readme, tables['images'])
+    #generate_main_readme(main_readme, tables['publications'],
+    #                     tables['architectures'], tables['models'],
+    #                     citations_folder)
+    generate_docker_readme(docker_readme, tables['images'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Generates READMEs based on the current '
@@ -233,7 +313,7 @@ if __name__ == '__main__':
     root_folder = os.path.join(scripts_folder, os.pardir)
 
     parser.add_argument('-d', '--data', required=False,
-                        default=os.path.join(root_folder, '.data'),
+                        default=os.path.join(root_folder, 'data'),
                         help='Folder containing tables with updated data')
     parser.add_argument('-mr', '--main_readme', required=False,
                         default=os.path.join(root_folder, 'README.md'),
@@ -246,10 +326,14 @@ if __name__ == '__main__':
                         default=os.path.join(root_folder, 'preprocessing',
                                              'README.md'),
                         help='Path to preprocessing README.md file')
+    parser.add_argument('-cf', '--citations_folder', required=False,
+                        default=os.path.join(root_folder, 'citations'),
+                        help='Path to folder containing citations')
 
     args = parser.parse_args()
 
     generate_readmes(args.data,
                      main_readme=args.main_readme,
                      docker_readme=args.docker_readme,
-                     preprocessing_readme=args.preprocessing_readme)
+                     preprocessing_readme=args.preprocessing_readme,
+                     citations_folder=args.citations_folder)
