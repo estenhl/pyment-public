@@ -21,8 +21,7 @@ class Model(KerasModel):
                 weights_path = weights
             else:
                 weights_path = WeightRepository.get_weights(
-                    classname=self.__class__.__name__,
-                    include_top=include_top,
+                    architecture=self.__class__.__name__,
                     name=weights
                 )
 
