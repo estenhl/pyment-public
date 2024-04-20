@@ -3,19 +3,19 @@ A collection of Dockerfiles used for building containers around the predictive m
 ## Images
 | Name | Architecture | Weights | Includes preprocessing | Includes explainability |
 | :-: | :-: | :-: | :-: | :-: |
-| estenhl/sfcn-reg_brain-age:2022 | sfcn-reg | brain-age-2022 | No | No |
-| estenhl/sfcn-bin_dementia:2024 | sfcn-bin | dementia-2024 | No | No |
-| estenhl/sfcn-bin_dementia:2024-explainable | sfcn-bin | dementia-2024 | No | Yes |
+| estenhl/sfcn-reg_brain-age-2022 | sfcn-reg | brain-age-2022 | No | No |
+| estenhl/sfcn-bin_dementia-2024 | sfcn-bin | dementia-2024 | No | No |
+| estenhl/sfcn-bin_dementia-2024_explainable | sfcn-bin | dementia-2024 | No | Yes |
 
 ## Usage
-### estenhl/sfcn-reg_brain-age:2022
+### estenhl/sfcn-reg_brain-age-2022
 <b>NOTE: This image requires preprocessed MRIs</b>
 ```
-docker pull estenhl/sfcn-reg_brain-age:2022
+docker pull estenhl/sfcn-reg_brain-age-2022
 docker run --rm -it \
     -v </path/to/data>:/input \
     -v </path/where/outputs/are/stored>:/output \
-    estenhl/sfcn-reg_brain-age:2022
+    estenhl/sfcn-reg_brain-age-2022
 ```
 ### estenhl/sfcn-bin_dementia:2024
 <b>NOTE: This image requires preprocessed MRIs</b>
