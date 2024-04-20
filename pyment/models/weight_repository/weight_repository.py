@@ -24,10 +24,15 @@ class WeightRepository:
     def _download_weight(sha: str, filename: str,
                          base_url: str = _BASE_URL) -> None:
         url = f'{base_url}/{sha}'
-        logging.info(f'Downloading {url} to {filename}')
+        logging.info('Downloading %s to %s', url, filename)
 
-        resp = requests.get(url, stream=True)
+        resp = requests.get(url, timeout=30, stream=True)
         content = resp.json()['content']
+
+        folder = os.path.dirname(filename)
+
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
         with open(filename, 'wb') as f:
             f.write(base64.b64decode(content))
