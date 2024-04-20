@@ -11,11 +11,11 @@ from tqdm import tqdm
 from pyment.models import get_model_class
 
 
-logformat = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
-logging.basicConfig(format=logformat, level=logging.INFO)
+LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s: %(message)s'
+logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def predict_from_path(model: Model, filename: str):
+def _predict_from_path(model: Model, filename: str):
     image = nib.load(filename)
     image = image.get_fdata()
     image = np.expand_dims(image, 0)
@@ -25,35 +25,78 @@ def predict_from_path(model: Model, filename: str):
 
     return prediction
 
-def predict(modelname: str, weights: str, input: str, pattern: str = None,
+def predict(modelname: str, weights: str, inputs: str, pattern: str = None,
             destination: str = None, size: int = None):
+    """ Creates predictions for an input nifti image (or set of images)
+    from a given model with a given set of weights.
+
+    Parameters:
+    -----------
+    modelname : str
+        A string identifying the model architecture to use. See the
+        table in data/architectures.csv for available architectures.
+    weights : str
+        A string identifying the weights to use. See data/models.csv
+        for a set of available weights.
+    inputs : str
+        Either the path to a nifti image, or to a folder containing
+        multiple images. If the latter, the images doesn't have to
+        reside directly in the folder specified. Instead, for each
+        subfolder in the folder the <pattern> parameter determines the
+        relative path to the image.
+    pattern : str
+        If <inputs> is a folder, this parameter determines the relative
+        path from each subfolder to the nifti images.
+    destination : str
+        (Optional) path where a CSV-file containing the predictions are
+        written.
+    size : int
+        (Optional) number of images to run. Only relevant if <inputs> is
+        a folder containing multiple subfolders.
+
+    Returns:
+    --------
+    np.ndarray
+        Processed predictions.
+    """
     model_class = get_model_class(modelname)
     model = model_class(weights=weights)
 
-    if os.path.isfile(input):
-        logging.debug(f'Predicting for single file')
-        prediction = predict_from_path(model, input)
-        logging.info(f'Prediction for {input}: {prediction}')
-    elif os.path.isdir(input):
+    if os.path.isfile(inputs):
+        logging.debug('Predicting for single file')
+        prediction = _predict_from_path(model, inputs)
+        logging.info('Prediction for %s: %.2f', inputs, prediction)
+    elif os.path.isdir(inputs):
         assert pattern is not None, \
             ('When a folder of images is provided as input, a pattern must '
              'also be given. It is assumed the given folder contains '
              'subfolders, and the pattern describes the path from each '
              'subfolder to the image files')
-        subfolders = os.listdir(input)
+        subfolders = os.listdir(inputs)
 
         if size is not None:
             subfolders = subfolders[:size]
 
-        paths = [os.path.join(input, subfolder, pattern) \
-                 for subfolder in subfolders]
-        predictions = [predict_from_path(model, path) for path in tqdm(paths)]
-        predictions = pd.DataFrame({'id': subfolders,
-                                    'prediction': predictions})
-        logging.info(f'Predictions:\n{predictions}')
+        predictions = pd.DataFrame({}, columns=['id', 'prediction'])
 
-        if destination is not None:
-            predictions.to_csv(destination, index=False)
+        for subfolder in tqdm(subfolders):
+            path = os.path.join(inputs, subfolder, pattern)
+
+            if not os.path.isfile(path):
+                logger.warning('File %s does not exist. Skipping prediction '
+                               'for %s', path, subfolder)
+                continue
+
+            prediction = _predict_from_path(model, path)
+            predictions = pd.concat([
+                predictions,
+                pd.DataFrame({'id': [subfolder], 'prediction': [prediction]})
+            ], ignore_index=True)
+
+            if destination is not None:
+                predictions.to_csv(destination, index=False)
+
+        logging.info('Predictions:\n%s', str(predictions))
 
 
 if __name__ == '__main__':
@@ -62,27 +105,38 @@ if __name__ == '__main__':
                                      'given model with a given set of weights')
 
     parser.add_argument('-m', '--model', required=True,
-                        help='Name of the model to use')
+                        help=('A string identifying the model architecture to '
+                              'use. See the table in data/architectures.csv '
+                              'for available architectures'))
     parser.add_argument('-w', '--weights', required=True,
-                        help='Name of the weights to use')
-    parser.add_argument('-i', '--input', required=True,
-                        help=('Path to input data. Must be either a single '
-                              '(nifti) image, or a folder containing several'))
+                        help=('A string identifying the weights to use. See '
+                              'data/models.csv for a set of available '
+                              'weights'))
+    parser.add_argument('-i', '--inputs', required=True,
+                        help=('Either the path to a nifti image, or to a '
+                              'folder containing multiple images. If the '
+                              'latter, the images doesn\'t have to reside '
+                              'directly in the folder specified. Instead, for '
+                              'each subfolder in the folder the <pattern> '
+                              'parameter determines the relative path to the '
+                              'image.'))
     parser.add_argument('-p', '--pattern', required=False, default=None,
-                        help=('Pattern used when the input is a folder of '
-                              'subfolders. The pattern describes the path '
-                              'to the image files relative to a subfolder'))
+                        help=('If <inputs> is a folder, this parameter '
+                              'determines the relative path from each '
+                              'subfolder to the nifti images.'))
     parser.add_argument('-d', '--destination', required=False, default=None,
-                        help='(Optional) path where predictions are written')
+                        help=('(Optional) path where a CSV-file containing '
+                              'the predictions are written.'))
     parser.add_argument('-n', '--size', required=False, default=None, type=int,
-                        help=('Number of images to predict for (used in '
-                              'combination with an input folder)'))
+                        help=('(Optional) number of images to run. Only '
+                              'relevant if <inputs> is a folder containing '
+                              'multiple subfolders.'))
 
     args = parser.parse_args()
 
     predict(modelname=args.model,
             weights=args.weights,
-            input=args.input,
+            inputs=args.inputs,
             pattern=args.pattern,
             destination=args.destination,
             size=args.size)
