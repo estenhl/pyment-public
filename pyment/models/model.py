@@ -1,3 +1,4 @@
+""" Module containing the wrapper extending the Keras Model-class. """
 import os
 import numpy as np
 
@@ -13,7 +14,7 @@ class Model(KerasModel):
     ModelRepository. Second, bundles the appropriate postprocessing
     function with each model. """
 
-    def __init__(self, *args, include_top: bool, weights: str, **kwargs):
+    def __init__(self, *args, weights: str, **kwargs):
         super().__init__(*args, **kwargs)
 
         if weights is not None:

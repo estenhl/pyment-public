@@ -76,6 +76,5 @@ class SFCN(Model):
             curr = Dropout(dropout, name=f'{name}_top_dropout')(curr)
             curr = self.prediction_head(curr, name=name, **kwargs)
 
-        super().__init__(self.input_layer, curr, include_top=include_top,
-                         weights=weights, name=name)
+        super().__init__(self.input_layer, curr, weights=weights, name=name)
 

@@ -3,6 +3,7 @@ import pandas as pd
 
 from pyment.models import get_model_class
 from pyment.models.weight_repository import WeightRepository
+from shutil import rmtree
 
 from conftest import METADATA_FOLDER, TemporaryFolder
 
@@ -58,3 +59,11 @@ def test_weight_repository_invalid_name():
     except Exception:
         pass
 
+def test_weight_repository_creates_folder_if_necessary():
+    try:
+        path = WeightRepository.get_weights('RegressionSFCN', 'brain-age-2022',
+                                            folder='temp')
+        assert os.path.isdir('temp'), \
+            'WeightRepository does not create folder if it does not exist'
+    finally:
+        rmtree('temp')

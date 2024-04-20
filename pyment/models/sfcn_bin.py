@@ -1,3 +1,4 @@
+""" Module containing the binary SFCN implementation. """
 import tensorflow as tf
 
 from tensorflow.keras.layers import Dense

@@ -1,3 +1,4 @@
+""" Module containing the script for procuring predictions. """
 import argparse
 import logging
 import os

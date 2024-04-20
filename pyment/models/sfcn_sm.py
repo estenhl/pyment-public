@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from tensorflow.keras.layers import Add, Dense, ReLU
+from tensorflow.keras.layers import Dense
 from typing import Tuple
 
 from .sfcn import SFCN
@@ -28,4 +28,3 @@ class SoftClassificationSFCN(SFCN):
 
         super().__init__(*args, prediction_range=prediction_range,
                          include_top=include_top, name=name, **kwargs)
-
