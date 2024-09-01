@@ -1,0 +1,4 @@
+name,architecture,weights,preprocessing,explainability
+estenhl/sfcn-reg_brain-age-2022,sfcn-reg,brain-age-2022,false,false
+estenhl/sfcn-bin_dementia:2024,sfcn-bin,dementia-2024,false,false
+estenhl/sfcn-bin_dementia:2024-explainable,sfcn-bin,dementia-2024,false,true
