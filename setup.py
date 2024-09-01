@@ -19,5 +19,9 @@ setup(
         'scikit-learn',
         'tensorflow',
         'matplotlib'
-    ]
+    ],
+    package_data={
+        '': ['data/*'],  # Include all files in the 'data' folder
+    },
+    include_package_data=True
 )
