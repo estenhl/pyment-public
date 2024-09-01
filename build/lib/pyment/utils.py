@@ -9,4 +9,4 @@ ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
 try:
     METADATA_DIR = pkg_resources.files('pyment').joinpath('data')
 except:
-    METADATA_DIR = os.path.join(ROOT_DIR, 'pyment', 'data')
+    METADATA_DIR = os.path.join(ROOT_DIR, 'data')
