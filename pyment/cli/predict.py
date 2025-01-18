@@ -100,7 +100,7 @@ def predict(modelname: str, weights: str, inputs: str, pattern: str = None,
         logging.info('Predictions:\n%s', str(predictions))
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser('Generates a prediction for a given '
                                      'nifti image (or set of images) from a '
                                      'given model with a given set of weights')
@@ -141,3 +141,7 @@ if __name__ == '__main__':
             pattern=args.pattern,
             destination=args.destination,
             size=args.size)
+
+
+if __name__ == '__main__':
+    main()

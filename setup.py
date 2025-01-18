@@ -22,5 +22,10 @@ setup(
     include_package_data=True,
     package_data={
         'pyment': ['data/*'],
+    },
+    entry_points={
+        'console_scripts': [
+            'pyment_predict = pyment.cli.predict:main',
+        ]
     }
 )
