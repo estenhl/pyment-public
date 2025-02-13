@@ -6,7 +6,7 @@ destination=false
 freesurfer_license=false
 
 script_name=$(basename "$0")
-usage_string="Usage: bash $script_name --filename <filename> --destination <destination> --license <freesurfer_license> [--help]"
+usage_string="Usage: bash $script_name --filename <filename> --destination <destination> --template <MNI152_T1_brain template from FSL> [--help]"
 
 # Parses arguments
 while [[ "$#" -gt 0 ]]; do
