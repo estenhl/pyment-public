@@ -1,0 +1,22 @@
+[project]
+name = "pyment"
+version = "3.0.0"
+description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
+authors = [
+    {name = "Esten Leonardsen",email = "estenleonardsen@gmail.com"}
+]
+license = "CC-BY-NC"
+license-files = [
+    "LICENSE.md"
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+]
+
+[tool.poetry.dependencies]
+fastsurfer = { git = "https://github.com/Deep-MI/FastSurfer.git", rev = "stable" }
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
