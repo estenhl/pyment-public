@@ -31,4 +31,4 @@ COPY scripts/preprocess.sh /scripts/preprocess.sh
 CMD ["/bin/sh", "/scripts/preprocess.sh", \
      "--license", "/licenses/freesurfer.txt", \
      "--python", "/envs/fastsurfer/bin/python", \
-     "/input", "/output"]
+     "/input", "/output/fastsurfer"]
