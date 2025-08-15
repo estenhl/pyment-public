@@ -9,6 +9,8 @@ from tensorflow.keras.layers import (
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import Regularizer
 
+from ..utils.ensure_weights import ensure_weights
+
 
 
 class SFCN(Model):
@@ -28,7 +30,8 @@ class SFCN(Model):
         dropout: float = 0.,
         regularizer: Regularizer = None,
         activation: Any = 'relu',
-        name: str = 'SFCN'
+        name: str = 'SFCN',
+        weights: str = None
     ):
         self.inputs = Input(input_shape, name=f'{name}_inputs')
         x = Reshape(input_shape + (1,), name=f'{name}_expand-dims')(
@@ -74,3 +77,11 @@ class SFCN(Model):
             x = self.construct_prediction_head(x, name=f'{name}_predictions')
 
         super().__init__(self.inputs, x)
+
+        if weights:
+            weights = ensure_weights(weights)
+            status = self.load_weights(weights)
+
+            # Silences warnings about optimizer-status not being loaded
+            status.expect_partial()
+            status.assert_existing_objects_matched()

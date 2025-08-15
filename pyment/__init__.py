@@ -1,5 +1,5 @@
 import os
-import tomllib
+import tomli
 
 def _get_version():
     """Get version from pyproject.toml"""
@@ -8,7 +8,7 @@ def _get_version():
     )
 
     with open(pyproject_path, 'rb') as f:
-        data = tomllib.load(f)
+        data = tomli.load(f)
 
     return data['project']['version']
 
