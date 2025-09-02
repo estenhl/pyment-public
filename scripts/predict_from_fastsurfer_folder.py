@@ -5,11 +5,11 @@ import re
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from typing import Tuple
+from typing import List, Tuple
 
 import nibabel as nib
 
-from pyment.models import MultiTaskSFCN
+from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
 
@@ -29,14 +29,20 @@ def _parse_folder_name(name: str) -> Tuple[str, str, str]:
 
 def predict_from_fastsurfer_folder(
     source: str, 
-    weights: str, 
+    weights: str,
+    model_name: str = 'sfcn-multi',
+    targets: List[str] = [
+        'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 'neuroticism'
+    ],
     destination: str = None
 ) -> pd.DataFrame:
     if destination is not None and os.path.isfile(destination):
         raise ValueError(f'Destination {destination} already exists')
     
     logger.info('Loading multi-task model with weights %s', weights)
-    model = MultiTaskSFCN(weights=weights)
+
+    model_class = sfcn_factory(model_name)
+    model = model_class(weights=weights)
 
     results = []
 
@@ -66,19 +72,18 @@ def predict_from_fastsurfer_folder(
         image = conform(image)
 
         predictions = model.predict(np.expand_dims(image, axis=0))[0]
+        print(predictions.shape)
+        print(predictions)
         logger.debug('Predictions for %s: %s', folder, str(predictions))
         
         results.append({
-            'source': os.path.join(source, folder),
-            'subject': subject,
-            'session': session,
-            'run': run,
-            'age': predictions[0],
-            'sex': predictions[1],
-            'handedness': predictions[2],
-            'bmi': predictions[3],
-            'fluid_intelligence': predictions[4],
-            'neuroticism': predictions[5]
+            **{
+                'source': os.path.join(source, folder),
+                'subject': subject,
+                'session': session,
+                'run': run
+            },
+            **{targets[i]: predictions[i] for i in range(len(targets))}
         })
 
     results = pd.DataFrame(results)
@@ -111,6 +116,24 @@ if __name__ == '__main__':
         )
     )
     parser.add_argument(
+        '-m', '--model', 
+        required=False,
+        default='sfcn-multi',
+        help=(
+            'Name of the model to use'
+        )
+    )
+    parser.add_argument(
+        '-t', '--targets',
+        required=False,
+        nargs='+',
+        default=[
+            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 
+            'neuroticism'
+        ],
+        help='Name to use for each of the prediction heads in the output CSV'
+    )
+    parser.add_argument(
         '-d', '--destination',
         required=False,
         default=None,
@@ -121,7 +144,9 @@ if __name__ == '__main__':
 
     predict_from_fastsurfer_folder(
         source=args.root,
+        model_name=args.model,
         weights=args.weights,
+        targets=args.targets,
         destination=args.destination
     )
 

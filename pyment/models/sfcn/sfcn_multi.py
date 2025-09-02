@@ -7,8 +7,8 @@ from .sfcn import SFCN
 class MultiTaskSFCN(SFCN):
     @classmethod
     def construct_prediction_head(
-        cls,
-        bottleneck: Tensor,
+        cls, 
+        bottleneck: Tensor, 
         name: str
     ) -> Tensor:
         x = bottleneck

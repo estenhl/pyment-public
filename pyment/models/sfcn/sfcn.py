@@ -82,6 +82,8 @@ class SFCN(Model):
             weights = ensure_weights(weights)
             status = self.load_weights(weights)
 
-            # Silences warnings about optimizer-status not being loaded
-            status.expect_partial()
-            status.assert_existing_objects_matched()
+            print(weights)
+            if not weights.endswith('hdf5'):
+                # Silences warnings about optimizer-status not being loaded
+                status.expect_partial()
+                status.assert_existing_objects_matched()
