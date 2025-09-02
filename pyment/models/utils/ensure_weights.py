@@ -21,12 +21,17 @@ def ensure_weights(identifier: str) -> str:
     ------
     KeyError
         If the identifier is not a valid identifier and there does not
-        exist files <identifier>.index and
-        <identifier>.data-00000-of-00001 on the local file system.
+        exist either a single file <identifier> or files 
+        <identifier>.index and <identifier>.data-00000-of-00001 on the
+        local file system.
     """
     if not (
-        os.path.isfile(f'{identifier}.index') and 
-        os.path.isfile(f'{identifier}.data-00000-of-00001')
+        (
+            os.path.isfile(f'{identifier}.index') and 
+            os.path.isfile(f'{identifier}.data-00000-of-00001')
+        ) or (
+            os.path.isfile(identifier)
+        )
     ):
         raise NotImplementedError(
             f'Identifier-based lookups are not supported'

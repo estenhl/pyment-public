@@ -4,11 +4,12 @@ import os
 import re
 import numpy as np
 import pandas as pd
+from typing import List
 from tqdm import tqdm
 
 import nibabel as nib
 
-from pyment.models import MultiTaskSFCN
+from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
 
@@ -29,7 +30,11 @@ def _extract_run(filename: str) -> str:
 
 def predict_from_bids_folder(
     source: str, 
-    weights: str, 
+    weights: str,
+    model_name: str = 'sfcn-multi',
+    targets: List[str] = [
+        'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 'neuroticism'
+    ],
     destination: str = None,
     per_image_normalization: bool = False
 ) -> pd.DataFrame:
@@ -37,7 +42,8 @@ def predict_from_bids_folder(
         raise ValueError(f'Destination {destination} already exists')
     
     logger.info('Loading multi-task model with weights %s', weights)
-    model = MultiTaskSFCN(weights=weights)
+    model_class = sfcn_factory(model_name)
+    model = model_class(weights=weights)
 
     results = []
 
@@ -73,16 +79,13 @@ def predict_from_bids_folder(
                 )
 
                 results.append({
-                    'source': os.path.join(anat_folder, filename),
-                    'subject': subject,
-                    'session': session,
-                    'run': run,
-                    'age': predictions[0],
-                    'sex': predictions[1],
-                    'handedness': predictions[2],
-                    'bmi': predictions[3],
-                    'fluid_intelligence': predictions[4],
-                    'neuroticism': predictions[5]
+                    **{
+                        'source': path,
+                        'subject': subject,
+                        'session': session,
+                        'run': run
+                    },
+                    **{targets[i]: predictions[i] for i in range(len(targets))}
                 })
 
     results = pd.DataFrame(results)
@@ -109,6 +112,24 @@ if __name__ == '__main__':
         )
     )
     parser.add_argument(
+        '-m', '--model', 
+        required=False,
+        default='sfcn-multi',
+        help=(
+            'Name of the model to use'
+        )
+    )
+    parser.add_argument(
+        '-t', '--targets',
+        required=False,
+        nargs='+',
+        default=[
+            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 
+            'neuroticism'
+        ],
+        help='Name to use for each of the prediction heads in the output CSV'
+    )
+    parser.add_argument(
         '-d', '--destination',
         required=False,
         default=None,
@@ -128,6 +149,8 @@ if __name__ == '__main__':
     predict_from_bids_folder(
         source=args.bids,
         weights=args.weights,
+        model_name=args.model,
+        targets=args.targets,
         destination=args.destination,
         per_image_normalization=args.per_image_normalization
     )
