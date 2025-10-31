@@ -20,10 +20,18 @@ The models in this repository expects Python version 3.10.4, which can be set up
 ```
 pyenv install 3.10.4
 ```
+
 ### Configure Python environment
 Next, we can set up a python environment for running the code in the repository:
 ```
 poetry env use 3.10.4
 poetry install
 ```
+
+### Activate the environment
+The environment can be activated with:
+```
+eval $(poetry env activate)
+```
+
 </details>
