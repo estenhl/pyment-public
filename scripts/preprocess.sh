@@ -1,8 +1,6 @@
 #!/bin/sh
 
-echo "$PYTHONPATH"
-
-# Function to display usage information
+# Displays usage information
 usage() {
   echo "Usage: $0 --license LICENSE --python PYTHON INPUT OUTPUT"
   echo "Arguments:"
@@ -12,13 +10,11 @@ usage() {
   echo "  OUTPUT                   Output file (required)"
 }
 
-# Initialize variables
 LICENSE=""
 PYTHON=""
 INPUT=""
 OUTPUT=""
 
-# Parse command line arguments
 while [ $# -gt 0 ]; do
   case $1 in
     -l|--license)
@@ -34,7 +30,7 @@ while [ $# -gt 0 ]; do
       exit 1
       ;;
     *)
-      # Store positional arguments
+      # Handle positional arguments
       if [ -z "$INPUT" ]; then
         INPUT="$1"
       elif [ -z "$OUTPUT" ]; then
