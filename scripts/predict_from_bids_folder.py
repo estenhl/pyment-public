@@ -20,7 +20,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def _extract_run(filename: str) -> str:
-    match = re.fullmatch(r'.*_run-(.*)(?:_.*)?(?:\.nii(?:\.gz)?|\.mgz)', filename)
+    match = re.fullmatch(
+        r'.*_run-([^_]+)(?:_.*)?(?:\.nii(?:\.gz)?|\.mgz)', 
+        filename
+    )
 
     if not match:
         logger.warning('Unable to extract run for filename %s', filename)
@@ -28,6 +31,17 @@ def _extract_run(filename: str) -> str:
 
     return match.groups()[0]
 
+def _extract_modality(filename: str) -> str:
+    match = re.fullmatch(
+        r'.*_run-(?:[^_]+)(?:_(.*))?(?:\.nii(?:\.gz)?|\.mgz)', 
+        filename
+    )
+
+    if not match:
+        logger.warning('Unable to extract modality for filename %s', filename)
+        return None
+
+    return match.groups()[0]
 def predict_from_bids_folder(
     source: str, 
     weights: str,
@@ -61,6 +75,7 @@ def predict_from_bids_folder(
             for filename in os.listdir(anat_folder):
                 path = os.path.join(anat_folder, filename)
                 run = _extract_run(filename)
+                modality = _extract_modality(filename)
 
                 logger.debug(f'Loading image {path}')
                 image = nib.load(os.path.join(anat_folder, filename))
@@ -81,9 +96,10 @@ def predict_from_bids_folder(
                 results.append({
                     **{
                         'source': path,
-                        'subject': subject,
-                        'session': session,
-                        'run': run
+                        'subject': subject.replace('sub-', ''),
+                        'session': session.replace('ses-', ''),
+                        'run': run,
+                        'modality': modality
                     },
                     **{targets[i]: predictions[i] for i in range(len(targets))}
                 })
