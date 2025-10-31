@@ -162,10 +162,6 @@ def finetune_from_configuration(configuration: str):
         target=configuration.training.target
     )
 
-    # strategy = tf.distribute.MirroredStrategy()
-
-    # with strategy.scope():
-
     loss_cls = loss_factory(configuration.training.loss)
     loss = loss_cls()
 
