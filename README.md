@@ -1,24 +1,29 @@
-## Build docker container for preprocessing
-Note that for now, building the container requires a folder called <checkpoints> that contains the FastSurfer segmentation checkpoints
+# Installation
+<details>
+<summary> <b>macOS</b> </summary>
 
+### Install pyenv
+To select the appropriate python version, ```pyenv``` must be installed. On macOS this can be done via brew:
 ```
-docker build \
-    -f docker/preprocess.Dockerfile \
-    -t pyment/preprocessing:1.0.0 \
-    .
+brew update
+brew install pyenv
+```
+After installation we can add pyenv to the ```~/.zshrc```-file to enable terminal shortcuts:
+```
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init - zsh)"' >> ~/.zshrc
 ```
 
-## Run docker container for preprocessing
-Running the container for preprocessing requires three volumes:
-- Inputs: A folder containing input data. All nifti-files detected in this folder or one of its subfolders will be processed
-- Outputs: A folder where the preprocessed images will be written.
-- Licenses: A folder containing the freesurfer license
+### Install Python
+The models in this repository expects Python version 3.10.4, which can be set up using ```pyenv```:
 ```
-docker run --rm \
-    --user $(id -u):$(id -g) \
-    --volume <path_to_input>:/input \
-    --volume <path_to_ouput>:/output \
-    --volume <path_to_licenses>:/licenses \
-    --gpus all \
-    pyment/preprocessing:1.0.0
+pyenv install 3.10.4
 ```
+### Configure Python environment
+Next, we can set up a python environment for running the code in the repository:
+```
+poetry env use 3.10.4
+poetry install
+```
+</details>
