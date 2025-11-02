@@ -28,7 +28,7 @@ def _parse_folder_name(name: str) -> Tuple[str, str, str]:
     return match.groups()
 
 def predict_from_fastsurfer_folder(
-    source: str, 
+    source: str,
     weights: str,
     model_name: str = 'sfcn-multi',
     targets: List[str] = [
@@ -38,7 +38,7 @@ def predict_from_fastsurfer_folder(
 ) -> pd.DataFrame:
     if destination is not None and os.path.isfile(destination):
         raise ValueError(f'Destination {destination} already exists')
-    
+
     logger.info('Loading multi-task model with weights %s', weights)
 
     model_class = sfcn_factory(model_name)
@@ -62,7 +62,7 @@ def predict_from_fastsurfer_folder(
         if not os.path.isfile(brainmask):
             logger.warning('No mask.mgz file for folder %s', folder)
             continue
-        
+
         brainmask = nib.load(brainmask)
         brainmask = brainmask.get_fdata()
 
@@ -72,10 +72,8 @@ def predict_from_fastsurfer_folder(
         image = conform(image)
 
         predictions = model.predict(np.expand_dims(image, axis=0))[0]
-        print(predictions.shape)
-        print(predictions)
         logger.debug('Predictions for %s: %s', folder, str(predictions))
-        
+
         results.append({
             **{
                 'source': os.path.join(source, folder),
@@ -100,7 +98,7 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        'root', 
+        'root',
         help=(
             'Path to FastSurfer folder. Should contain subfolders that have '
             'an \'mri\' subfolder that contains files orig.mgz and mask.mgz'
@@ -108,15 +106,16 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-w', '--weights',
-        required=True,
+        required=False,
+        default='multi-2025',
         help=(
             'Weights to use. Should either point to a local file path, or a '
-            'known keyword. If a local file path <path> is used, there should '
+            'known identifier. If a local file path <path> is used, there should '
             'exist files named <path>.index and <path>.data-00000-of-00001'
         )
     )
     parser.add_argument(
-        '-m', '--model', 
+        '-m', '--model',
         required=False,
         default='sfcn-multi',
         help=(
@@ -128,7 +127,7 @@ if __name__ == '__main__':
         required=False,
         nargs='+',
         default=[
-            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 
+            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence',
             'neuroticism'
         ],
         help='Name to use for each of the prediction heads in the output CSV'
