@@ -79,13 +79,9 @@ class SFCN(Model):
         super().__init__(self.inputs, x)
 
         if weights:
-            print(weights)
             weights = ensure_weights(weights)
-            print(weights)
-            weights = 'checkpoints/pyment/sfcn-multi'
             status = self.load_weights(weights)
 
-            print(weights)
             if not weights.endswith('hdf5'):
                 # Silences warnings about optimizer-status not being loaded
                 status.expect_partial()
