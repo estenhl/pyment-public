@@ -1,5 +1,34 @@
 # Installation
 
+## Configure system
+<details>
+<summary>Ubuntu</summary>
+
+First we need to download and install CUDA 11.2:
+```
+wget https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda_11.2.2_460.32.03_linux.run
+sudo sh cuda_11.2.2_460.32.03_linux.run --silent --toolkit --installpath=/usr/local/cuda-11.2
+```
+
+Next, cudnn must be installed. Download a suitable deb-file from
+https://developer.nvidia.com/rdp/cudnn-archive. Then install the file:
+```
+sudo dpkg -i ~/Downloads/cudnn-local-repo-ubuntu2204-8.9.7.29_1.0-1_amd64.deb
+sudo cp /var/cudnn-local-repo-ubuntu2204-8.9.7.29/cudnn-local-*-keyring.gpg /usr/share/keyrings/
+sudo apt update
+sudo apt install libcudnn8 libcudnn8-dev
+sudo cp /usr/include/cudnn*.h /usr/local/cuda-11.2/include/
+sudo cp -P /usr/lib/x86_64-linux-gnu/libcudnn*.so* /usr/local/cuda-11.2/lib64/
+sudo ldconfig
+```
+Finally, we must configure the system paths (or add these lines to ~/.bashrc:
+```
+echo 'export CUDA_HOME=/usr/local/cuda-11.2' >> ~/.bashrc
+echo 'export PATH=$CUDA_HOME/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64' >> ~/.bashrc
+```
+
+</details>
 
 ## Install pyenv and Python
 
@@ -99,5 +128,15 @@ grep -v "simpleitk==2.1.1" $FASTSURFER_HOME/requirements.txt | $FASTSURFER_VENV/
 Finally, we can run the preprocessing script, pointing towards the python from the virtual environment. Note that a valid freesurfer license must also be passed to this script, and that the $FASTSURFER_HOME variable must be set:
 ```
 sh scripts/preprocess.sh --license <path-to-license> --python ~/venvs/fastsurfer/bin/python ~/data/ixi/images ~/data/ixi/preprocessed
+```
+
+### Generate predictions
+After preprocessing, we can generate predictions for the IXI dataset using the scripts in the repository. First, ensure the virtual environment is loaded:
+```
+eval $(poetry env activate)
+```
+Next, run the prediction-script:
+```
+python scripts/predict_from_fastsurfer_folder.py
 ```
 </details>
