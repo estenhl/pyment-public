@@ -2715,6 +2715,74 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyqt5"
+version = "5.15.11"
+description = "Python bindings for the Qt cross platform application toolkit"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "PyQt5-5.15.11-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:c8b03dd9380bb13c804f0bdb0f4956067f281785b5e12303d529f0462f9afdc2"},
+    {file = "PyQt5-5.15.11-cp38-abi3-macosx_11_0_x86_64.whl", hash = "sha256:6cd75628f6e732b1ffcfe709ab833a0716c0445d7aec8046a48d5843352becb6"},
+    {file = "PyQt5-5.15.11-cp38-abi3-manylinux_2_17_x86_64.whl", hash = "sha256:cd672a6738d1ae33ef7d9efa8e6cb0a1525ecf53ec86da80a9e1b6ec38c8d0f1"},
+    {file = "PyQt5-5.15.11-cp38-abi3-win32.whl", hash = "sha256:76be0322ceda5deecd1708a8d628e698089a1cea80d1a49d242a6d579a40babd"},
+    {file = "PyQt5-5.15.11-cp38-abi3-win_amd64.whl", hash = "sha256:bdde598a3bb95022131a5c9ea62e0a96bd6fb28932cc1619fd7ba211531b7517"},
+    {file = "PyQt5-5.15.11.tar.gz", hash = "sha256:fda45743ebb4a27b4b1a51c6d8ef455c4c1b5d610c90d2934c7802b5c1557c52"},
+]
+
+[package.dependencies]
+PyQt5-Qt5 = ">=5.15.2,<5.16.0"
+PyQt5-sip = ">=12.15,<13"
+
+[[package]]
+name = "pyqt5-qt5"
+version = "5.15.17"
+description = "The subset of a Qt installation needed by PyQt5."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "PyQt5_Qt5-5.15.17-py3-none-macosx_10_13_x86_64.whl", hash = "sha256:d8b8094108e748b4bbd315737cfed81291d2d228de43278f0b8bd7d2b808d2b9"},
+    {file = "PyQt5_Qt5-5.15.17-py3-none-macosx_11_0_arm64.whl", hash = "sha256:b68628f9b8261156f91d2f72ebc8dfb28697c4b83549245d9a68195bd2d74f0c"},
+    {file = "PyQt5_Qt5-5.15.17-py3-none-manylinux2014_x86_64.whl", hash = "sha256:b018f75d1cc61146396fa5af14da1db77c5d6318030e5e366f09ffdf7bd358d8"},
+]
+
+[[package]]
+name = "pyqt5-sip"
+version = "12.17.1"
+description = "The sip module support for PyQt5"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pyqt5_sip-12.17.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:bd4f73b1ebd5e0bd8d4539a8e55132318efc70a92f648ef0f9d93329ad50adeb"},
+    {file = "pyqt5_sip-12.17.1-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:b52e85520dbfe5c3d0c0c47aa2c10fc1853d892ae60ebebfe8154b052394da50"},
+    {file = "pyqt5_sip-12.17.1-cp310-cp310-win32.whl", hash = "sha256:71a67e2c9b77a74e943e220db0a341c702fd9bcf83c4a2e07342dfce691742ae"},
+    {file = "pyqt5_sip-12.17.1-cp310-cp310-win_amd64.whl", hash = "sha256:2710effb921bf6955b902779c763d890bb593da6325f0e128a0e3991cc855e9f"},
+    {file = "pyqt5_sip-12.17.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:5134d637efadd108a70306bab55b3d7feaa951bf6b8162161a67ae847bea9130"},
+    {file = "pyqt5_sip-12.17.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:155cf755266c8bf64428916e2ff720d5efa1aec003d4ccc40c003b147dbdac03"},
+    {file = "pyqt5_sip-12.17.1-cp311-cp311-win32.whl", hash = "sha256:9dfa7fe4ac93b60004430699c4bf56fef842a356d64dfea7cbc6d580d0427d6d"},
+    {file = "pyqt5_sip-12.17.1-cp311-cp311-win_amd64.whl", hash = "sha256:2ddd214cf40119b86942a5da2da5a7345334955ab00026d8dcc56326b30e6d3c"},
+    {file = "pyqt5_sip-12.17.1-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:c362606de782d2d46374a38523632786f145c517ee62de246a6069e5f2c5f336"},
+    {file = "pyqt5_sip-12.17.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:140cc582151456103ebb149fefc678f3cae803e7720733db51212af5219cd45c"},
+    {file = "pyqt5_sip-12.17.1-cp312-cp312-win32.whl", hash = "sha256:9dc1f1525d4d42c080f6cfdfc70d78239f8f67b0a48ea0745497251d8d848b1d"},
+    {file = "pyqt5_sip-12.17.1-cp312-cp312-win_amd64.whl", hash = "sha256:d5e2e9e175559017cd161d661e0ee0b551684f824bb90800c5a8c8a3bea9355e"},
+    {file = "pyqt5_sip-12.17.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:9ebbd7769ccdaaa6295e9c872553b6cde17f38e171056f17300d8af9a14d1fc8"},
+    {file = "pyqt5_sip-12.17.1-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:b023da906a70af2cf5e6fc1932f441ede07530f3e164dd52c6c2bb5ab7c6f424"},
+    {file = "pyqt5_sip-12.17.1-cp313-cp313-win32.whl", hash = "sha256:36dbef482bd638786b909f3bda65b7b3d5cbd6cbf16797496de38bae542da307"},
+    {file = "pyqt5_sip-12.17.1-cp313-cp313-win_amd64.whl", hash = "sha256:d04e5551bbc3bcec98acc63b3b0618ddcbf31ff107349225b516fe7e7c0a7c8b"},
+    {file = "pyqt5_sip-12.17.1-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:c49918287e1ad77956d1589f1d3d432a0be7630c646ea02cf652413a48e14458"},
+    {file = "pyqt5_sip-12.17.1-cp314-cp314-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:944a4bf1e1ee18ad03a54964c1c6433fb6de582313a1f0b17673e7203e22fc83"},
+    {file = "pyqt5_sip-12.17.1-cp314-cp314-win32.whl", hash = "sha256:99a2935fd662a67748625b1e6ffa0a2d1f2da068b9df6db04fa59a4a5d4ee613"},
+    {file = "pyqt5_sip-12.17.1-cp314-cp314-win_amd64.whl", hash = "sha256:aaa33232cc80793d14fdb3b149b27eec0855612ed66aad480add5ac49b9cee63"},
+    {file = "pyqt5_sip-12.17.1-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:6fdc457bd528e5909a5893db0a7dee0066d5f22e08234c9152db0ae6df9a367f"},
+    {file = "pyqt5_sip-12.17.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:06ea59741c1bffb198d99b00d26594791f45fb11b10f774c8105aea5962e3835"},
+    {file = "pyqt5_sip-12.17.1-cp39-cp39-win32.whl", hash = "sha256:b9ef23869d35c6740a95fcb1f387f4aea8d8fac80e19096fbaf1a64e18409c4b"},
+    {file = "pyqt5_sip-12.17.1-cp39-cp39-win_amd64.whl", hash = "sha256:90eed15f19557dfab22e68c7763e3690053cc8dd30d93ade2523d1b5a04a87be"},
+    {file = "pyqt5_sip-12.17.1.tar.gz", hash = "sha256:0eab72bcb628f1926bf5b9ac51259d4fa18e8b2a81d199071135458f7d087ea8"},
+]
+
+[[package]]
 name = "pytest"
 version = "8.3.3"
 description = "pytest: simple powerful testing with Python"
@@ -4088,4 +4156,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "3.10.4"
-content-hash = "5bcab6231b21344133a42a97b439b6c847b1ef803c281d2518a40bbfa7d9cef2"
+content-hash = "f4ed40969ecb1dec94a4d0f7f994e17cea56a8e86b72ea95a021f5247942d8a1"

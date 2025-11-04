@@ -1,3 +1,5 @@
+import base64
+import json
 import math
 import requests
 from tqdm import tqdm
@@ -6,7 +8,8 @@ from tqdm import tqdm
 def download_file(
     url: str,
     destination: str,
-    description: str = None
+    description: str = None,
+    decode_github: bool = False
 ) -> str:
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
@@ -28,3 +31,13 @@ def download_file(
         with open(destination, 'wb') as f:
             for chunk in progress_bar:
                 f.write(chunk)
+
+    if decode_github:
+        # Assumes a JSON file downloaded from GitHub
+        with open(destination, 'rb') as f:
+            data = json.load(f)
+
+        data = base64.b64decode(data['content'])
+
+        with open(destination, 'wb') as f:
+            f.write(data)

@@ -13,10 +13,6 @@ from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
-    level=logging.DEBUG
-)
 logger = logging.getLogger(__name__)
 
 def _parse_folder_name(name: str) -> Tuple[str, str, str]:
@@ -71,7 +67,10 @@ def predict_from_fastsurfer_folder(
         logger.debug('Conforming image from %s', os.path.join(source, folder))
         image = conform(image)
 
-        predictions = model.predict(np.expand_dims(image, axis=0))[0]
+        predictions = model.predict(
+            np.expand_dims(image, axis=0),
+            verbose=0
+        )[0]
         logger.debug('Predictions for %s: %s', folder, str(predictions))
 
         results.append({

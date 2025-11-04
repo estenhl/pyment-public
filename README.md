@@ -21,7 +21,7 @@ sudo cp /usr/include/cudnn*.h /usr/local/cuda-11.2/include/
 sudo cp -P /usr/lib/x86_64-linux-gnu/libcudnn*.so* /usr/local/cuda-11.2/lib64/
 sudo ldconfig
 ```
-Finally, we must configure the system paths (or add these lines to ~/.bashrc:
+Finally, we must configure the system paths in .bashrc:
 ```
 echo 'export CUDA_HOME=/usr/local/cuda-11.2' >> ~/.bashrc
 echo 'export PATH=$CUDA_HOME/bin:$PATH' >> ~/.bashrc
@@ -135,8 +135,9 @@ After preprocessing, we can generate predictions for the IXI dataset using the s
 ```
 eval $(poetry env activate)
 ```
-Next, run the prediction-script:
+Next, make an output-folder for the predictions and run the prediction-script:
 ```
-python scripts/predict_from_fastsurfer_folder.py
+mkdir ~/data/ixi/outputs
+python scripts/predict_from_fastsurfer_folder.py ~/data/ixi/preprocessed -d ~/data/ixi/outputs/predictions.csv
 ```
 </details>
