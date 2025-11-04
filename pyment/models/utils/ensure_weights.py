@@ -28,7 +28,8 @@ def _lookup_identifier(identifier: str, local_cache: str) -> str:
                 local_cache,
                 f'{identifier}.data-00000-of-00001'
             ),
-            description=f'Downloading {identifier} data'
+            description=f'Downloading {identifier} data',
+            decode_github=True
         )
         download_file(
             url=BASE_URL + '/' + IDENTIFIERS[identifier]['index'],
@@ -36,7 +37,8 @@ def _lookup_identifier(identifier: str, local_cache: str) -> str:
                 local_cache,
                 f'{identifier}.index'
             ),
-            description=f'Downloading {identifier} index'
+            description=f'Downloading {identifier} index',
+            decode_github=True
         )
 
     return os.path.join(local_cache, identifier)

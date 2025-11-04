@@ -37,6 +37,7 @@ pytest = "8.3.3"
 scikit-learn = "1.5.1"
 xlrd = "2.0.1"
 pydantic = "2.10"
+pyqt5 = "^5.15.11"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

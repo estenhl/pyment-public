@@ -3,14 +3,10 @@ import numpy as np
 from typing import Tuple
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
-    level=logging.DEBUG
-)
 logger = logging.getLogger(__name__)
 
 def _pad_if_necessary(
-    image: np.ndarray, 
+    image: np.ndarray,
     target_shape: Tuple[int, int, int]
 ) -> np.ndarray:
     pad = [(0, 0)] * 3
@@ -25,7 +21,7 @@ def _pad_if_necessary(
     return np.pad(image, tuple(pad), mode='constant', constant_values=0)
 
 def _crop_if_necessary(
-    image: np.ndarray, 
+    image: np.ndarray,
     target_shape: Tuple[int, int, int]
 ) -> np.ndarray:
     nonzero = np.where(image != 0)
@@ -36,7 +32,7 @@ def _crop_if_necessary(
         if image.shape[dim] > target_shape[dim]:
             extrafluous = target_shape[dim] / 2
             center = np.round(np.mean([
-                np.amin(nonzero[dim]), 
+                np.amin(nonzero[dim]),
                 np.amax(nonzero[dim])
             ]))
             min_idx = int(center - extrafluous)
@@ -45,7 +41,7 @@ def _crop_if_necessary(
             if min_idx < 0:
                 max_idx -= min_idx
                 min_idx = 0
-            
+
             if max_idx > image.shape[dim]:
                 diff = max_idx - image.shape[dim]
                 min_idx -= diff
@@ -58,7 +54,7 @@ def _crop_if_necessary(
     return image
 
 def _center_crop_or_pad(
-    image: np.ndarray, 
+    image: np.ndarray,
     target_shape: Tuple[int, int, int]
 ) -> np.ndarray:
     image = _pad_if_necessary(image, target_shape)
@@ -67,22 +63,22 @@ def _center_crop_or_pad(
     return image
 
 def conform(
-    image: np.ndarray, 
+    image: np.ndarray,
     relative_normalization: bool = False
 ) -> np.ndarray:
-    """Conforms an image to the expected format if necessary. The 
+    """Conforms an image to the expected format if necessary. The
     expected format means an image of shape 224x192x224 with voxel
-    values spanning the range [0, 1]. If the image has a redundant 
-    channel-dimension, this is removed. If the image is currently too 
+    values spanning the range [0, 1]. If the image has a redundant
+    channel-dimension, this is removed. If the image is currently too
     large along any dimension, a "central" crop is made by determining
-    the bound of the brain (e.g. non-zero voxels) and retaining 
+    the bound of the brain (e.g. non-zero voxels) and retaining
     equivalent padding on each side. If the image is currently too small
-    along either axis, the image is zero-padded equally on each side. 
+    along either axis, the image is zero-padded equally on each side.
     If the voxel-values does not fall within the expected range, they
-    are normalized. If the relative_normalization-flag is set, the 
+    are normalized. If the relative_normalization-flag is set, the
     values are normalized by dividing by the image max, otherwise they
-    are divided by 255. However, if the largest value is >255, this 
-    indicates that the image has not been processed with FastSurfer, 
+    are divided by 255. However, if the largest value is >255, this
+    indicates that the image has not been processed with FastSurfer,
     and an error is raised.
 
     Parameters
@@ -106,7 +102,7 @@ def conform(
     if len(image.shape) == 4:
         if image.shape[-1] != 1:
             raise ValueError(f'Unable to handle multi-channel images')
-        
+
         image = image[...,0]
 
     if image.shape != (224, 192, 224):
@@ -114,7 +110,7 @@ def conform(
 
     logger.debug('Conformed image shape: %s', str(image.shape))
     logger.debug(
-        'Original image voxel value range: %f-%f', 
+        'Original image voxel value range: %f-%f',
         np.amin(image), np.amax(image)
     )
 
@@ -124,7 +120,7 @@ def conform(
         image *= 255.0
 
     logger.debug(
-        'Conformed image voxel value range: %f-%f', 
+        'Conformed image voxel value range: %f-%f',
         np.amin(image), np.amax(image)
     )
 
