@@ -1,7 +1,5 @@
 FROM python:3.10.2-slim
 
-#ARG CHECKPOINTS_FOLDER
-
 RUN apt-get update && apt-get install -y \
     apt-utils git \
     && rm -rf /var/lib/apt/lists/*
@@ -23,7 +21,7 @@ RUN /envs/fastsurfer/bin/pip install --upgrade pip && \
     /envs/fastsurfer/bin/pip install -r ${FASTSURFER_HOME}/requirements.txt
 
 #COPY ${CHECKPOINTS_FOLDER} ${FASTSURFER_HOME}/FastSurferCNN/checkpoints
-COPY checkpoints ${FASTSURFER_HOME}/FastSurferCNN/checkpoints
+COPY checkpoints/fastsurfer ${FASTSURFER_HOME}/FastSurferCNN/checkpoints
 
 RUN mkdir /scripts
 COPY scripts/preprocess.sh /scripts/preprocess.sh

@@ -1,24 +1,20 @@
-## Build docker container for preprocessing
-Note that for now, building the container requires a folder called <checkpoints> that contains the FastSurfer segmentation checkpoints
+# Building docker containers
+
+## Building docker container for preprocessing
+Note that for now, building the container requires a folder called <checkpoints> that contains the FastSurfer segmentation checkpoints in a subfolder called `fastsurfer`. This folder should contain the files `aparc_vinn_axial_v2.0.0.pkl`, `aparc_vinn_coronal_v2.0.0.pkl`, and `aparc_vinn_sagittal_v2.0.0.pkl`. The command should be run from the root of the repository:
 
 ```
 docker build \
     -f docker/preprocess.Dockerfile \
-    -t pyment/preprocessing:1.0.0 \
+    -t estenhl/pyment-preprocessing:1.0.0 \
     .
 ```
 
-## Run docker container for preprocessing
-Running the container for preprocessing requires three volumes:
-- Inputs: A folder containing input data. All nifti-files detected in this folder or one of its subfolders will be processed
-- Outputs: A folder where the preprocessed images will be written.
-- Licenses: A folder containing the freesurfer license
+## Building docker container for preprocessing
+Note that for now, building the container requires a folder called <checkpoints> that contains the multi-task model checkpoints in a subfolder called `pyment`. This folder should contain the files `sfcn-multi.data-00000-of-00001`and `sfcn-multi.index`. The command should be run from the root of the repository:
 ```
-docker run --rm \
-    --user $(id -u):$(id -g) \
-    --volume <path_to_input>:/input \
-    --volume <path_to_ouput>:/output \
-    --volume <path_to_licenses>:/licenses \
-    --gpus all \
-    pyment/preprocessing:1.0.0
+docker build \
+    -f docker/predict.Dockerfile \
+    -t estenhl/pyment-predict:1.0.0 \
+    .
 ```

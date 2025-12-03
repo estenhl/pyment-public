@@ -12,7 +12,10 @@ import nibabel as nib
 from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
-
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
+    level=logging.DEBUG
+)
 logger = logging.getLogger(__name__)
 
 def _parse_folder_name(name: str) -> Tuple[str, str, str]:
@@ -25,7 +28,8 @@ def _parse_folder_name(name: str) -> Tuple[str, str, str]:
 
 def predict_from_fastsurfer_folder(
     source: str,
-    weights: str,
+    folders: List[str] = None,
+    weights: str = None,
     model_name: str = 'sfcn-multi',
     targets: List[str] = [
         'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence', 'neuroticism'
@@ -42,13 +46,26 @@ def predict_from_fastsurfer_folder(
 
     results = []
 
-    for folder in tqdm(os.listdir(source)):
+    logger.info(f'Reading fastsurfer folders from {source}')
+
+    folders = (
+        folders if folders is not None
+        else [
+            folder for folder in os.listdir(source)
+            if os.path.isdir(os.path.join(source, folder))
+        ]
+    )
+
+    for folder in tqdm(folders):
         orig = os.path.join(source, folder, 'mri', 'orig.mgz')
 
         subject, session, run = _parse_folder_name(folder)
 
         if not os.path.isfile(orig):
-            logger.warning('No orig.mgz file for folder %s', folder)
+            logger.warning(
+                'No orig.mgz file for folder %s',
+                os.path.join(source, folder)
+            )
             continue
 
         orig = nib.load(orig)
@@ -56,10 +73,18 @@ def predict_from_fastsurfer_folder(
         brainmask = os.path.join(source, folder, 'mri', 'mask.mgz')
 
         if not os.path.isfile(brainmask):
-            logger.warning('No mask.mgz file for folder %s', folder)
+            logger.warning(
+                'No mask.mgz file for folder %s',
+                os.path.join(source, folder)
+            )
             continue
 
-        brainmask = nib.load(brainmask)
+        try:
+            brainmask = nib.load(brainmask)
+        except Exception as e:
+            logger.error('Error loading brainmask for folder %s: %s', folder, e)
+            continue
+
         brainmask = brainmask.get_fdata()
 
         image = orig * brainmask
@@ -109,8 +134,9 @@ if __name__ == '__main__':
         default='multi-2025',
         help=(
             'Weights to use. Should either point to a local file path, or a '
-            'known identifier. If a local file path <path> is used, there should '
-            'exist files named <path>.index and <path>.data-00000-of-00001'
+            'known identifier. If a local file path <path> is used, there '
+            'should exist files named <path>.index and '
+            '<path>.data-00000-of-00001'
         )
     )
     parser.add_argument(
@@ -132,6 +158,15 @@ if __name__ == '__main__':
         help='Name to use for each of the prediction heads in the output CSV'
     )
     parser.add_argument(
+        '-f', '--folders',
+        default=None,
+        nargs='+',
+        help=(
+            'List of folders to process. If not provided, all folders in '
+            'the source folder will be processed.'
+        )
+    )
+    parser.add_argument(
         '-d', '--destination',
         required=False,
         default=None,
@@ -142,9 +177,10 @@ if __name__ == '__main__':
 
     predict_from_fastsurfer_folder(
         source=args.root,
+        folders=args.folders,
         model_name=args.model,
         weights=args.weights,
         targets=args.targets,
-        destination=args.destination
+        destination=args.destination,
     )
 

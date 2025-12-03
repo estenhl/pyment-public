@@ -13,9 +13,8 @@ def evaluate_ixi_predictions(
     predictions: str
 ) -> None:
     labels = pd.read_excel(labels)
-    print(labels.head())
     predictions = pd.read_csv(predictions)
-    print(predictions.head())
+
     predictions['IXI_ID'] = predictions['source'].apply(
         lambda path: int(path.split('/')[-1][3:6])
     )
@@ -28,7 +27,7 @@ def evaluate_ixi_predictions(
     )
 
     mae = np.mean(np.abs(predictions['AGE'] - predictions['age_prediction']))
-    print(f'MAE: {mae}')
+    print(f'MAE: {mae:.2f}')
 
     plt.scatter(predictions['AGE'], predictions['age_prediction'])
     plt.xlabel('True age')
