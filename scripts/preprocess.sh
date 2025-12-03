@@ -52,7 +52,6 @@ if [ -z "$INPUT" ] || [ -z "$OUTPUT" ]; then
   exit 1
 fi
 
-# Validate that license is provided
 if [ -z "$LICENSE" ]; then
   echo "Error: License is required"
   usage
@@ -86,14 +85,17 @@ fi
 
 # Loop through each NIFTI file path
 echo "$NIFTI_FILES" | while IFS= read -r filepath; do
-  # Extract filename without .nii.gz suffix
   IMAGE=$(basename "$filepath" .nii.gz)
-  $FASTSURFER_HOME/run_fastsurfer.sh \
-    --sd $OUTPUT \
-    --sid $IMAGE \
-    --t1 $filepath \
-    --fs_license $LICENSE \
-    --py $PYTHON \
-    --seg_only
+  if [ ! -f "$OUTPUT/$IMAGE/mri/mask.mgz" ]; then
+    $FASTSURFER_HOME/run_fastsurfer.sh \
+      --sd $OUTPUT \
+      --sid $IMAGE \
+      --t1 $filepath \
+      --fs_license $LICENSE \
+      --py $PYTHON \
+      --seg_only
+  else
+    echo "$IMAGE already processed"
+  fi
 done
 

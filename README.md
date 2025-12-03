@@ -93,6 +93,7 @@ All the approaches described below rely on having the IXI dataset downloaded. If
 python tutorials/download_ixi.py
 ```
 ## Generate predictions
+
 <details>
 <summary> Preprocess and predict manually </summary>
 
@@ -101,11 +102,7 @@ Preprocessing and predicting manually relies on using the scripts provided in th
 ### Preprocessing
 The images must be preprocessed using FastSurfer. First, FastSurfer must be downloaded. If any of the subsequent steps fail, a comprehensive installation-guide can be found in the [FastSurfer GitHub repository](https://github.com/Deep-MI/FastSurfer/blob/dev/doc/overview/INSTALL.md#native-ubuntu-2004-or-ubuntu-2204). The following steps downloads and installs FastSurfer into the folder `~/repos/fastsurfer`. First, some system packages must be installed:
 ```
-sudo apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    git \
-    ca-certificates \
-    file
+sudo apt-get update && apt-get install -y --no-install-recommends wget git ca-certificates file
 ```
 Next, we can clone FastSurfer, and change to the correct branch:
 ```
@@ -141,3 +138,46 @@ mkdir ~/data/ixi/outputs
 python scripts/predict_from_fastsurfer_folder.py ~/data/ixi/preprocessed -d ~/data/ixi/outputs/predictions.csv
 ```
 </details>
+
+<details>
+<summary> Preprocess and predict in two steps via docker </summary>
+Preprocessing and predicting in two steps via docker requires using the two prebuilt docker containers for the two steps independently.
+
+### Preprocessing
+Running the container for preprocessing requires mounting three volumes:
+- Inputs: A folder containing input data. All nifti-files detected in this folder or one of its subfolders will be processed
+- Outputs: A folder where the preprocessed images will be written. This must be created prior to running the container
+- Licenses: A folder containing the freesurfer license. The file must be named freesurfer.txt
+```
+mkdir -p ~/data/ixi/outputs
+docker run --rm \
+    --user $(id -u):$(id -g) \
+    --volume $HOME/data/ixi/images:/input \
+    --volume $HOME/data/ixi/outputs:/output \
+    --volume <path_to_licenses>:/licenses \
+    --gpus all \
+    estenhl/pyment-preprocessing:1.0.0
+```
+
+### Generate predictions
+Running the container for predictions requires two volumes:
+- Fastsurfer: The folder containing fastsurfer-processed images
+- Outputs: The folder where the predictions are written
+```
+docker run --rm -it \
+    --user $(id -u):$(id -g) \
+    --volume $HOME/data/ixi/outputs/fastsurfer:/fastsurfer \
+    --volume $HOME/data/ixi/outputs:/output \
+    --gpus all \
+    estenhl/pyment-predict:1.0.0
+```
+
+</details>
+
+## Evaluate predictions
+
+Evaluate the IXI predictions with
+```
+python tutorials/evaluate_ixi_predictions.py
+```
+If everything is set up correctly, this should yield an MAE of 3.12. Note that the paths to both the labels and predictions can be given as keyword arguments to the script if they don't reside in the standard locations.
