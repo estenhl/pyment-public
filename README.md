@@ -3,7 +3,7 @@ title: pyment-public
 language:
   - en
 license: cc-by-nc-4.0
-pipeline_tag: multi-task
+pipeline_tag: image-classification
 tags:
   - neuroimaging
   - multi-task
