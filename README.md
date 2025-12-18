@@ -95,7 +95,28 @@ python tutorials/download_ixi.py
 ## Generate predictions
 
 <details>
-<summary> Preprocess and predict manually </summary>
+<summary> Preprocess and predict with Docker </summary>
+
+Preprocessing and predicting with Docker relies on running the docker container that first runs FastSurfer preprocessing over all raw input images and then runs the model on the resulting preprocessed images. The docker-container will result in both a folder with preprocessed images, and a file predictions.csv containing all predictions.
+
+Running the container relies on mounting three volumes:
+- Inputs: A folder containing input data. All nifti-files detected in this folder or one of its subfolders will be processed
+- Outputs: A folder where the preprocessed images and predictions will be written. This must be created prior to running the container
+- Licenses: A folder containing the freesurfer license. The file must be named freesurfer.txt
+```
+mkdir -p ~/data/ixi/outputs
+docker pull estenhl/pyment-preprocess-and-predict:1.0.0
+docker run --rm -it \
+    --user $(id -u):$(id -g) \
+    --volume $HOME/data/ixi/images:/input \
+    --volume $HOME/data/ixi/outputs:/output \
+    --volume $HOME/licenses:/licenses \
+    --gpus all \
+    estenhl/pyment-preprocess-and-predict:1.0.0
+```
+</details>
+<details>
+<summary> Preprocess and predict in Python </summary>
 
 Preprocessing and predicting manually relies on using the scripts provided in this repository to generate predictions via two steps
 
@@ -140,7 +161,7 @@ python scripts/predict_from_fastsurfer_folder.py ~/data/ixi/preprocessed -d ~/da
 </details>
 
 <details>
-<summary> Preprocess and predict in two steps via docker </summary>
+<summary> Preprocess and predict in two steps with docker </summary>
 Preprocessing and predicting in two steps via docker requires using the two prebuilt docker containers for the two steps independently.
 
 ### Preprocessing
@@ -150,6 +171,7 @@ Running the container for preprocessing requires mounting three volumes:
 - Licenses: A folder containing the freesurfer license. The file must be named freesurfer.txt
 ```
 mkdir -p ~/data/ixi/outputs
+docker pull estenhl/pyment-preprocessing:1.0.0
 docker run --rm \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ixi/images:/input \
@@ -164,6 +186,7 @@ Running the container for predictions requires two volumes:
 - Fastsurfer: The folder containing fastsurfer-processed images
 - Outputs: The folder where the predictions are written
 ```
+docker pull estenhl/pyment-predict:1.0.0
 docker run --rm -it \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ixi/outputs/fastsurfer:/fastsurfer \
