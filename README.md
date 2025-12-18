@@ -3,6 +3,12 @@ title: pyment-public
 language:
   - en
 license: cc-by-nc-4.0
+pipeline_tag: multi-task
+tags:
+  - neuroimaging
+  - multi-task
+  - structural t1 mri
+  - brain age
 ---
 
 # Installation
