@@ -1,3 +1,8 @@
+---
+language:
+  - en
+---
+
 # Installation
 
 ## Configure system
@@ -95,7 +100,7 @@ python tutorials/download_ixi.py
 ## Generate predictions
 
 <details>
-<summary> Preprocess and predict with Docker </summary>
+<summary> Preprocess and predict with docker </summary>
 
 Preprocessing and predicting with Docker relies on running the docker container that first runs FastSurfer preprocessing over all raw input images and then runs the model on the resulting preprocessed images. The docker-container will result in both a folder with preprocessed images, and a file predictions.csv containing all predictions.
 
