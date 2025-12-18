@@ -1,8 +1,10 @@
+<!--
 ---
 language:
   - en
 license: CC BY-NC 4.0
 ---
+-->
 
 # Installation
 
