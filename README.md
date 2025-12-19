@@ -1,7 +1,6 @@
 ---
 title: pyment-public
-language:
-  - en
+model_file: artifacts/sfcn-multi.onnx
 license: cc-by-nc-4.0
 pipeline_tag: image-classification
 tags:
