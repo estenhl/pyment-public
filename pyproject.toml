@@ -23,7 +23,7 @@ python = ">=3.10,<3.11"
 tensorflow-macos = { version = "2.11", markers = "platform_system == 'Darwin'" }
 tensorflow-metal = { version = "0.7", markers = "platform_system == 'Darwin'" }
 tensorflow = { version = "2.11", markers = "platform_system != 'Darwin'" }
-numpy = "1.22.3"
+numpy = "1.23.5"
 tomli = "2.2.1"
 pandas = "1.4.2"
 packaging = "24.1"
