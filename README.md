@@ -12,6 +12,17 @@ tags:
 
 # Installation
 
+<details>
+<summary>With pip</summary>
+If you have a python 3.10.4 installation, ideally in a virtual environment, you can install the package with:
+
+```
+pip install git+https://github.com/estenhl/pyment-public
+```
+
+</details>
+<details>
+<summary>Manual installation</summary>
 ## Configure system
 <details>
 <summary>Ubuntu</summary>
@@ -97,6 +108,7 @@ The environment can be activated with:
 ```
 eval $(poetry env activate)
 ```
+</details>
 
 # Tutorials
 ## Download the IXI dataset
