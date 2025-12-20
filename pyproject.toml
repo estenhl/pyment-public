@@ -11,6 +11,29 @@ license-files = [
 ]
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
+dependencies = [
+    "tensorflow-macos>=2.11,<2.12; platform_system == 'Darwin'",
+    "tensorflow-metal>=0.7,<0.8; platform_system == 'Darwin'",
+    "tensorflow>=2.11,<2.12; platform_system != 'Darwin'",
+    "numpy==1.23.5",
+    "tomli==2.2.1",
+    "pandas==1.4.2",
+    "packaging==24.1",
+    "typing-extensions==4.12.2",
+    "wheel==0.43",
+    "decorator==5.1.1",
+    "requests==2.32.3",
+    "nibabel==5.2.1",
+    "jupyter==1.1.1",
+    "matplotlib==3.8",
+    "tqdm==4.66.4",
+    "plotly==5.24.1",
+    "pytest==8.3.3",
+    "scikit-learn==1.5.1",
+    "xlrd==2.0.1",
+    "pydantic==2.10",
+    "pyqt5>=5.15.11,<6.0",
+]
 
 [tool.poetry]
 packages = [{include = "pyment"}]
