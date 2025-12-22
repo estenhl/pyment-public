@@ -115,7 +115,7 @@ def predict_from_fastsurfer_folder(
 
     return results
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
         'Generates multi-task predictions for preprocessed images organized '
         'in a FastSurfer folder'
@@ -183,4 +183,7 @@ if __name__ == '__main__':
         targets=args.targets,
         destination=args.destination,
     )
+
+if __name__ == '__main__':
+    main()
 
