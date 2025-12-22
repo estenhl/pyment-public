@@ -41,6 +41,9 @@ include = [
     {path = "pyproject.toml", format = "sdist"}
 ]
 
+[tool.poetry.scripts]
+pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
+
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 tensorflow-macos = { version = "2.11", markers = "platform_system == 'Darwin'" }
