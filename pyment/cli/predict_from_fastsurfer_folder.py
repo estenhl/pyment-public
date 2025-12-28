@@ -12,6 +12,7 @@ import nibabel as nib
 from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
+
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
     level=logging.DEBUG

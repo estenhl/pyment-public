@@ -1,2 +1,1 @@
-from .dataset_configuration import DatasetConfiguration
-from .finetuning_configuration import FinetuningConfiguration
+from .training_configuration import TrainingConfiguration

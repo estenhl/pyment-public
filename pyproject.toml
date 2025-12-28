@@ -33,6 +33,7 @@ dependencies = [
     "xlrd==2.0.1",
     "pydantic==2.10",
     "pyqt5>=5.15.11,<6.0",
+    "tensorflow-neuroimaging @ git+https://github.com/estenhl/tensorflow-neuroimaging.git",
 ]
 
 [tool.poetry]
@@ -67,6 +68,7 @@ scikit-learn = "1.5.1"
 xlrd = "2.0.1"
 pydantic = "2.10"
 pyqt5 = "^5.15.11"
+tensorflow-neuroimaging = { git = "https://github.com/estenhl/tensorflow-neuroimaging.git" }
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
