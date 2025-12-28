@@ -1,4 +1,5 @@
 from .sfcn import SFCN
+from .sfcn_bin import BinarySFCN
 from .sfcn_multi import MultiTaskSFCN
 from .sfcn_reg import RegressionSFCN
 
@@ -11,4 +12,10 @@ def sfcn_factory(model_type: str):
 
     raise ValueError(f'Unknown SFCN type {model_type}')
 
-__all__ = ['sfcn_factory', 'SFCN', 'MultiTaskSFCN', 'RegressionSFCN']
+__all__ = [
+    'sfcn_factory',
+    'BinarSFCN',
+    'MultiTaskSFCN',
+    'RegressionSFCN',
+    'SFCN'
+]

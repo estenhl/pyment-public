@@ -14,6 +14,7 @@ from ..utils.ensure_weights import ensure_weights
 
 
 class SFCN(Model):
+    DEFAULT_INPUT_SHAPE = (224, 192, 224)
     FILTERS = [32, 64, 128, 256, 256, 64]
 
     @abstractmethod
@@ -24,7 +25,7 @@ class SFCN(Model):
         pass
 
     def __init__(self, *,
-        input_shape: Tuple[int] = (224, 192, 224),
+        input_shape: Tuple[int] = DEFAULT_INPUT_SHAPE,
         include_top: bool = True,
         pooling: str = 'avg',
         dropout: float = 0.,

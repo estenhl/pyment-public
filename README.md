@@ -83,7 +83,7 @@ docker run --rm -it \
 ```
 </details>
 
-# Installing the package locally
+# Local install
 
 Installing the package locally allows for more flexibility in terms of modifying the model. Depending on the OS, this generally requires three steps:
 1. [Configure the system (only necessary on Linux)](#system-configuration)
@@ -226,6 +226,7 @@ Preprocessing and predicting manually relies on using the scripts provided in th
 
 Prior to both inference and finetuning, images must be preprocessed using FastSurfer. This can either be achieved via the [prebuilt preprocessing-container in Docker](#preprocessing-with-docker), described in the [Inference in Docker](#inference-using-docker)-section above, or via a local installation.
 
+<a id="preprocess-locally"></a>
 <details>
 <summary>Preprocessing images with FastSurfer locally</summary>
 
@@ -262,7 +263,7 @@ sh scripts/preprocess.sh \
 
 </details>
 
-## Generate predictions
+# Local inference
 
 After preprocessing the images, we can run scripts prepackaged in this repository to generate predictions. First, we must activate the virtual environment:
 
@@ -300,11 +301,35 @@ python pyment/cli/predict_from_fastsurfer_folder.py $HOME/data/ixi/preprocessed 
 ```
 </details>
 
-
-# Sanity check
+# Inference sanity check
 
 Evaluate the IXI predictions with
 ```
 python scripts/evaluate_ixi_predictions.py
 ```
 If everything is set up correctly, this should yield an MAE of 3.12. Note that the paths to both the labels and predictions can be given as keyword arguments to the script if they don't reside in the standard locations.
+
+# Finetuning
+## Generating labels
+Prior to finetuning on the IXI-dataset, we must generate appropriate labels. This can be done with a prepackaged script, after activating the appropriate virtual environment (see [Installing locally](#installing-the-package-locally)):
+```
+python scripts/create_ixi_labels \
+    -s $HOME/data/ixi/IXI.xls \
+    -d $HOME/data/ixi/labels.csv \
+    -i $HOME/data/ixi/images
+```
+
+## Preprocessing
+The images should also be [preprocessed](#preprocessing) using the same pipeline as during pretraining before further finetuning.
+
+## Sanity check
+The prebuilt Docker-container for finetuning relies on a very experimental GPU-based TensorFlow parser for MGH/MGZ images from a [different repo](https://github.com/estenhl/tensorflow-neuroimaging). Given its developmental status, its worth sanity checking this loader on the exact images you intend to use for finetuning before progressing further. This can be done by first generating the FastSurfer-crops that will be used for finetuning:
+```
+python scripts/create_fastsurfer_conformed_crops.py \
+    $HOME/data/ixi/outputs/fastsurfer/ \
+    -num_threads <Number of threads>
+```
+And then by running the built-in CLI for sanity checking from the other repository (this requires the library to be installed, either implicitly via installing this repository locally, or by cloning and building that repository directly):
+```
+verify-mgh-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
+```
