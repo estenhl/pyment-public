@@ -64,11 +64,14 @@ class FastSurferDataset(Dataset):
             os.path.join(image_path, 'mri', 'crop.mgz')
             for image_path in self.labels['image_path'].values
         ]
-        targets = self.labels[self.target].values
 
         if self.target_encoder:
             targets = np.asarray(
                 [self.target_encoder(target) for target in targets]
+            )
+        else:
+            targets = np.asarray(
+                [target for target in self.labels[self.target].values]
             )
 
         dataset = tf.data.Dataset.from_tensor_slices((paths, targets))

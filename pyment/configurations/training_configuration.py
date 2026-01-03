@@ -3,14 +3,14 @@ from pydantic import BaseModel, Field
 from .dataset_configuration import FastSurferDatasetConfiguration
 from .data_split_configuration import DataSplitConfiguration
 from .sfcn_configuration import SFCNConfiguration
-from .target_configuration import BinaryTargetConfiguration
+from .target_configuration import TargetConfiguration
 
 
 class TrainingConfiguration(BaseModel):
     dataset: FastSurferDatasetConfiguration
     data_split: DataSplitConfiguration
     model: SFCNConfiguration
-    target: BinaryTargetConfiguration
+    target: TargetConfiguration
     batch_size: int
     num_threads: int = 1
     loss: str

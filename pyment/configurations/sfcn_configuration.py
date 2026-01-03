@@ -1,20 +1,33 @@
 from abc import abstractmethod,ABC
 from pydantic import BaseModel
-from typing import Literal, Union
+from typing import Annotated, ClassVar, Literal, Union
+from pydantic import Field
 
-from ..models.sfcn import BinarySFCN, SFCN
+from ..models.sfcn import BinarySFCN, RegressionSFCN, SFCN
 
 class BaseSFCNConfiguration(BaseModel, ABC):
     input_shape: tuple[int, int, int] = SFCN.DEFAULT_INPUT_SHAPE
+    dropout: float = 0.0
 
-    @abstractmethod
-    def instantiate(self) -> SFCN:
-        pass
+    cls: ClassVar[type[BinarySFCN]]
+
+    def build(self) -> SFCN:
+        return self.cls(
+            input_shape=self.input_shape,
+            dropout=self.dropout
+        )
 
 class BinarySFCNConfiguration(BaseSFCNConfiguration):
     kind: Literal['sfcn-bin']
 
-    def instantiate(self) -> BinarySFCN:
-        return BinarySFCN(input_shape=self.input_shape)
+    cls = BinarySFCN
 
-SFCNConfiguration = BinarySFCNConfiguration
+class RegressionSFCNConfiguration(BaseSFCNConfiguration):
+    kind: Literal['sfcn-reg']
+
+    cls = RegressionSFCN
+
+SFCNConfiguration = Annotated[
+    Union[BinarySFCNConfiguration, RegressionSFCNConfiguration],
+    Field(discriminator='kind')
+]

@@ -1,1 +1,2 @@
+from .target_configuration import compile_target_encoder
 from .training_configuration import TrainingConfiguration
