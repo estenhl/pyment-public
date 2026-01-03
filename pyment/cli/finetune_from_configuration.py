@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 
-from pyment.configurations import TrainingConfiguration
+from pyment.configurations import compile_target_encoder, TrainingConfiguration
 
 
 logging.basicConfig(
@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 def finetune_from_configuration(configuration: str):
     configuration = TrainingConfiguration.model_validate(configuration)
 
-    dataset = configuration.dataset.instantiate(
+    dataset = configuration.dataset.build(
         target=configuration.target.name,
-        target_encoder=configuration.target.instantiate_encoder()
+        target_encoder=compile_target_encoder(configuration.target)
     )
     train, validation = configuration.data_split.split(dataset)
 
-    model = configuration.model.instantiate()
+    model = configuration.model.build()
     model.compile(
         loss=configuration.loss,
         metrics=configuration.metrics,

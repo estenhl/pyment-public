@@ -7,16 +7,15 @@
         "training_fraction": 0.8
     },
     "model": {
-        "kind": "sfcn-bin"
+        "kind": "sfcn-reg"
     },
     "target": {
-        "kind": "binary",
-        "name": "bachelor",
-        "labels": [false, true]
+        "kind": "regression",
+        "name": "weight"
     },
     "batch_size": 2,
     "num_threads": 8,
-    "loss": "binary_crossentropy",
-    "metrics": ["accuracy"],
+    "loss": "mean_squared_error",
+    "metrics": ["mean_absolute_error"],
     "epochs": 100
 }

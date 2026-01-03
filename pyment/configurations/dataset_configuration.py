@@ -10,7 +10,7 @@ class FastSurferDatasetConfiguration(BaseModel):
     images: str
     labels: str
 
-    def instantiate(
+    def build(
         self,
         target: str,
         target_encoder: Callable[[Any], int] = None

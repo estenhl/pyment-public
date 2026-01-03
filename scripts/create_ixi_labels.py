@@ -43,18 +43,11 @@ def create_ixi_labels(source: str, destination: str, images: str):
     })
 
     # Directly copies height as a continuous label
-    labels['height'] = labels['HEIGHT']
+    labels['weight'] = labels['WEIGHT']
 
-    # Encodes the original education label as a multiclass label
-    labels['education'] = labels['QUALIFICATION_ID'].map({
-        1: 'None',
-        2: 'O-levels',
-        3: 'A-levels',
-        4: 'Further education',
-        5: 'University'
-    })
+    labels['site'] = labels['image_id'].apply(lambda x: x.split('-')[1])
 
-    columns = ['image_id', 'bachelor', 'height', 'education']
+    columns = ['image_id', 'bachelor', 'weight', 'site']
     labels[columns].to_csv(destination, index=False)
 
 
