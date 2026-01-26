@@ -1,46 +1,50 @@
 import logging
 import nibabel as nib
 import numpy as np
+from nibabel.processing import resample_from_to
 from typing import Tuple, Union
 
-from .crop import crop_numpy_array_if_necessary
+from .crop import crop_nifti_image_if_necessary
+from .pad import pad_nifti_image_if_necessary
 
 
 logger = logging.getLogger(__name__)
 
-def _pad_if_necessary(
-    image: np.ndarray,
-    target_shape: Tuple[int, int, int]
-) -> np.ndarray:
-    pad = [(0, 0)] * 3
+def _rescale(
+    image: nib.Nifti1Image,
+    target_resolution = np.asarray([1.0, 1.0, 1.0]),
+    order: int = 1
+):
+    current_shape = np.asarray(image.shape[:3])
+    current_resolution = np.asarray(image.header.get_zooms()[:3])
 
-    for dim in range(3):
-        if image.shape[dim] < target_shape[dim]:
-            padding = target_shape[dim] - image.shape[dim]
-            first_padding = padding // 2
-            second_padding = padding - first_padding
-            pad[dim] = (first_padding, second_padding)
+    scale = current_resolution / target_resolution
+    new_shape = tuple(np.round(current_shape * scale).astype(int))
 
-    return np.pad(image, tuple(pad), mode='constant', constant_values=0)
+    target_affine = image.affine.copy()
+    target_affine[:3, :3] *= target_resolution / current_resolution
 
-def _center_crop_or_pad(
-    image: np.ndarray,
-    target_shape: Tuple[int, int, int]
-) -> np.ndarray:
-    image = _pad_if_necessary(image, target_shape)
-    image = crop_numpy_array_if_necessary(image, target_shape)
+    resampled = resample_from_to(
+        image,
+        (new_shape, target_affine),
+        order=order
+    )
 
-    return image
+    return resampled
 
-def conform(image: np.ndarray) -> np.ndarray:
-    """Conforms an image to the expected format if necessary. The
-    expected format means an image of shape 224x192x224. If the image
-    has a redundant channel-dimension, this is removed. If the image is
+def conform(
+    image: nib.Nifti1Image,
+    target_shape: tuple[int, int, int] = np.asarray([224, 192, 224]),
+    target_dtype: np.dtype = np.float32
+) -> nib.Nifti1Image:
+    """Conforms an image to the expected format, i.e. a 3-dimensional
+    image with the given shape (defaults to 224x192x224). If a
+    redundant channel-dimension exists, it is removed. If the image is
     currently too large along any dimension, a "central" crop is made
     by determining the bound of the brain (e.g. non-zero voxels) and
-    retaining equivalent padding on each side. If the image is
-    currently too small along either axis, the image is zero-padded
-    equally on each side.
+    retaining equivalent padding oneach side. If the image is currently
+    too small along either axis, the image is zero-padded equally on
+    each side.
 
     Parameters
     ----------
@@ -53,19 +57,37 @@ def conform(image: np.ndarray) -> np.ndarray:
     np.ndarray
         The conformed image.
     """
-    logger.debug('Original image shape: %s', str(image.shape))
+    if len(image.dataobj.shape) > 3:
+        raise NotImplementedError(
+            'Conforming images with a channel-dimension is not implemented'
+        )
 
-    image = to_float32(image)
+    if image.header.get_data_dtype() != np.dtype(target_dtype):
+        image.header.set_data_dtype(target_dtype)
+        logger.debug('Sat header dtype to %s', target_dtype)
 
-    if len(image.shape) == 4:
-        if image.shape[-1] != 1:
-            raise ValueError(f'Unable to handle multi-channel images')
+    if image.dataobj.dtype != np.dtype(target_dtype):
+        image = nib.Nifti1Image(
+            image.get_fdata(dtype=target_dtype),
+            header=image.header,
+            affine=image.affine
+        )
+        logger.debug('Sat data dtype to %s', target_dtype)
 
-        image = image[...,0]
+    if image.header.get_zooms()[:3] != (1.0, 1.0, 1.0):
+        image = _rescale(image)
+        logger.debug(
+            'Rescaled image to shape %s with zooms %s',
+            image.shape,
+            image.header.get_zooms()
+        )
 
-    if image.shape != (224, 192, 224):
-        image = _center_crop_or_pad(image, (224, 192, 224))
+    if np.any(image.shape > target_shape):
+        image = crop_nifti_image_if_necessary(image, target_shape=target_shape)
+        logger.debug('Cropped image to shape %s', image.shape)
 
-    logger.debug('Conformed image shape: %s', str(image.shape))
+    if np.any(image.shape < target_shape):
+        image = pad_nifti_image_if_necessary(image, target_shape=target_shape)
+        logger.debug('Padded image to shape %s', image.shape)
 
     return image

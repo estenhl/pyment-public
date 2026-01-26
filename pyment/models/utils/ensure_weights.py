@@ -85,7 +85,7 @@ def ensure_weights(
         return _lookup_identifier(identifier, local_cache)
     else:
         raise NotImplementedError(
-            f'Identifier-based lookups are not supported'
+            f'{identifier} is not a valid file prefix nor a known identifier'
         )
 
     return identifier

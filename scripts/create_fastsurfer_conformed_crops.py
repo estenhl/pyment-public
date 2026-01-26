@@ -39,7 +39,7 @@ if __name__ == '__main__':
         'Creates conformed crops for preprocessed FastSurfer images. The '
         'script will parse a FastSurfer output directory (i.e. one folder per '
         'processed image, with an \'mri\' subfolder), and ensure there exists '
-        'a \'crop.mgz\' file in each subfolder. If the file does not exist, ',
+        'a \'crop.mgz\' file in each subfolder. If the file does not exist, '
         'it will be created by combining the original image (\'orig.mgz\') '
         'and brain mask (\'mask.mgz\') and conforming the result.'
     )

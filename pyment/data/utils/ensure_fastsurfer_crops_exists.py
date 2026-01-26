@@ -1,9 +1,11 @@
 import logging
 import os
 import nibabel as nib
+import numpy as np
 from concurrent.futures import ThreadPoolExecutor
+from nibabel.processing import resample_from_to
 
-from pyment.preprocessing import crop_nifti_image_if_necessary
+from pyment.preprocessing import conform
 
 
 logger = logging.getLogger(__name__)
@@ -16,16 +18,37 @@ def ensure_fastsurfer_crop_exists(
 
     if not os.path.exists(crop_path):
         logger.debug('Creating crop for %s', folder)
-        mask = nib.load(os.path.join(folder, 'mri', 'mask.mgz'))
-        orig = nib.load(os.path.join(folder, 'mri', 'orig.mgz'))
+        mask = os.path.join(folder, 'mri', 'mask.mgz')
+        orig = os.path.join(folder, 'mri', 'orig.mgz')
+
+        if not os.path.isfile(orig):
+            logger.debug(
+                'Unable to create crop for %s: Missing orig', folder
+            )
+            return False
+        elif not os.path.isfile(mask):
+            logger.debug(
+                'Unable to create crop for %s: Missing mask', folder
+            )
+            return False
+
+        orig = nib.load(orig)
+        orig_data = orig.get_fdata()
+        # orig_data -= np.amin(orig_data)
+        # orig_data /= np.amax(orig_data)
+        # orig_data *= 255.0
+
+        mask = nib.load(mask)
 
         crop = nib.Nifti1Image(
-            mask.get_fdata() * orig.get_fdata(),
+            orig_data * mask.get_fdata(),
             affine=orig.affine,
             header=orig.header
         )
-        crop = crop_nifti_image_if_necessary(crop, target_shape)
 
+        crop = conform(crop)
+
+        logger.debug('Writing crop to %s', crop_path)
         nib.save(crop, crop_path)
 
     return True
@@ -48,4 +71,7 @@ def ensure_fastsurfer_crops_exists(
         )
 
     if not all(results):
-        raise ValueError('Failed to create crops for some folders')
+        logger.warning(
+            'Failed to create crops for %d folders', 
+            len(results) - sum(results)
+        )
