@@ -6,7 +6,7 @@ import numpy as np
 import os
 import pandas as pd
 from concurrent.futures import ProcessPoolExecutor
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Union
 
 import tensorflow as tf
 from tensorflow_neuroimaging.loaders import load_mgh
@@ -26,7 +26,8 @@ class FastSurferDataset(Dataset):
         images: str,
         labels: str,
         target: str,
-        target_encoder: Callable[[Any], int] = None
+        target_encoder: Callable[[Any], int] = None,
+        class_weights: Optional[Union[str, dict[Any, float]]] = None
     ) -> FastSurferDataset:
         folders = {
             folder: os.path.join(images, folder)
@@ -44,7 +45,8 @@ class FastSurferDataset(Dataset):
         return FastSurferDataset(
             labels=labels,
             target=target,
-            target_encoder=target_encoder
+            target_encoder=target_encoder,
+            class_weights=class_weights
         )
 
     def to_tensorflow_generator(

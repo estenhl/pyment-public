@@ -9,6 +9,7 @@ from typing import List, Tuple
 
 import nibabel as nib
 
+from pyment.data.utils import ensure_fastsurfer_crop_exists
 from pyment.models.sfcn import sfcn_factory
 from pyment.preprocessing.conform import conform
 
@@ -58,40 +59,21 @@ def predict_from_fastsurfer_folder(
     )
 
     for folder in tqdm(folders):
-        orig = os.path.join(source, folder, 'mri', 'orig.mgz')
-
         subject, session, run = _parse_folder_name(folder)
 
-        if not os.path.isfile(orig):
+        if not ensure_fastsurfer_crop_exists(
+            os.path.join(source, folder), 
+            target_shape=(224, 192, 224)
+        ):
             logger.warning(
-                'No orig.mgz file for folder %s',
-                os.path.join(source, folder)
+                'Unable to generate prediction for %s: Can\'t ensure crop '
+                'exists',
+                folder
             )
             continue
-
-        orig = nib.load(orig)
-        orig = orig.get_fdata()
-        brainmask = os.path.join(source, folder, 'mri', 'mask.mgz')
-
-        if not os.path.isfile(brainmask):
-            logger.warning(
-                'No mask.mgz file for folder %s',
-                os.path.join(source, folder)
-            )
-            continue
-
-        try:
-            brainmask = nib.load(brainmask)
-        except Exception as e:
-            logger.error('Error loading brainmask for folder %s: %s', folder, e)
-            continue
-
-        brainmask = brainmask.get_fdata()
-
-        image = orig * brainmask
-
-        logger.debug('Conforming image from %s', os.path.join(source, folder))
-        image = conform(image)
+            
+        image = os.path.join(source, folder, 'mri', 'crop.mgz')
+        image = nib.load(image).get_fdata()
 
         predictions = model.predict(
             np.expand_dims(image, axis=0),

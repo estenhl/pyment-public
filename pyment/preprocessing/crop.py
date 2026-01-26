@@ -31,19 +31,12 @@ def calculate_bounds(
 
     return idx
 
-
-def crop_numpy_array_if_necessary(
-    image: np.ndarray,
-    target_shape: tuple[int, int, int]
-) -> np.ndarray:
-    idx = calculate_bounds(image, target_shape)
-
-    return image[tuple(idx)]
-
 def crop_nifti_image_if_necessary(
     image: nib.Nifti1Image,
     target_shape: tuple[int, int, int]
 ) -> nib.Nifti1Image:
     idx = calculate_bounds(image.get_fdata(), target_shape)
 
-    return image.slicer[tuple(idx)]
+    sliced = image.slicer[tuple(idx)]
+
+    return sliced
