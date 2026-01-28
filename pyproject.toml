@@ -1,6 +1,6 @@
 [project]
 name = "pyment"
-version = "3.0.0"
+version = "4.0.0"
 description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
 authors = [
     {name = "Esten Leonardsen",email = "estenleonardsen@gmail.com"}
@@ -33,6 +33,7 @@ dependencies = [
     "xlrd==2.0.1",
     "pydantic==2.10",
     "pyqt5>=5.15.11,<6.0",
+    "tensorflow-neuroimaging @ git+https://github.com/estenhl/tensorflow-neuroimaging",
 ]
 
 [tool.poetry]
@@ -67,6 +68,7 @@ scikit-learn = "1.5.1"
 xlrd = "2.0.1"
 pydantic = "2.10"
 pyqt5 = "^5.15.11"
+tensorflow-neuroimaging = { git = "https://github.com/estenhl/tensorflow-neuroimaging" }
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

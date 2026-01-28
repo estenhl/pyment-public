@@ -3819,6 +3819,30 @@ six = ">=1.15.0"
 wheel = ">=0.35,<1.0"
 
 [[package]]
+name = "tensorflow-neuroimaging"
+version = "1.0.0"
+description = "Repository containing the various utilities for working with neuroimaging data in TensorFlow."
+optional = false
+python-versions = ">=3.10,<3.11"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+matplotlib = ">=3.8,<4.0.0"
+numpy = "1.23.5"
+tensorflow = {version = ">=2.11,<2.12", markers = "platform_system != \"Darwin\""}
+tensorflow-macos = {version = ">=2.11,<2.12", markers = "platform_system == \"Darwin\""}
+tensorflow-metal = {version = ">=0.7,<0.8", markers = "platform_system == \"Darwin\""}
+tqdm = ">=4.66.4,<5.0.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/estenhl/tensorflow-neuroimaging"
+reference = "HEAD"
+resolved_reference = "5b6169866c1ac7e6caf324cabe21269dc8d9e057"
+
+[[package]]
 name = "termcolor"
 version = "3.2.0"
 description = "ANSI color formatting for output in terminal"
@@ -4282,4 +4306,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "0e7ec74a843ed34a8aa25b6d613037e7953739949a932665cffd11b565cd4f23"
+content-hash = "e38f32d55d8768c4524b411d2a5c15cd442714d6cb8becfa894386a00564d745"

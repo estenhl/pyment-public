@@ -1,0 +1,177 @@
+name: Verify preprocess and predict Docker container
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  preprocess-and-predict:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download weights
+        run: |
+          mkdir -p checkpoints/pyment
+          if ! command -v python3 >/dev/null 2>&1; then
+            if command -v sudo >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo apt-get install -y python3
+            else
+              apt-get update
+              apt-get install -y python3
+            fi
+          fi
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.request
+
+          base = "https://api.github.com/repos/estenhl/pyment-public/git/blobs"
+          identifiers = {
+              "data": "f4054d701fa59971fb7000d38cf9e63a202bd66a",
+              "index": "9c208ca0bcc3969ceb281ba63a8cee4944a63157",
+          }
+          outputs = {
+              "data": "checkpoints/pyment/multi-2025.data-00000-of-00001",
+              "index": "checkpoints/pyment/multi-2025.index",
+          }
+
+          for key, sha in identifiers.items():
+              url = f"{base}/{sha}"
+              with urllib.request.urlopen(url) as r:
+                  data = json.load(r)
+              content = base64.b64decode(data["content"])
+              os.makedirs(os.path.dirname(outputs[key]), exist_ok=True)
+              with open(outputs[key], "wb") as f:
+                  f.write(content)
+          PY
+      - name: Install Docker CLI
+        run: |
+          if ! command -v docker >/dev/null 2>&1; then
+            if command -v sudo >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+            else
+              apt-get update
+              apt-get install -y docker.io
+            fi
+          fi
+
+      - name: Build preprocess-and-predict image
+        run: |
+          docker build \
+            -f docker/preprocess_and_predict.Dockerfile \
+            -t pyment-preprocess-and-predict:ci \
+            .
+
+      - name: Prepare output and license
+        env:
+          FREESURFER_LICENSE: ${{ secrets.FREESURFER_LICENSE }}
+        run: |
+          if [ -z "$FREESURFER_LICENSE" ]; then
+            echo "FREESURFER_LICENSE secret is required." >&2
+            exit 1
+          fi
+          mkdir -p "${{ github.workspace }}/.act/ixi/outputs" \
+            "${{ github.workspace }}/.act/licenses"
+          printf "%s" "$FREESURFER_LICENSE" > "${{ github.workspace }}/.act/licenses/freesurfer.txt"
+          chmod -R 0777 "${{ github.workspace }}/.act/ixi/outputs"
+
+      - name: Clean output directory
+        run: |
+          output_dir="${{ github.workspace }}/.act/ixi/outputs"
+          if [ -d "$output_dir" ]; then
+            rm -rf "$output_dir"/* "$output_dir"/.[!.]* "$output_dir"/..?* || true
+          fi
+
+      - name: GPU sanity check
+        run: |
+          if command -v nvidia-smi >/dev/null 2>&1; then
+            nvidia-smi
+          else
+            echo "nvidia-smi not found; no GPU visible in runner."
+          fi
+
+      - name: Install pandas
+        run: |
+          apt-get update
+          apt-get install -y python3 python3-pip
+          python3 -m pip install --no-cache-dir pandas
+
+      - name: Run container
+        run: |
+          user_flags="--user $(id -u):$(id -g)"
+          if [ "${ACT:-}" = "true" ] && [ "$(id -u)" -eq 0 ]; then
+            user_flags="--user 1000:1000"
+          fi
+          gpu_flags=""
+          if command -v nvidia-smi >/dev/null 2>&1 || [ -e /dev/nvidiactl ]; then
+            gpu_flags="--gpus all"
+          fi
+          docker run --rm \
+            $gpu_flags \
+            $user_flags \
+            --volume "${{ github.workspace }}/data/ixi/raw:/input" \
+            --volume "${{ github.workspace }}/.act/ixi/outputs:/output" \
+            --volume "${{ github.workspace }}/.act/licenses:/licenses" \
+            pyment-preprocess-and-predict:ci
+
+      - name: Compare predictions
+        run: |
+          python3 - <<'PY'
+          import os
+          import sys
+          import numpy as np
+          import pandas as pd
+
+          gt = os.path.join(
+            os.environ["GITHUB_WORKSPACE"],
+            "data/ixi/predictions.csv"
+          )
+          pred = os.path.join(
+            os.environ["GITHUB_WORKSPACE"],
+            ".act/ixi/outputs/predictions.csv"
+          )
+          key = "source"
+
+          gt = pd.read_csv(gt)
+          gt[key] = gt[key].apply(lambda x: x.split('/')[-1])
+          pred = pd.read_csv(pred)
+          pred[key] = pred[key].apply(lambda x: x.split('/')[-1])
+
+          if key not in gt.columns or key not in pred.columns:
+            print(
+              f"Missing key column '{key}' in one or both files.",
+              file=sys.stderr
+            )
+            print(f"Ground truth columns: {list(gt.columns)}", file=sys.stderr)
+            print(f"Prediction columns: {list(pred.columns)}", file=sys.stderr)
+            sys.exit(1)
+
+          columns = [
+            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence',
+            'neuroticism'
+          ]
+
+          df = pd.merge(gt, pred, how='inner', on=key, suffixes=['_gt', '_pred'])
+
+          if not len(df) == len(gt):
+            print(
+              "Non-overlapping samples between new predictions and ground "
+              "truths"
+            )
+            sys.exit(1)
+
+          for col in columns:
+            if not np.array_equal(df[f'{col}_gt'], df[f'{col}_pred']):
+              print(
+                f'Column {col} differs between new predictions and ground '
+                'truths'
+              )
+              sys.exit(1)
+          PY

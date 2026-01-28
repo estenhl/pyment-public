@@ -1,0 +1,20 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  docker-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build -f docker/tests.Dockerfile -t pyment-tests .
+
+      - name: Run tests
+        run: docker run --rm pyment-tests

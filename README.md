@@ -35,14 +35,14 @@ Running the container relies on mounting three volumes:
 - Licenses: A folder containing the freesurfer license. The file must be named freesurfer.txt
 ```
 mkdir -p ~/data/ixi/outputs
-docker pull estenhl/pyment-preprocess-and-predict:1.0.0
+docker pull estenhl/pyment-preprocess-and-predict:latest
 docker run --rm -it \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ixi/images:/input \
     --volume $HOME/data/ixi/outputs:/output \
     --volume $HOME/licenses:/licenses \
     --gpus all \
-    estenhl/pyment-preprocess-and-predict:1.0.0
+    estenhl/pyment-preprocess-and-predict:latest
 ```
 </details>
 
@@ -58,14 +58,14 @@ Running the container for preprocessing requires mounting three volumes:
 - Licenses: A folder containing the freesurfer license. The file must be named freesurfer.txt
 ```
 mkdir -p ~/data/ixi/outputs
-docker pull estenhl/pyment-preprocessing:1.0.0
+docker pull estenhl/pyment-preprocess:latest
 docker run --rm \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ixi/images:/input \
     --volume $HOME/data/ixi/outputs:/output \
     --volume <path_to_licenses>:/licenses \
     --gpus all \
-    estenhl/pyment-preprocessing:1.0.0
+    estenhl/pyment-preprocess:latest
 ```
 
 ### Generate predictions with Docker
@@ -73,13 +73,13 @@ Running the container for predictions requires two volumes:
 - Fastsurfer: The folder containing fastsurfer-processed images
 - Outputs: The folder where the predictions are written
 ```
-docker pull estenhl/pyment-predict:1.0.0
+docker pull estenhl/pyment-predict:latest
 docker run --rm -it \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ixi/outputs/fastsurfer:/fastsurfer \
     --volume $HOME/data/ixi/outputs:/output \
     --gpus all \
-    estenhl/pyment-predict:1.0.0
+    estenhl/pyment-predict:latest
 ```
 </details>
 

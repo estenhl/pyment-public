@@ -1,4 +1,4 @@
-FROM estenhl/pyment-preprocessing:1.0.0
+FROM estenhl/pyment-preprocess
 
 RUN mkdir -p /repos/pyment
 
@@ -15,7 +15,7 @@ RUN /envs/pyment/bin/pip install --upgrade pip poetry-core build && \
 
 RUN mkdir -p /.pyment/weights && \
     chmod -R 1777 /.pyment
-COPY checkpoints/pyment /.pyment/weights
+COPY checkpoints/pyment/multi-2025.* /.pyment/weights/
 
 CMD ["/bin/sh", "-c", "\
   mkdir -p /output/fastsurfer && \
@@ -23,7 +23,7 @@ CMD ["/bin/sh", "-c", "\
     --license /licenses/freesurfer.txt \
     --python /envs/fastsurfer/bin/python \
     /input /output/fastsurfer && \
-  /envs/pyment/bin/python /repos/pyment/scripts/predict_from_fastsurfer_folder.py \
+  /envs/pyment/bin/pyment-predict \
     /output/fastsurfer \
     -d /output/predictions.csv \
 "]

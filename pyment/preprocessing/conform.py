@@ -2,7 +2,6 @@ import logging
 import nibabel as nib
 import numpy as np
 from nibabel.processing import resample_from_to
-from typing import Tuple, Union
 
 from .crop import crop_nifti_image_if_necessary
 from .pad import pad_nifti_image_if_necessary
@@ -10,7 +9,7 @@ from .pad import pad_nifti_image_if_necessary
 
 logger = logging.getLogger(__name__)
 
-def _rescale(
+def rescale(
     image: nib.Nifti1Image,
     target_resolution = np.asarray([1.0, 1.0, 1.0]),
     order: int = 1
@@ -74,12 +73,22 @@ def conform(
         )
         logger.debug('Sat data dtype to %s', target_dtype)
 
-    if image.header.get_zooms()[:3] != (1.0, 1.0, 1.0):
-        image = _rescale(image)
-        logger.debug(
-            'Rescaled image to shape %s with zooms %s',
+    if (
+        np.amax(image.header.get_zooms()[:3]) > 1.03 or
+        np.amin(image.header.get_zooms()[:3]) < 0.69
+    ):
+        shape_before = image.shape
+        scale_before = image.header.get_zooms()
+        image = rescale(image)
+        logger.warning(
+            (
+                'Voxel-size %s outside the range of training data. Rescaled '
+                'image to %s with shape %s (from original shape %s)'
+            ),
+            scale_before,
+            image.header.get_zooms(),
             image.shape,
-            image.header.get_zooms()
+            shape_before
         )
 
     if np.any(image.shape > target_shape):
