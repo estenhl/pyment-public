@@ -1,4 +1,5 @@
 .pytest_cache
+.act
 **/__pycache__/
 *.egg-info
 checkpoints

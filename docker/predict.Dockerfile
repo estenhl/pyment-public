@@ -1,5 +1,9 @@
 FROM python:3.10.2-slim
 
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /repos/pyment
 
 COPY scripts /repos/pyment/scripts
@@ -14,8 +18,6 @@ RUN pip install --upgrade pip poetry-core build && \
 
 RUN mkdir -p /.pyment/weights && \
     chmod -R 1777 /.pyment
-COPY checkpoints/pyment /.pyment/weights
+COPY checkpoints/pyment/multi-2025.* /.pyment/weights/
 
-CMD ["python", "/repos/pyment/scripts/predict_from_fastsurfer_folder.py", \
-     "/fastsurfer", \
-     "-d", "/output/predictions.csv"]
+CMD ["pyment-predict", "/fastsurfer", "-d", "/output/predictions.csv"]
