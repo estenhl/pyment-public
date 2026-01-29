@@ -4,45 +4,45 @@ import logging
 import numpy as np
 import pandas as pd
 from sklearn.utils.class_weight import compute_class_weight
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Union
 
 
 logger = logging.getLogger(__name__)
 
 class Dataset:
     @property
-    def class_weights(self) -> dict[Any, float]:
+    def class_weights(self) -> Optional[dict[Any, float]]:
         return self._class_weights
 
     @class_weights.setter
-    def class_weights(self, value: Union[str, dict[Any, float]]):
+    def class_weights(self, value: Optional[Union[str, dict[Any, float]]]):
         if value is None:
-            pass
+            self._class_weights = None
         elif value == 'balanced' or isinstance(value, dict):
             unique_values = sorted(
                 np.unique(self.labels[self.target].values)
             )
             weights = compute_class_weight(
-                value, 
-                classes=np.asarray(unique_values), 
+                value,
+                classes=np.asarray(unique_values),
                 y=self.labels[self.target].values
             )
             self._class_weights = {
-                unique_values[i]: weights[i] 
+                unique_values[i]: weights[i]
                 for i in range(len(unique_values))
             }
             logger.info(
-                'Computed balanced class weights: %s', 
+                'Computed balanced class weights: %s',
                 self._class_weights
             )
         else:
             raise ValueError(f'Invalid class_weights value {value}')
-    
+
     def __init__(
         self,
         labels: pd.DataFrame,
         target: str,
-        target_encoder: Callable[[Any], int] = None,
+        target_encoder: Callable[[Any], int] = lambda x: x,
         class_weights: Optional[Union[str, dict[Any, float]]] = None
     ):
         assert 'image_path' in labels.columns, (
