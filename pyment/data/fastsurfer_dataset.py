@@ -67,14 +67,13 @@ class FastSurferDataset(Dataset):
             for image_path in self.labels['image_path'].values
         ]
 
+        raw_targets = self.labels[self.target].values
         if self.target_encoder:
             targets = np.asarray(
-                [self.target_encoder(target) for target in targets]
+                [self.target_encoder(target) for target in raw_targets]
             )
         else:
-            targets = np.asarray(
-                [target for target in self.labels[self.target].values]
-            )
+            targets = np.asarray(raw_targets)
 
         dataset = tf.data.Dataset.from_tensor_slices((paths, targets))
 

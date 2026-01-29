@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Annotated, Any, Callable, Literal, Union
+from typing import Annotated, Any, Callable, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -21,11 +21,11 @@ TargetConfiguration = Annotated[
 
 def compile_target_encoder(
     configuration: BaseTargetConfiguration
-) -> Callable[[Any], Any]:
+) -> Optional[Callable[[Any], Any]]:
     if (
         isinstance(configuration, BinaryTargetConfiguration) and
         configuration.labels is not None
     ):
-        return lambda x: self.labels.index(x)
+        return lambda x: configuration.labels.index(x)
 
     return None
