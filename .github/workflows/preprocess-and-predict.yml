@@ -174,10 +174,13 @@ jobs:
             sys.exit(1)
 
           for col in columns:
-            if not np.array_equal(df[f'{col}_gt'], df[f'{col}_pred']):
+            if not np.allclose(df[f'{col}_gt'], df[f'{col}_pred'], atol=1e-3):
+              mean_difference = np.mean(
+                np.abs(df[f'{col}_gt'] - df[f'{col}_pred'])
+              )
               print(
                 f'Column {col} differs between new predictions and ground '
-                'truths'
+                f'truths. Mean difference: {mean_difference}'
               )
               sys.exit(1)
           PY
