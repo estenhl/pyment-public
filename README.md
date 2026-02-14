@@ -9,7 +9,7 @@ tags:
   - structural t1 mri
   - brain age
 ---
-This repository contains the pretrained multi-task model from PAPER LINK. There are two approaches for running the model locally, via Docker or by installing the Python-package locally. Running the model with Docker requires less setup, but is less flexible.
+This repository contains the pretrained multi-task model from [Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v1). There are two approaches for running the model locally, via Docker or by installing the Python-package locally. Running the model with Docker requires less setup, but is less flexible.
 - [(Recommended) Instructions for generating predictions with the pretrained model using Docker](#predict-with-docker)
 - [Instructions for generating predictions with the pretrained model in a local Python-environment](#installing-the-package-locally)
 
