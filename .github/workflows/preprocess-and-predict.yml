@@ -112,7 +112,7 @@ jobs:
       - name: Run container
         run: |
           user_flags="--user $(id -u):$(id -g)"
-          if [ "${ACT:-}" = "true" ] && [ "$(id -u)" -eq 0 ]; then
+          if [ "$(id -u)" -eq 0 ]; then
             user_flags="--user 1000:1000"
           fi
           gpu_flags=""
