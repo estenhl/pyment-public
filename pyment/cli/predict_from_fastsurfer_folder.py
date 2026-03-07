@@ -62,7 +62,7 @@ def predict_from_fastsurfer_folder(
         subject, session, run = _parse_folder_name(folder)
 
         if not ensure_fastsurfer_crop_exists(
-            os.path.join(source, folder), 
+            os.path.join(source, folder),
             target_shape=(224, 192, 224)
         ):
             logger.warning(
@@ -71,7 +71,7 @@ def predict_from_fastsurfer_folder(
                 folder
             )
             continue
-            
+
         image = os.path.join(source, folder, 'mri', 'crop.mgz')
         image = nib.load(image).get_fdata()
 
@@ -119,7 +119,7 @@ def main():
             'Weights to use. Should either point to a local file path, or a '
             'known identifier. If a local file path <path> is used, there '
             'should exist files named <path>.index and '
-            '<path>.data-00000-of-00001'
+            '<path>.data-00000-of-00001. Defaults to \'multi-2025\''
         )
     )
     parser.add_argument(
@@ -127,7 +127,7 @@ def main():
         required=False,
         default='sfcn-multi',
         help=(
-            'Name of the model to use'
+            'Name of the model to use. Defaults to sfcn-multi'
         )
     )
     parser.add_argument(
@@ -138,7 +138,10 @@ def main():
             'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence',
             'neuroticism'
         ],
-        help='Name to use for each of the prediction heads in the output CSV'
+        help=(
+            'Name to use for each of the prediction heads in the output CSV. '
+            'Defaults to the target labels for the \'multi-2025\' model'
+        )
     )
     parser.add_argument(
         '-f', '--folders',
