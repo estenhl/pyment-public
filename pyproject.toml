@@ -44,6 +44,7 @@ include = [
 
 [tool.poetry.scripts]
 pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
+pyment-finetune = "pyment.cli.finetune_from_configuration:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"

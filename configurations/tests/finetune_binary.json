@@ -1,0 +1,24 @@
+{
+    "dataset": {
+        "images": "/output/fastsurfer",
+        "labels": "/labels.csv"
+    },
+    "data_split": {
+        "training_fraction": 0.7
+    },
+    "model": {
+        "kind": "sfcn-bin",
+        "weights": "multi-2025"
+    },
+    "target": {
+        "name": "bachelor",
+        "kind": "binary",
+        "labels": [false, true]
+    },
+    "batch_size": 2,
+    "num_threads": 4,
+    "loss": "binary_crossentropy",
+    "metrics": ["accuracy"],
+    "epochs": 1,
+    "destination": "/output/finetune_output"
+}
