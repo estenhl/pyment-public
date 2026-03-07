@@ -17,3 +17,4 @@ class TrainingConfiguration(BaseModel):
     metrics: list[str] = Field(default_factory=list)
     optimizer: str = 'adam'
     epochs: int
+    destination: str

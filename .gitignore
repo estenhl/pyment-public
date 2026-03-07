@@ -7,3 +7,4 @@ checkpoints
 artifacts/SavedModel
 AGENTS.md
 .devcontainer
+.claude

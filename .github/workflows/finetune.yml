@@ -1,0 +1,134 @@
+name: Verify finetune Docker container
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  finetune:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download weights
+        run: |
+          mkdir -p checkpoints/pyment
+          if ! command -v python3 >/dev/null 2>&1; then
+            if command -v sudo >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo apt-get install -y python3
+            else
+              apt-get update
+              apt-get install -y python3
+            fi
+          fi
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.request
+
+          base = "https://api.github.com/repos/estenhl/pyment-public/git/blobs"
+          identifiers = {
+              "data": "f4054d701fa59971fb7000d38cf9e63a202bd66a",
+              "index": "9c208ca0bcc3969ceb281ba63a8cee4944a63157",
+          }
+          outputs = {
+              "data": "checkpoints/pyment/multi-2025.data-00000-of-00001",
+              "index": "checkpoints/pyment/multi-2025.index",
+          }
+
+          for key, sha in identifiers.items():
+              url = f"{base}/{sha}"
+              with urllib.request.urlopen(url) as r:
+                  data = json.load(r)
+              content = base64.b64decode(data["content"])
+              os.makedirs(os.path.dirname(outputs[key]), exist_ok=True)
+              with open(outputs[key], "wb") as f:
+                  f.write(content)
+          PY
+
+      - name: Install Docker CLI
+        run: |
+          if ! command -v docker >/dev/null 2>&1; then
+            if command -v sudo >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+            else
+              apt-get update
+              apt-get install -y docker.io
+            fi
+          fi
+
+      - name: Build finetune image
+        run: |
+          docker build \
+            -f docker/finetune.Dockerfile \
+            -t pyment-finetune:ci \
+            .
+
+      - name: Prepare output and license
+        env:
+          FREESURFER_LICENSE: ${{ secrets.FREESURFER_LICENSE }}
+        run: |
+          if [ -z "$FREESURFER_LICENSE" ]; then
+            echo "FREESURFER_LICENSE secret is required." >&2
+            exit 1
+          fi
+          mkdir -p "${{ github.workspace }}/.act/ixi/finetune_outputs" \
+            "${{ github.workspace }}/.act/licenses"
+          printf "%s" "$FREESURFER_LICENSE" > "${{ github.workspace }}/.act/licenses/freesurfer.txt"
+          chmod -R 0777 "${{ github.workspace }}/.act/ixi/finetune_outputs"
+
+      - name: Clean output directory
+        run: |
+          output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs"
+          if [ -d "$output_dir" ]; then
+            rm -rf "$output_dir"/* "$output_dir"/.[!.]* "$output_dir"/..?* || true
+          fi
+
+      - name: GPU sanity check
+        run: |
+          if command -v nvidia-smi >/dev/null 2>&1; then
+            nvidia-smi
+          else
+            echo "nvidia-smi not found; no GPU visible in runner."
+          fi
+
+      - name: Run container
+        run: |
+          user_flags="--user $(id -u):$(id -g)"
+          if [ "$(id -u)" -eq 0 ]; then
+            user_flags="--user 1000:1000"
+          fi
+          gpu_flags=""
+          if command -v nvidia-smi >/dev/null 2>&1 || [ -e /dev/nvidiactl ]; then
+            gpu_flags="--gpus all"
+          fi
+          docker run --rm \
+            $gpu_flags \
+            $user_flags \
+            --volume "${{ github.workspace }}/data/ixi/raw:/input" \
+            --volume "${{ github.workspace }}/.act/ixi/finetune_outputs:/output" \
+            --volume "${{ github.workspace }}/.act/licenses:/licenses" \
+            --volume "${{ github.workspace }}/data/ixi/labels.csv:/labels.csv" \
+            --volume "${{ github.workspace }}/configurations/tests/finetune_binary.json:/configuration.json" \
+            pyment-finetune:ci
+
+      - name: Verify output files
+        run: |
+          output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs/finetune_output"
+          for f in \
+            "$output_dir/model/saved_model.pb" \
+            "$output_dir/history.json" \
+            "$output_dir/predictions.csv"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing expected output file: $f" >&2
+              exit 1
+            fi
+            echo "Found: $f"
+          done
