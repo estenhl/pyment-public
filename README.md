@@ -311,7 +311,7 @@ If everything is set up correctly, this should yield an MAE of 3.12. Note that t
 
 # Finetuning
 ## Generating labels
-Prior to finetuning on the IXI-dataset, we must generate appropriate labels. This can be done with a prepackaged script, after activating the appropriate virtual environment (see [Installing locally](#installing-the-package-locally)):
+Prior to finetuning on the IXI-dataset, we generate some example labels. This can be done with a prepackaged script, after activating the appropriate virtual environment (see [Installing locally](#installing-the-package-locally)):
 ```
 python scripts/create_ixi_labels \
     -s $HOME/data/ixi/IXI.xls \
