@@ -4,8 +4,22 @@ import logging
 import os
 
 import pandas as pd
+import tensorflow as tf
 
 from pyment.configurations import compile_target_encoder, TrainingConfiguration
+
+_LEGACY_OPTIMIZERS = {
+    'adam': tf.keras.optimizers.legacy.Adam,
+    'sgd': tf.keras.optimizers.legacy.SGD,
+    'rmsprop': tf.keras.optimizers.legacy.RMSprop,
+}
+
+def _resolve_optimizer(optimizer):
+    if isinstance(optimizer, str):
+        legacy_cls = _LEGACY_OPTIMIZERS.get(optimizer.lower())
+        if legacy_cls is not None:
+            return legacy_cls()
+    return optimizer
 
 
 logging.basicConfig(
@@ -29,7 +43,7 @@ def finetune_from_configuration(configuration: str):
     model.compile(
         loss=configuration.loss,
         metrics=configuration.metrics,
-        optimizer=configuration.optimizer
+        optimizer=_resolve_optimizer(configuration.optimizer)
     )
 
     # Remove batch dimension
