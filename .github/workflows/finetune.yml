@@ -70,7 +70,7 @@ jobs:
             -t pyment-finetune:ci \
             .
 
-      - name: Prepare output and license
+      - name: Validate license secret
         env:
           FREESURFER_LICENSE: ${{ secrets.FREESURFER_LICENSE }}
         run: |
@@ -78,17 +78,6 @@ jobs:
             echo "FREESURFER_LICENSE secret is required." >&2
             exit 1
           fi
-          mkdir -p "${{ github.workspace }}/.act/ixi/finetune_outputs" \
-            "${{ github.workspace }}/.act/licenses"
-          printf "%s" "$FREESURFER_LICENSE" > "${{ github.workspace }}/.act/licenses/freesurfer.txt"
-          chmod -R 0777 "${{ github.workspace }}/.act/ixi/finetune_outputs"
-
-      - name: Clean output directory
-        run: |
-          output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs"
-          rm -rf "$output_dir"
-          mkdir -p "$output_dir"
-          chmod 0777 "$output_dir"
 
       - name: GPU sanity check
         run: |
@@ -99,24 +88,34 @@ jobs:
           fi
 
       - name: Run container
+        env:
+          FREESURFER_LICENSE: ${{ secrets.FREESURFER_LICENSE }}
         run: |
-          user_flags=""
-          if [ "$(id -u)" -ne 0 ]; then
-            user_flags="--user $(id -u):$(id -g)"
-          fi
           gpu_flags=""
           if command -v nvidia-smi >/dev/null 2>&1 || [ -e /dev/nvidiactl ]; then
             gpu_flags="--gpus all"
           fi
-          docker run --rm \
+          CONTAINER=$(docker create \
             $gpu_flags \
-            $user_flags \
-            --volume "${{ github.workspace }}/data/ixi/raw:/input" \
-            --volume "${{ github.workspace }}/.act/ixi/finetune_outputs:/output" \
-            --volume "${{ github.workspace }}/.act/licenses:/licenses" \
-            --volume "${{ github.workspace }}/data/ixi/labels.csv:/labels.csv" \
-            --volume "${{ github.workspace }}/configurations/tests/finetune_binary.json:/configuration.json" \
-            pyment-finetune:ci
+            --env FREESURFER_LICENSE \
+            pyment-finetune:ci \
+            /bin/sh -c '
+              mkdir -p /licenses /output/fastsurfer && \
+              printf "%s" "$FREESURFER_LICENSE" > /licenses/freesurfer.txt && \
+              /scripts/preprocess.sh \
+                --license /licenses/freesurfer.txt \
+                --python /envs/fastsurfer/bin/python \
+                /input /output/fastsurfer && \
+              /envs/pyment/bin/pyment-finetune \
+                /configuration.json
+            ')
+          echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
+          docker cp "${{ github.workspace }}/data/ixi/raw/." "${CONTAINER}:/input/"
+          docker cp "${{ github.workspace }}/data/ixi/labels.csv" "${CONTAINER}:/labels.csv"
+          docker cp "${{ github.workspace }}/configurations/tests/finetune_binary.json" "${CONTAINER}:/configuration.json"
+          docker start -a "${CONTAINER}"
+          mkdir -p "${{ github.workspace }}/.act/ixi/finetune_outputs"
+          docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ixi/finetune_outputs/"
 
       - name: Verify output files
         run: |
@@ -131,3 +130,8 @@ jobs:
             fi
             echo "Found: $f"
           done
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f "${CONTAINER}" 2>/dev/null || true
