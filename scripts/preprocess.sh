@@ -93,7 +93,8 @@ echo "$NIFTI_FILES" | while IFS= read -r filepath; do
       --t1 $filepath \
       --fs_license $LICENSE \
       --py $PYTHON \
-      --seg_only
+      --seg_only \
+      --allow_root
   else
     echo "$IMAGE already processed"
   fi
