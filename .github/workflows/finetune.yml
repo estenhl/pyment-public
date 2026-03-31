@@ -87,9 +87,9 @@ jobs:
       - name: Clean output directory
         run: |
           output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs"
-          if [ -d "$output_dir" ]; then
-            rm -rf "$output_dir"/* "$output_dir"/.[!.]* "$output_dir"/..?* || true
-          fi
+          rm -rf "$output_dir"
+          mkdir -p "$output_dir"
+          chmod 0777 "$output_dir"
 
       - name: GPU sanity check
         run: |
