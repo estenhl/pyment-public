@@ -3,8 +3,7 @@ name: Verify finetune Docker container
 on:
   push:
     branches:
-      - "**"
-  pull_request:
+      - main
   workflow_dispatch:
 
 jobs:
