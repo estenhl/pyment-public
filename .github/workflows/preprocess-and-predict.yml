@@ -110,9 +110,9 @@ jobs:
 
       - name: Run container
         run: |
-          user_flags="--user $(id -u):$(id -g)"
-          if [ "$(id -u)" -eq 0 ]; then
-            user_flags="--user 1000:1000"
+          user_flags=""
+          if [ "$(id -u)" -ne 0 ]; then
+            user_flags="--user $(id -u):$(id -g)"
           fi
           gpu_flags=""
           if command -v nvidia-smi >/dev/null 2>&1 || [ -e /dev/nvidiactl ]; then
