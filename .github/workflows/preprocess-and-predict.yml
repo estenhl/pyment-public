@@ -121,7 +121,7 @@ jobs:
                 -d /output/predictions.csv
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
-          docker cp "${{ github.workspace }}/data/ixi/raw/." "${CONTAINER}:/input/"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/raw/." "${CONTAINER}:/input/"
           docker start -a "${CONTAINER}"
           mkdir -p "${{ github.workspace }}/.act/ixi/outputs"
           docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ixi/outputs/"
@@ -136,7 +136,7 @@ jobs:
 
           gt = os.path.join(
             os.environ["GITHUB_WORKSPACE"],
-            "data/ixi/predictions.csv"
+            ".github/workflows/fixtures/ixi/predictions.csv"
           )
           pred = os.path.join(
             os.environ["GITHUB_WORKSPACE"],

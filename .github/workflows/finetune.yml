@@ -110,9 +110,9 @@ jobs:
                 /configuration.json
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
-          docker cp "${{ github.workspace }}/data/ixi/raw/." "${CONTAINER}:/input/"
-          docker cp "${{ github.workspace }}/data/ixi/labels.csv" "${CONTAINER}:/labels.csv"
-          docker cp "${{ github.workspace }}/configurations/tests/finetune_binary.json" "${CONTAINER}:/configuration.json"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/raw/." "${CONTAINER}:/input/"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/labels.csv" "${CONTAINER}:/labels.csv"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/finetune_binary.json" "${CONTAINER}:/configuration.json"
           docker start -a "${CONTAINER}"
           mkdir -p "${{ github.workspace }}/.act/ixi/finetune_outputs"
           docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ixi/finetune_outputs/"
