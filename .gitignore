@@ -4,7 +4,5 @@
 *.egg-info
 checkpoints
 .python-version
-artifacts/SavedModel
-AGENTS.md
 .devcontainer
 .claude
