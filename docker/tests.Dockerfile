@@ -8,7 +8,6 @@ WORKDIR /repos/pyment
 
 COPY pyment /repos/pyment/pyment
 COPY tests /repos/pyment/tests
-COPY data /repos/pyment/data
 COPY pyproject.toml /repos/pyment/
 COPY README.md /repos/pyment/
 COPY LICENSE.md /repos/pyment/
