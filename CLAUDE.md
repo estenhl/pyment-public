@@ -42,6 +42,15 @@ Sanity-check IXI predictions (should yield MAE ≈ 3.12):
 python scripts/evaluate_ixi_predictions.py
 ```
 
+Linting and formatting use **ruff**. Pre-commit hooks run `ruff check` and `ruff format --check` on every `git commit` — they are **check-only** and abort the commit on violations without modifying files. Apply fixes manually:
+```
+ruff check --fix .            # apply safe autofixes
+ruff format .                 # apply formatting
+ruff check .                  # report-only (what pre-commit runs)
+ruff format --check .         # report-only (what pre-commit runs)
+```
+Config lives in `[tool.ruff]` in `pyproject.toml` — line length 80, single quotes enforced (`quote-style = "single"`), conservative rule set (`E, F, W, I`). After cloning, contributors must run `pre-commit install` once to activate the hooks.
+
 ## Architecture
 
 ### Configuration-driven finetuning (the core pattern)

@@ -333,3 +333,8 @@ And then by running the built-in CLI for sanity checking from the other reposito
 ```
 verify-mgh-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
 ```
+
+# Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, code style, and how to submit changes.
+
