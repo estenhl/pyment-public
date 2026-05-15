@@ -1,0 +1,52 @@
+# Contributing to pyment
+
+Thanks for your interest in contributing.
+
+## Reporting issues
+
+Open an issue on GitHub with steps to reproduce, your platform, and the relevant package versions.
+
+## Development setup
+
+Set up a local environment as described in the README's [Build locally with poetry](./README.md#install-the-pyment-package) section. Then install the pre-commit hooks:
+
+```
+pre-commit install
+```
+
+This activates a check that runs before each `git commit`. The hook is **check-only** — it does not modify files. If lint or formatting issues are present, the commit aborts and you fix them deliberately.
+
+## Code style
+
+`pyment` uses [ruff](https://docs.astral.sh/ruff/) for both linting and formatting. The pre-commit hook runs `ruff check` and `ruff format --check`. When either reports issues, apply the fix locally:
+
+```
+ruff check --fix .            # apply safe autofixes
+ruff format .                 # apply formatting
+```
+
+Project conventions worth knowing:
+- **Line length:** 80
+- **Quote style:** single quotes (enforced — `ruff format` will rewrite double-quoted strings unless escaping would make them uglier)
+- **Rule set:** `E, F, W, I` (pycodestyle errors/warnings, pyflakes, isort)
+
+Configuration lives under `[tool.ruff]` in `pyproject.toml`.
+
+## Running tests
+
+```
+pytest tests/
+```
+
+A single file or test:
+
+```
+pytest tests/preprocessing/test_conform.py
+pytest tests/preprocessing/test_conform.py::test_<name>
+```
+
+## Submitting changes
+
+1. Fork the repo and create a feature branch from `main`.
+2. Make your changes. Ensure tests pass and pre-commit hooks run clean.
+3. Open a pull request against `main` with a clear description of what changed and why.

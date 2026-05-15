@@ -39,6 +39,17 @@ include = [
     {path = "pyproject.toml", format = "sdist"}
 ]
 
+[tool.ruff]
+line-length = 80
+target-version = "py310"
+exclude = [".act", "checkpoints"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.format]
+quote-style = "single"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
