@@ -51,6 +51,8 @@ ruff format --check .         # report-only (what pre-commit runs)
 ```
 Config lives in `[tool.ruff]` in `pyproject.toml` — line length 80, single quotes enforced (`quote-style = "single"`), conservative rule set (`E, F, W, I`). After cloning, contributors must run `pre-commit install` once to activate the hooks.
 
+Code conventions beyond what ruff enforces are documented in [STYLE.md](./STYLE.md).
+
 ## Architecture
 
 ### Configuration-driven finetuning (the core pattern)
