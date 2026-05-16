@@ -13,11 +13,7 @@ COPY README.md /repos/pyment/
 COPY LICENSE.md /repos/pyment/
 
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir \
-      numpy==1.23.5 \
-      nibabel==5.2.1 \
-      scipy==1.11.4 \
-      pytest==8.3.3 && \
-    pip install --no-cache-dir --no-deps .
+    pip install --no-cache-dir pytest==8.3.3 && \
+    pip install --no-cache-dir .
 
 CMD ["pytest", "-q"]
