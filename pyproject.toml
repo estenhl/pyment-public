@@ -45,7 +45,10 @@ target-version = "py310"
 exclude = [".act", "checkpoints"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+select = ["E", "F", "W", "I", "G"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
 
 [tool.ruff.format]
 quote-style = "single"

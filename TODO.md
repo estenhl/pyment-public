@@ -11,11 +11,29 @@ When a task lands a fact that future sessions should know (a chosen tool, a new 
   - The license validates, GPU sanity check passes, the image builds — only the container itself fails to run on push. Possible causes (none confirmed without log access): self-hosted runner workspace state being cleaner on push, concurrent-run contention for `/dev/nvidiactl`, timing between `Download weights` and `Run container`, or secret context differences.
   - First step: install `gh` in the devcontainer (or use a PAT) and pull the failing job logs to see the actual container exit reason. Without that, this is guesswork.
 
-- [ ] **Pick a linting/formatting tool**
-  - Nothing is configured today — no `ruff`, `black`, `flake8`, or `.pre-commit-config.yaml` in the repo.
-  - Decide between **ruff** (modern, fast, single dep, replaces flake8 + isort + pyupgrade and has a built-in formatter) and **black + flake8** (traditional split, very stable). Other options on the table if either feels wrong.
-  - Once chosen: add as a dev dependency in `pyproject.toml`, commit a config block, run it across `pyment/`, `scripts/`, and `tests/`, and consider adding a pre-commit hook or a CI check so it actually stays applied.
-  - **When done:** document the chosen tool and how to invoke it (lint, format, fix) in `CLAUDE.md` under "Common commands".
+- [ ] **Lint sweep across the codebase (ruff)**
+  - Setup is complete: ruff configured in `[tool.ruff]` (line length 80, single quotes, rules `E F W I G`, max-doc-length 72), pre-commit hook installed (check-only via `.pre-commit-config.yaml`), STYLE.md captures project-level conventions beyond ruff, pre-commit+pipx workflow documented in CONTRIBUTING.md.
+  - Remaining: apply `ruff format` and `ruff check --fix .` across the codebase, plus enforce STYLE.md conventions (docstrings on publics, blank line after docstrings, `-> None`, `basicConfig` only in `main()`, `%`-style log placeholders, etc.) as each file is touched. Doing file-by-file in lexicographic order. Folder progress:
+    - [x] `pyment/cli/` — `finetune_from_configuration.py` and `predict_from_fastsurfer_folder.py` done; `predict_from_bids_folder.py` deleted as orphan; unit tests added for `_resolve_optimizer` and `_parse_folder_name`.
+    - [ ] `pyment/configurations/`
+    - [ ] `pyment/data/`
+    - [ ] `pyment/factories/`
+    - [ ] `pyment/metrics/`
+    - [ ] `pyment/models/`
+    - [ ] `pyment/preprocessing/`
+    - [ ] `pyment/utils/`
+    - [ ] `pyment/__init__.py` and the `__init__.py` files under each subpackage (also add `__all__` to those that re-export symbols)
+    - [ ] `scripts/`
+    - [ ] `tests/` (existing files only — new test files added during the sweep are already clean)
+
+- [ ] **Make `pytest tests` work without explicit `python -m`**
+  - Bare `pytest tests` fails with `ModuleNotFoundError: No module named 'pyment'` in fresh shells. Two causes:
+    1. The `pytest` binary doesn't auto-add CWD to `sys.path` — only `python -m pytest` does.
+    2. `pyment` isn't reliably installed in site-packages — `pip show pyment` often returns "not found" despite the devcontainer's `postCreateCommand` running `pip install -e .`.
+  - Two fixes worth applying:
+    - Add `[tool.pytest.ini_options] pythonpath = ["."]` to `pyproject.toml`. Makes `pytest tests` work regardless of install state.
+    - Investigate why the editable install evaporates — likely candidates: the chown loop overwriting metadata permissions, or some poetry/pip interaction with `POETRY_VIRTUALENVS_CREATE=false`.
+  - Workaround until fixed: use `python -m pytest tests` instead of bare `pytest tests`.
 
 - [ ] **Write a proper finetuning tutorial**
   - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.

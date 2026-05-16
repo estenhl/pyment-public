@@ -32,19 +32,14 @@ This adds a check that runs before each `git commit`. The hook is **check-only**
 
 ## Code style
 
-`pyment` uses [ruff](https://docs.astral.sh/ruff/) for both linting and formatting. The pre-commit hook runs `ruff check` and `ruff format --check`. When either reports issues, apply the fix locally:
+`pyment` uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. The pre-commit hook runs `ruff check` and `ruff format --check` on every commit. To fix issues locally:
 
 ```
-ruff check --fix .            # apply safe autofixes
-ruff format .                 # apply formatting
+ruff check --fix .
+ruff format .
 ```
 
-Project conventions worth knowing:
-- **Line length:** 80
-- **Quote style:** single quotes (enforced — `ruff format` will rewrite double-quoted strings unless escaping would make them uglier)
-- **Rule set:** `E, F, W, I` (pycodestyle errors/warnings, pyflakes, isort)
-
-Configuration lives under `[tool.ruff]` in `pyproject.toml`.
+Project conventions beyond ruff (typing, docstrings, logging, etc.) live in [STYLE.md](./STYLE.md).
 
 ## Running tests
 
