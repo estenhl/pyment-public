@@ -48,8 +48,9 @@ def predict_from_fastsurfer_folder(
     Iterates folders under ``source``
     (or the explicit ``folders`` list), lazily generates the model crop
     if missing, runs the model, and returns one row per processed
-    folder. Folders whose names don't match ``sub-X_ses-Y_run-Z`` are
-    skipped with a warning.
+    folder. Folders whose names don't match ``sub-X_ses-Y_run-Z``
+    produce ``None`` for the ``subject``, ``session``, and ``run``
+    metadata columns.
 
     Parameters
     ----------
@@ -111,7 +112,7 @@ def predict_from_fastsurfer_folder(
             subject, session, run = _parse_folder_name(folder)
         except ValueError as e:
             logger.warning(str(e))
-            continue
+            subject, session, run = None, None, None
 
         if not ensure_fastsurfer_crop_exists(
             os.path.join(source, folder), target_shape=(224, 192, 224)
