@@ -1,5 +1,5 @@
-import numpy as np
 import nibabel as nib
+import numpy as np
 
 from pyment.preprocessing.pad import pad_nifti_image_if_necessary
 
@@ -11,13 +11,22 @@ def test_pad_nifti_image_if_necessary_shape_and_edge_mode():
 
     padded = pad_nifti_image_if_necessary(image, target_shape)
 
-    assert padded.shape == target_shape
+    assert padded.shape == target_shape, (
+        'Expected pad_nifti_image_if_necessary to yield images with the given '
+        'target_shape'
+    )
 
     padded_data = padded.get_fdata()
-    # Edge padding: original data should appear centered and edges repeated.
-    assert np.allclose(padded_data[1:3, 1:4, 1:5], data)
-    assert np.allclose(padded_data[0, 0, 0], data[0, 0, 0])
-    assert np.allclose(padded_data[-1, -1, -1], data[-1, -1, -1])
+    assert np.allclose(padded_data[1:3, 1:4, 1:5], data), (
+        'Expected pad_nifti_image_if_necessary to center the original data '
+        'in the padded output'
+    )
+    assert np.allclose(padded_data[0, 0, 0], data[0, 0, 0]), (
+        'Expected pad_nifti_image_if_necessary to use edge padding at the start'
+    )
+    assert np.allclose(padded_data[-1, -1, -1], data[-1, -1, -1]), (
+        'Expected pad_nifti_image_if_necessary to use edge padding at the end'
+    )
 
 
 def test_pad_nifti_image_if_necessary_affine_shift():
@@ -34,4 +43,7 @@ def test_pad_nifti_image_if_necessary_affine_shift():
     expected_affine = affine.copy()
     expected_affine[:3, 3] -= expected_affine[:3, :3] @ expected_shift
 
-    assert np.allclose(padded.affine, expected_affine)
+    assert np.allclose(padded.affine, expected_affine), (
+        'Expected pad_nifti_image_if_necessary to shift the affine to '
+        'account for the padding offset'
+    )

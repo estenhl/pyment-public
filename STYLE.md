@@ -43,3 +43,4 @@ Project conventions beyond what ruff enforces (ruff config lives in `[tool.ruff]
 
 - Mirror source layout (`pyment/x/y.py` → `tests/x/test_y.py`).
 - Testing private (`_name`) functions is fine.
+- Assert messages follow `'Expected <subject> to <verb> <outcome>'`. The subject is the function or the value it returns. Use `return` for scalars/objects, `yield` for images/arrays. Reference parameter names rather than their values when the expected result is input-derived; state values explicitly only when they are hardcoded in the implementation. Append a condition clause (`for ...`, `when ...`) when the scenario needs disambiguation.

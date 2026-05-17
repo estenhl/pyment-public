@@ -14,7 +14,10 @@ from pyment.cli.finetune_from_configuration import _resolve_optimizer
 )
 def test_known_optimizer_returns_instance(name, expected_cls):
     optimizer = _resolve_optimizer(name)
-    assert isinstance(optimizer, expected_cls)
+    assert isinstance(optimizer, expected_cls), (
+        f'Expected _resolve_optimizer to return an instance of '
+        f'{expected_cls.__name__} for {name!r}'
+    )
 
 
 def test_unknown_optimizer_name_raises():
