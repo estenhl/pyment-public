@@ -114,9 +114,7 @@ def predict_from_fastsurfer_folder(
             logger.warning(str(e))
             subject, session, run = None, None, None
 
-        if not ensure_fastsurfer_crop_exists(
-            os.path.join(source, folder), target_shape=(224, 192, 224)
-        ):
+        if not ensure_fastsurfer_crop_exists(os.path.join(source, folder)):
             logger.warning(
                 "Unable to generate prediction for %s: Can't ensure crop "
                 'exists',

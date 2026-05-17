@@ -62,17 +62,12 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
         optimizer=_resolve_optimizer(configuration.optimizer),
     )
 
-    # Remove batch dimension
-    target_shape = model.input_shape[1:]
-
     train_generator = train.to_tensorflow_generator(
-        target_shape=target_shape,
         batch_size=configuration.batch_size,
         num_threads=configuration.num_threads,
         shuffle=True,
     )
     validation_generator = validation.to_tensorflow_generator(
-        target_shape=target_shape,
         batch_size=configuration.batch_size,
         num_threads=configuration.num_threads,
     )
@@ -97,7 +92,6 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
     prediction_rows = []
     for subset_name, subset in subsets:
         pred_generator = subset.to_tensorflow_generator(
-            target_shape=target_shape,
             batch_size=configuration.batch_size,
             num_threads=configuration.num_threads,
         )

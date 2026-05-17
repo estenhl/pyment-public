@@ -31,6 +31,8 @@ docker build -f docker/tests.Dockerfile -t pyment-tests .
 docker run --rm pyment-tests
 ```
 
+`tests.Dockerfile` does a full `pip install .` (all runtime deps, including tensorflow). Do not revert this to `--no-deps` to slim the image — the test suite imports tensorflow and pandas, so a partial install will silently skip or error those tests.
+
 CLIs installed by `poetry install` (entry points in `pyproject.toml`):
 ```
 pyment-predict  <fastsurfer-folder>  -d <out.csv>       # inference
