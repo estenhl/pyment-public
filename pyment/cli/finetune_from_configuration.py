@@ -9,7 +9,11 @@ from typing import Any
 import pandas as pd
 import tensorflow as tf
 
-from pyment.configurations import TrainingConfiguration, compile_target_encoder
+from pyment.configurations import (
+    FinetuningConfiguration,
+    compile_target_encoder,
+)
+from pyment.models.sfcn import MultiTaskSFCN
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +38,7 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
     """Finestunes a multi-task model towards a new task from a raw
      training-configuration dict.
 
-    Validates ``raw_configuration`` against ``TrainingConfiguration``,
+    Validates ``raw_configuration`` against ``FinetuningConfiguration``,
     builds dataset and model, fits, then writes ``model/``,
     ``history.json``, and ``predictions.csv`` under
     ``configuration.destination``.
@@ -42,10 +46,10 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
     Parameters
     ----------
     raw_configuration : dict[str, Any]
-        A dict that conforms to the ``TrainingConfiguration`` schema.
+        A dict that conforms to the ``FinetuningConfiguration`` schema.
     """
 
-    configuration = TrainingConfiguration.model_validate(raw_configuration)
+    configuration = FinetuningConfiguration.model_validate(raw_configuration)
 
     os.makedirs(configuration.destination, exist_ok=True)
 
@@ -56,6 +60,12 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
     train, validation = configuration.data_split.split(dataset)
 
     model = configuration.model.build()
+
+    backbone = MultiTaskSFCN(weights=configuration.pretrained_multitask_weights)
+    backbone.transfer_weights_to_single_task_model(
+        model, target=configuration.target.name
+    )
+
     model.compile(
         loss=configuration.loss,
         metrics=configuration.metrics,

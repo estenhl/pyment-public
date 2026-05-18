@@ -1,10 +1,17 @@
 from abc import abstractmethod
-from typing import Any, Callable, Tuple
+from typing import Any
 
 import tensorflow as tf
 from tensorflow.keras.layers import (
-    Activation, BatchNormalization, Conv3D, Dropout, GlobalAveragePooling3D,
-    GlobalMaxPooling3D, Input, MaxPooling3D, Reshape
+    Activation,
+    BatchNormalization,
+    Conv3D,
+    Dropout,
+    GlobalAveragePooling3D,
+    GlobalMaxPooling3D,
+    Input,
+    MaxPooling3D,
+    Reshape,
 )
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import Regularizer
@@ -12,64 +19,65 @@ from tensorflow.keras.regularizers import Regularizer
 from ..utils.ensure_weights import ensure_weights
 
 
-
 class SFCN(Model):
-    DEFAULT_INPUT_SHAPE = (224, 192, 224)
-    FILTERS = [32, 64, 128, 256, 256, 64]
-
+    @staticmethod
     @abstractmethod
     def construct_prediction_head(
         bottleneck: tf.Tensor,
-        name: str
+        name: str,
     ) -> tf.Tensor:
         pass
 
-    def __init__(self, *,
-        input_shape: Tuple[int] = DEFAULT_INPUT_SHAPE,
+    def __init__(
+        self,
+        *,
+        input_shape: tuple[int, int, int] = (224, 192, 224),
         include_top: bool = True,
         pooling: str = 'avg',
-        dropout: float = 0.,
-        regularizer: Regularizer = None,
+        dropout: float = 0.0,
+        regularizer: Regularizer | None = None,
         activation: Any = 'relu',
         name: str = 'SFCN',
-        weights: str = None
+        weights: str | None = None,
     ):
         self.inputs = Input(input_shape, name=f'{name}_inputs')
-        x = Reshape(input_shape + (1,), name=f'{name}_expand-dims')(
-            self.inputs
-        )
+        x = Reshape(input_shape + (1,), name=f'{name}_expand-dims')(self.inputs)
 
-        for i in range(len(self.FILTERS) - 1):
+        NUM_FILTERS = [32, 64, 128, 256, 256, 64]
+
+        for i, num_filters in enumerate(NUM_FILTERS[:-1]):
             x = Conv3D(
-                self.FILTERS[i],
+                num_filters,
                 (3, 3, 3),
                 padding='SAME',
                 activation=None,
                 kernel_regularizer=regularizer,
-                name=f'{name}_block-{i}_conv'
+                name=f'{name}_block-{i}_conv',
             )(x)
             x = BatchNormalization(name=f'{name}_block-{i}_norm')(x)
             x = Activation(activation, name=f'{name}_block-{i}_activation')(x)
             x = MaxPooling3D((2, 2, 2), name=f'{name}_block-{i}_pool')(x)
 
         x = Conv3D(
-            self.FILTERS[-1],
+            NUM_FILTERS[-1],
             (1, 1, 1),
             padding='SAME',
             activation=None,
-            name=f'{name}_top_conv'
+            name=f'{name}_top_conv',
         )(x)
         x = BatchNormalization(name=f'{name}_top_norm')(x)
         x = Activation(activation, name=f'{name}_top_activation')(x)
 
-        if pooling == 'avg':
-            pooling = GlobalAveragePooling3D
-        elif pooling == 'max':
-            pooling = GlobalMaxPooling3D
-        else:
+        POOLING_OPTIONS = {
+            'avg': GlobalAveragePooling3D,
+            'max': GlobalMaxPooling3D,
+        }
+        pooling_cls = POOLING_OPTIONS.get(pooling)
+
+        if pooling_cls is None:
             raise ValueError(f'Unknown pooling layer {pooling}')
 
-        x = pooling(name=f'{name}_top_pool')(x)
+        x = pooling_cls(name=f'{name}_top_pool')(x)
 
         self.bottleneck = x
 
@@ -84,6 +92,9 @@ class SFCN(Model):
             status = self.load_weights(weights)
 
             if not weights.endswith('hdf5'):
-                # Silences warnings about optimizer-status not being loaded
-                status.expect_partial()
-                status.assert_existing_objects_matched()
+                # SavedModel checkpoints include optimizer state which
+                # is not restoredhere. expect_partial() suppresses the
+                # resulting warning; assert_existing_objects_matched()
+                # confirms all model weights were still matched.
+                status.expect_partial()  # type: ignore
+                status.assert_existing_objects_matched()  # type: ignore
