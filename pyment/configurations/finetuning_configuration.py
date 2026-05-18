@@ -1,4 +1,4 @@
-"""Top-level Pydantic configuration for a training run."""
+"""Top-level Pydantic configuration for a finetuning run."""
 
 from pydantic import BaseModel, Field
 
@@ -8,7 +8,7 @@ from .sfcn_configuration import SFCNConfiguration
 from .target_configuration import TargetConfiguration
 
 
-class TrainingConfiguration(BaseModel):
+class FinetuningConfiguration(BaseModel):
     """Full configuration for a pyment finetuning run.
 
     Validated from a JSON file by ``pyment-finetune``. Each
@@ -20,6 +20,7 @@ class TrainingConfiguration(BaseModel):
     data_split: DataSplitConfiguration
     model: SFCNConfiguration
     target: TargetConfiguration
+    pretrained_multitask_weights: str = 'multi-2025'
     batch_size: int
     num_threads: int = 1
     loss: str

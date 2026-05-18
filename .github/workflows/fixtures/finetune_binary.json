@@ -7,14 +7,14 @@
         "training_fraction": 0.7
     },
     "model": {
-        "kind": "sfcn-bin",
-        "weights": "multi-2025"
+        "kind": "sfcn-bin"
     },
     "target": {
         "name": "bachelor",
         "kind": "binary",
         "labels": [false, true]
     },
+    "pretrained_multitask_weights": "multi-2025",
     "batch_size": 2,
     "num_threads": 4,
     "loss": "binary_crossentropy",

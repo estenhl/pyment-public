@@ -1,7 +1,7 @@
 """Pydantic configurations for SFCN model variants."""
 
 from abc import ABC
-from typing import Annotated, ClassVar, Literal, cast
+from typing import Annotated, Any, ClassVar, Literal, cast
 
 from pydantic import BaseModel, Field
 
@@ -15,9 +15,8 @@ class BaseSFCNConfiguration(BaseModel, ABC):
     instantiate.
     """
 
-    input_shape: tuple[int, int, int] = SFCN.DEFAULT_INPUT_SHAPE
+    input_shape: tuple[int, int, int] | None = None
     dropout: float = 0.0
-    weights: str | None = None
 
     cls: ClassVar[type[SFCN]]
 
@@ -29,13 +28,11 @@ class BaseSFCNConfiguration(BaseModel, ABC):
         An SFCN-variant, defined by the class
         """
 
-        object = self.cls(
-            input_shape=self.input_shape,
-            dropout=self.dropout,
-            weights=self.weights,
-        )
+        kwargs: dict[str, Any] = {'dropout': self.dropout}
+        if self.input_shape is not None:
+            kwargs['input_shape'] = self.input_shape
 
-        return cast(SFCN, object)
+        return cast(SFCN, self.cls(**kwargs))
 
 
 class BinarySFCNConfiguration(BaseSFCNConfiguration):
