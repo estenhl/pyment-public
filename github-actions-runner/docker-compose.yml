@@ -1,0 +1,24 @@
+services:
+  runner:
+    image: myoung34/github-runner:latest
+    restart: unless-stopped
+    environment:
+      REPO_URL: https://github.com/estenhl/pyment-public
+      ACCESS_TOKEN: ${GITHUB_PAT}
+      RUNNER_NAME: pyment-gpu-runner
+      LABELS: self-hosted,Linux,X64,gpu
+      RUNNER_WORKDIR: /tmp/runner/work
+      RUNNER_REUSE_EXISTING_CONFIG: 'true'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-work:/tmp/runner
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  runner-work:
