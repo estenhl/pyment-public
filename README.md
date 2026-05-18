@@ -338,3 +338,19 @@ verify-mgh-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, code style, and how to submit changes.
 
+# CI runner
+
+The CI workflows require a self-hosted GPU runner. The runner configuration lives in `github-actions-runner/`. To start it:
+
+1. Create `github-actions-runner/.env` with your GitHub personal access token (needs `repo` scope):
+   ```
+   GITHUB_PAT=your_token_here
+   ```
+2. Start the runner:
+   ```
+   cd github-actions-runner
+   docker compose --env-file .env up -d
+   ```
+
+The runner registers itself against this repo and listens for jobs. Check registration with `docker compose logs -f` — you should see `Listening for Jobs` once it is ready.
+
