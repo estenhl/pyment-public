@@ -1,10 +1,14 @@
 def _get_version():
-    """Get version from package metadata (generated from pyproject.toml during installation)"""
+    """Get version from package metadata (generated from pyproject.toml
+    during installation)."""
+
     try:
-        from importlib.metadata import version, PackageNotFoundError
+        from importlib.metadata import PackageNotFoundError, version
+
         return version('pyment')
     except PackageNotFoundError:
         import os
+
         import tomli
 
         pyproject_path = os.path.join(
