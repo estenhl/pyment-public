@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Outstanding work is tracked in [TODO.md](./TODO.md). Items are deleted when done — anything worth preserving long-term belongs here in `CLAUDE.md`.
+
 ## Project
 
 `pyment` is the pretrained multi-task neuroimaging model from *Learning diverse and generic representations of the brain with large-scale multi-task pretraining* (medRxiv 2025). The package wraps an SFCN architecture trained on T1 MRI to predict age, sex, handedness, BMI, fluid intelligence, and neuroticism, and exposes finetuning + inference flows for downstream use. Current release: **v4.1.0**.

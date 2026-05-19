@@ -6,7 +6,15 @@ IDENTIFIERS = {
     'multi-2025': {
         'data': 'f4054d701fa59971fb7000d38cf9e63a202bd66a',
         'index': '9c208ca0bcc3969ceb281ba63a8cee4944a63157',
-    }
+    },
+    'multi-2025-no-abcd': {
+        'data': '564cd7b3b89f280f41abf126d063279def15c828',
+        'index': 'a6c1c4c7216212dbd4c901c2f229de9a15d23c46',
+    },
+    'reg-2025': {
+        'data': 'a876e76e382b0da7375f81686a20620415817b7f',
+        'index': '0748f0c6e83272d74735ba7b1a796a43519df66f',
+    },
 }
 BASE_URL = 'https://api.github.com/repos/estenhl/pyment-public/git/blobs'
 

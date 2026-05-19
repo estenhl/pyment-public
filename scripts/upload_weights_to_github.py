@@ -1,6 +1,7 @@
 import argparse
 import base64
 import os
+
 import requests
 
 
@@ -17,12 +18,9 @@ def upload_weights_to_github(filename: str, token: str, user: str, repo: str):
     headers = {
         'Accept': 'application/vnd.github+json',
         'Authorization': f'Bearer {token}',
-        'X-GitHub-Api-Version': '2022-11-28'
+        'X-GitHub-Api-Version': '2022-11-28',
     }
-    content = {
-        'content': bytes,
-        'encoding': 'base64'
-    }
+    content = {'content': bytes, 'encoding': 'base64'}
 
     url = f'https://api.github.com/repos/{user}/{repo}/git/blobs'
 
@@ -30,39 +28,46 @@ def upload_weights_to_github(filename: str, token: str, user: str, repo: str):
 
     return response
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Uploads a weights-file to github')
 
     parser.add_argument(
-        '-f', '--filename',
+        '-f',
+        '--filename',
         required=True,
-        help='Path to file containing weights'
+        help='Path to file containing weights',
     )
     parser.add_argument(
-        '-t', '--token',
+        '-t',
+        '--token',
         required=True,
-        help='Token for the GitHub API'
+        help=(
+            'Fine-grained GitHub personal access token with Contents: '
+            'Read and write for this repo. Generate one at GitHub → '
+            'Settings → Developer settings → Personal access tokens → '
+            'Fine-grained tokens.'
+        ),
     )
     parser.add_argument(
-        '-u', '--user',
+        '-u',
+        '--user',
         required=False,
         default='estenhl',
-        help='Owner of the github repo'
+        help='Owner of the github repo',
     )
     parser.add_argument(
-        '-r', '--repo',
+        '-r',
+        '--repo',
         required=False,
         default='pyment-public',
-        help='Name of the github repo'
+        help='Name of the github repo',
     )
 
     args = parser.parse_args()
 
     response = upload_weights_to_github(
-        filename=args.filename,
-        token=args.token,
-        user=args.user,
-        repo=args.repo
+        filename=args.filename, token=args.token, user=args.user, repo=args.repo
     )
 
     print(response.text)
