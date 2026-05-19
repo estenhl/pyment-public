@@ -18,23 +18,20 @@ dependencies = [
     "numpy==1.23.5",
     "tomli==2.2.1",
     "pandas==1.4.2",
-    "packaging==24.1",
     "typing-extensions==4.12.2",
-    "wheel==0.43",
-    "decorator==5.1.1",
     "requests==2.32.3",
     "nibabel==5.2.1",
-    "jupyter==1.1.1",
     "matplotlib==3.8",
     "tqdm==4.66.4",
-    "plotly==5.24.1",
-    "pytest==8.3.3",
     "scikit-learn==1.5.1",
     "xlrd==2.0.1",
     "pydantic==2.10",
-    "pyqt5>=5.15.11,<6.0",
     "tensorflow-neuroimaging @ git+https://github.com/estenhl/tensorflow-neuroimaging",
 ]
+
+[project.scripts]
+pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
+pyment-finetune = "pyment.cli.finetune_from_configuration:main"
 
 [tool.poetry]
 packages = [{include = "pyment"}]
@@ -42,35 +39,27 @@ include = [
     {path = "pyproject.toml", format = "sdist"}
 ]
 
-[tool.poetry.scripts]
-pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
-pyment-finetune = "pyment.cli.finetune_from_configuration:main"
+[tool.ruff]
+line-length = 80
+target-version = "py310"
+exclude = [".act", "checkpoints"]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.11"
-tensorflow-macos = { version = "2.11", markers = "platform_system == 'Darwin'" }
-tensorflow-metal = { version = "0.7", markers = "platform_system == 'Darwin'" }
-tensorflow = { version = "2.11", markers = "platform_system != 'Darwin'" }
-numpy = "1.23.5"
-tomli = "2.2.1"
-pandas = "1.4.2"
-packaging = "24.1"
-typing-extensions = "4.12.2"
-wheel = "0.43"
-decorator = "5.1.1"
-requests = "2.32.3"
-nibabel = "5.2.1"
-jupyter = "1.1.1"
-matplotlib = "3.8"
-tqdm = "4.66.4"
-plotly = "5.24.1"
-pytest = "8.3.3"
-scikit-learn = "1.5.1"
-xlrd = "2.0.1"
-pydantic = "2.10"
-pyqt5 = "^5.15.11"
-tensorflow-neuroimaging = { git = "https://github.com/estenhl/tensorflow-neuroimaging" }
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "G"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
+
+[tool.ruff.format]
+quote-style = "single"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.15.13,<0.16.0)",
+    "pre-commit (>=4.6.0,<5.0.0)",
+    "pytest (>=9.0.3,<10.0.0)"
+]

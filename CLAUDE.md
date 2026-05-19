@@ -31,6 +31,8 @@ docker build -f docker/tests.Dockerfile -t pyment-tests .
 docker run --rm pyment-tests
 ```
 
+`tests.Dockerfile` does a full `pip install .` (all runtime deps, including tensorflow). Do not revert this to `--no-deps` to slim the image — the test suite imports tensorflow and pandas, so a partial install will silently skip or error those tests.
+
 CLIs installed by `poetry install` (entry points in `pyproject.toml`):
 ```
 pyment-predict  <fastsurfer-folder>  -d <out.csv>       # inference
@@ -41,6 +43,17 @@ Sanity-check IXI predictions (should yield MAE ≈ 3.12):
 ```
 python scripts/evaluate_ixi_predictions.py
 ```
+
+Linting and formatting use **ruff**. Pre-commit hooks run `ruff check` and `ruff format --check` on every `git commit` — they are **check-only** and abort the commit on violations without modifying files. Apply fixes manually:
+```
+ruff check --fix .            # apply safe autofixes
+ruff format .                 # apply formatting
+ruff check .                  # report-only (what pre-commit runs)
+ruff format --check .         # report-only (what pre-commit runs)
+```
+Config lives in `[tool.ruff]` in `pyproject.toml` — line length 80, single quotes enforced (`quote-style = "single"`), conservative rule set (`E, F, W, I`). After cloning, contributors must run `pre-commit install` once to activate the hooks.
+
+Code conventions beyond what ruff enforces are documented in [STYLE.md](./STYLE.md).
 
 ## Architecture
 

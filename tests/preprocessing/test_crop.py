@@ -1,7 +1,10 @@
-import numpy as np
 import nibabel as nib
+import numpy as np
 
-from pyment.preprocessing.crop import calculate_bounds, crop_nifti_image_if_necessary
+from pyment.preprocessing.crop import (
+    calculate_bounds,
+    crop_nifti_image_if_necessary,
+)
 
 
 def test_calculate_bounds_centers_on_brain_with_left_adjustment():
@@ -11,7 +14,10 @@ def test_calculate_bounds_centers_on_brain_with_left_adjustment():
 
     idx = calculate_bounds(image, target_shape)
 
-    assert idx == [slice(0, 6), slice(0, 6), slice(0, 6)]
+    assert idx == [slice(0, 6), slice(0, 6), slice(0, 6)], (
+        'Expected calculate_bounds to yield indices that match the given '
+        'target_shape centered on the content'
+    )
 
 
 def test_calculate_bounds_centers_on_brain_with_right_adjustment():
@@ -21,7 +27,10 @@ def test_calculate_bounds_centers_on_brain_with_right_adjustment():
 
     idx = calculate_bounds(image, target_shape)
 
-    assert idx == [slice(4, 10), slice(4, 10), slice(4, 10)]
+    assert idx == [slice(4, 10), slice(4, 10), slice(4, 10)], (
+        'Expected calculate_bounds to yield indices that match the given '
+        'target_shape centered on the content'
+    )
 
 
 def test_crop_nifti_image_if_necessary_keeps_brain_region():
@@ -32,5 +41,11 @@ def test_crop_nifti_image_if_necessary_keeps_brain_region():
 
     cropped = crop_nifti_image_if_necessary(image, target_shape)
 
-    assert cropped.shape == target_shape
-    assert np.count_nonzero(cropped.get_fdata()) == 8
+    assert cropped.shape == target_shape, (
+        'Expected crop_nifti_image_if_necessary to yield images with a shape '
+        'matching the given target_shape'
+    )
+    assert np.count_nonzero(cropped.get_fdata()) == 8, (
+        'Expected crop_nifti_image_if_necessary to preserve informative '
+        '(i.e. non-zero) voxels'
+    )
