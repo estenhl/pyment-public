@@ -43,7 +43,7 @@ def test_pad_nifti_image_if_necessary_affine_shift():
     expected_affine = affine.copy()
     expected_affine[:3, 3] -= expected_affine[:3, :3] @ expected_shift
 
-    assert np.allclose(padded.affine, expected_affine), (
+    assert np.allclose(np.asarray(padded.affine), expected_affine), (
         'Expected pad_nifti_image_if_necessary to shift the affine to '
         'account for the padding offset'
     )

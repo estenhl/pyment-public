@@ -1,8 +1,29 @@
+"""Utility for recursively converting objects to JSON-serialisable
+Python types."""
+
 import math
-import numpy as np
 from typing import Any
 
+import numpy as np
+
+
 def json_serialize(obj: Any) -> Any:
+    """Recursively converts obj to a JSON-serialisable Python type.
+
+    numpy scalars become int or float, numpy arrays become lists, and
+    non-finite floats (nan, inf) become None. All other types are
+    returned unchanged.
+
+    Parameters
+    ----------
+    obj : Any
+        The object to serialise.
+
+    Returns
+    -------
+    Any
+        A JSON-safe equivalent of obj.
+    """
     if isinstance(obj, dict):
         return {json_serialize(k): json_serialize(v) for k, v in obj.items()}
     elif isinstance(obj, list):
