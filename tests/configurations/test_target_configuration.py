@@ -31,7 +31,7 @@ def test_regression_config_returns_none():
 def test_encoder_maps_label_to_index(label, expected):
     config = BinaryTargetConfiguration(name='sex', kind='binary', labels=[0, 1])
     encoder = compile_target_encoder(config)
-    assert encoder(label) == expected, (
+    assert encoder is not None and encoder(label) == expected, (
         f'Expected binary encoder to return {expected} for label {label} '
         'according to its given configuration'
     )

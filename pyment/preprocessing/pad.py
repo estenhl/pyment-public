@@ -1,11 +1,27 @@
+"""Utilities for padding NIfTI images to a target shape."""
+
 import nibabel as nib
 import numpy as np
 
 
 def pad_nifti_image_if_necessary(
-    image: nib.Nifti1Image,
-    target_shape: tuple[int, int, int]
+    image: nib.Nifti1Image, target_shape: tuple[int, int, int]
 ) -> nib.Nifti1Image:
+    """Pads image to target_shape along any axis that falls short of it,
+    distributing padding equally on both sides and adjusting the affine.
+
+    Parameters
+    ----------
+    image : nib.Nifti1Image
+        Image to pad.
+    target_shape : tuple[int, int, int]
+        Minimum size per axis.
+
+    Returns
+    -------
+    nib.Nifti1Image
+        Image with each axis >= the corresponding target dimension.
+    """
     pad = [(0, 0)] * 3
 
     for dim in range(3):
@@ -16,7 +32,7 @@ def pad_nifti_image_if_necessary(
             pad[dim] = (first_padding, second_padding)
 
     data = np.pad(image.dataobj, tuple(pad), mode='edge')
-    affine = image.affine.copy()
+    affine = image.affine.copy() if image.affine is not None else np.eye(4)
     affine[:3, 3] -= affine[:3, :3] @ np.asarray([p[0] for p in pad])
 
     image = nib.Nifti1Image(data, header=image.header, affine=affine)
