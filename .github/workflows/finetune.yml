@@ -13,11 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Download weights
         run: |
-          python3 -m pip install --upgrade pip 'poetry-core>=2.0.0,<3.0.0'
-          python3 -m pip install --no-build-isolation .
-          python3 scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
+          pip install .
+          python scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
 
       - name: Install Docker CLI
         run: |
