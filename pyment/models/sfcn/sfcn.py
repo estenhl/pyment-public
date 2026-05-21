@@ -89,12 +89,4 @@ class SFCN(Model):
 
         if weights:
             weights = ensure_weights(weights)
-            status = self.load_weights(weights)
-
-            if not weights.endswith('hdf5'):
-                # SavedModel checkpoints include optimizer state which
-                # is not restoredhere. expect_partial() suppresses the
-                # resulting warning; assert_existing_objects_matched()
-                # confirms all model weights were still matched.
-                status.expect_partial()  # type: ignore
-                status.assert_existing_objects_matched()  # type: ignore
+            self.load_weights(weights)

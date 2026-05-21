@@ -15,7 +15,7 @@ RUN /envs/pyment/bin/pip install --upgrade pip poetry-core build && \
 
 RUN mkdir -p /.pyment/weights && \
     chmod -R 1777 /.pyment
-COPY checkpoints/pyment/multi-2025.* /.pyment/weights/
+COPY checkpoints/pyment/ /.pyment/weights/
 
 CMD ["/bin/sh", "-c", "\
   mkdir -p /output/fastsurfer && \

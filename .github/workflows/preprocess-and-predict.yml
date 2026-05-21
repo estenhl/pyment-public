@@ -15,41 +15,8 @@ jobs:
 
       - name: Download weights
         run: |
-          mkdir -p checkpoints/pyment
-          if ! command -v python3 >/dev/null 2>&1; then
-            if command -v sudo >/dev/null 2>&1; then
-              sudo apt-get update
-              sudo apt-get install -y python3
-            else
-              apt-get update
-              apt-get install -y python3
-            fi
-          fi
-          python3 - <<'PY'
-          import base64
-          import json
-          import os
-          import urllib.request
-
-          base = "https://api.github.com/repos/estenhl/pyment-public/git/blobs"
-          identifiers = {
-              "data": "f4054d701fa59971fb7000d38cf9e63a202bd66a",
-              "index": "9c208ca0bcc3969ceb281ba63a8cee4944a63157",
-          }
-          outputs = {
-              "data": "checkpoints/pyment/multi-2025.data-00000-of-00001",
-              "index": "checkpoints/pyment/multi-2025.index",
-          }
-
-          for key, sha in identifiers.items():
-              url = f"{base}/{sha}"
-              with urllib.request.urlopen(url) as r:
-                  data = json.load(r)
-              content = base64.b64decode(data["content"])
-              os.makedirs(os.path.dirname(outputs[key]), exist_ok=True)
-              with open(outputs[key], "wb") as f:
-                  f.write(content)
-          PY
+          pip install .
+          python scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
       - name: Install Docker CLI
         run: |
           if ! command -v docker >/dev/null 2>&1; then
