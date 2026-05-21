@@ -17,6 +17,8 @@ RUN mkdir -p /.pyment/weights && \
     chmod -R 1777 /.pyment
 COPY checkpoints/pyment/ /.pyment/weights/
 
+ENV PYMENT_WEIGHTS=multi-2025
+
 CMD ["/bin/sh", "-c", "\
   mkdir -p /output/fastsurfer && \
   /scripts/preprocess.sh \
@@ -26,4 +28,5 @@ CMD ["/bin/sh", "-c", "\
   /envs/pyment/bin/pyment-predict \
     /output/fastsurfer \
     -d /output/predictions.csv \
+    --weights ${PYMENT_WEIGHTS} \
 "]
