@@ -15,9 +15,9 @@ jobs:
 
       - name: Download weights
         run: |
-          pip install --upgrade pip
-          pip install .
-          python scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
+          python3 -m pip install --upgrade pip 'poetry-core>=2.0.0,<3.0.0'
+          python3 -m pip install --no-build-isolation .
+          python3 scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
       - name: Install Docker CLI
         run: |
           if ! command -v docker >/dev/null 2>&1; then
