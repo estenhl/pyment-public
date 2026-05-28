@@ -16,8 +16,11 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
 
 - [ ] **Add new pretrained weight identifiers**
   - Blobs already uploaded for two new identifiers; remaining steps:
-    - [ ] Upload SFCN-reg 2022 weights (`.data-00000-of-00001` + `.index`) via `scripts/upload_weights_to_github.py` and record the blob SHAs.
     - [ ] Add all new identifiers to `IDENTIFIERS` in `pyment/models/utils/ensure_weights.py`.
     - [ ] **Mirror the SHAs into CI workflows** — both `.github/workflows/finetune.yml` and `.github/workflows/preprocess-and-predict.yml` have a "Download weights" step that hardcodes the SHAs. Update both, or refactor those steps to call `ensure_weights` instead of duplicating the logic.
-    - [ ] **Test each identifier** — extend `scripts/evaluate_ixi_predictions.py` for new multi-task identifiers, and add a smoke test (load → single forward pass → shape/range check) for the regression identifier which doesn't have IXI ground truth.
+    - [ ] **Test each identifier** — extend `scripts/evaluate_ixi_predictions.py` for new multi-task identifiers.
     - [ ] Update the "Pretrained weight resolution" section of `CLAUDE.md` to list all identifiers and the naming convention.
+
+- [ ] **Expose SFCN-reg 2022 weights** *(deferred — needs scoping)*
+  - The SFCN-reg 2022 model was trained on a different preprocessing pipeline than the current FastSurfer-based flow, so serving it requires either a separate Docker image or a documented alternative preprocessing path. Needs a decision on whether to bother before any implementation work starts.
+  - If pursued: upload weights via `scripts/upload_weights_to_github.py`, record blob SHAs, add identifier to `IDENTIFIERS`, add a smoke test (load → single forward pass → shape/range check).
