@@ -13,6 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
       - name: Install pyment
         run: pip install .
 

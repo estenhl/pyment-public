@@ -32,9 +32,7 @@ def _decode(imagebytes: tf.Tensor, dtype: tf.Tensor):
         for key in _VALID_MGH_DTYPES
     ]
 
-    return tf.case(
-        cases, default=lambda: tf.Assert(False, [f'Unknown data type: {dtype}'])
-    )
+    return tf.case(cases, exclusive=True)
 
 
 def _parse(
