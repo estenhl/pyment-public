@@ -1,6 +1,6 @@
 [project]
 name = "pyment"
-version = "4.1.2"
+version = "4.1.3"
 description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
 authors = [
     {name = "Esten Leonardsen",email = "estenleonardsen@gmail.com"}

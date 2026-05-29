@@ -3,13 +3,6 @@
 Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete them when done — anything worth preserving long-term belongs in `CLAUDE.md`.
 
 ## Open
-
-- [ ] **Fix `tf.Assert` calls in `load_mgh` header parsing**
-  - `tf.Assert` returns an op that must be part of the computation graph to be evaluated. The current calls in `_parse_header` (version check, rasflag check) discard the return value, making them silent no-ops in graph mode (`tf.function`). Replace with `tf.debugging.assert_equal` / `tf.debugging.assert_greater` which integrate into the graph automatically, or wrap with `tf.control_dependencies`.
-
-- [ ] **Fix `load_mgh` reshape order to work for non-square volumes**
-  - The current code reshapes the flat image bytes to `(W, H, D)` then transposes `[2, 1, 0]` to `(D, H, W)`. This accidentally matches nibabel for volumes where W == D (e.g. 224×192×224 crops) but produces wrong values for asymmetric volumes. Fix: reshape directly to `(D, H, W)` (the actual on-disk byte order) so the `[2, 1, 0]` transpose correctly yields `(W, H, D)` matching nibabel for any shape.
-
 - [ ] **Write a proper finetuning tutorial**
   - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.
   - Tutorial should cover:

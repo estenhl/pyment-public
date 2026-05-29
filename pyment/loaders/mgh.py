@@ -35,7 +35,7 @@ def _decode(imagebytes: tf.Tensor, dtype: tf.Tensor) -> tf.Tensor:
         for key in _VALID_MGH_DTYPES
     ]
 
-    return tf.case(cases, exclusive=True)
+    return tf.case(cases)
 
 
 def _parse(
@@ -55,9 +55,7 @@ def _parse(
 def _parse_header(tfbytes: tf.Tensor) -> dict[str, tf.Tensor]:
     version = _parse(tfbytes, 0, 4, tf.int32)
     tf.debugging.assert_equal(
-        version,
-        tf.constant(1, dtype=tf.int32),
-        message='Unknown MGH version',
+        version, tf.constant(1, dtype=tf.int32), message='Unknown MGH version'
     )
 
     width = _parse(tfbytes, 4, 4, tf.int32)
@@ -100,8 +98,9 @@ def load_mgh(path: str | tf.Tensor) -> tf.Tensor:
     imagesize = tf.squeeze(imagesize)
     imagebytes = tf.strings.substr(mghdata, 284, imagesize)
     image = _decode(imagebytes, header['dtype'])
-    image = tf.reshape(image, header['shape'])
-    image = tf.cast(image, tf.float32)
+    image = tf.reshape(
+        image, [header['depth'], header['height'], header['width']]
+    )
     image = tf.transpose(image, [2, 1, 0])
 
     return image
