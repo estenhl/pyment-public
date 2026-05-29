@@ -98,7 +98,9 @@ def load_mgh(path: str | tf.Tensor) -> tf.Tensor:
     imagesize = tf.squeeze(imagesize)
     imagebytes = tf.strings.substr(mghdata, 284, imagesize)
     image = _decode(imagebytes, header['dtype'])
-    image = tf.reshape(image, header['shape'])
+    image = tf.reshape(
+        image, [header['depth'], header['height'], header['width']]
+    )
     image = tf.transpose(image, [2, 1, 0])
 
     return image
