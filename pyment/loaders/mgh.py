@@ -21,20 +21,21 @@ _MGH_BYTE_SIZES = tf.lookup.StaticHashTable(
 )
 
 
-def _decode(imagebytes: tf.Tensor, dtype: tf.Tensor):
+def _decode(imagebytes: tf.Tensor, dtype: tf.Tensor) -> tf.Tensor:
     cases = [
         (
             tf.equal(dtype, key),
-            lambda k=key: tf.io.decode_raw(
-                imagebytes, _MGH_DTYPES[k]['dtype'], little_endian=False
+            lambda k=key: tf.cast(
+                tf.io.decode_raw(
+                    imagebytes, _MGH_DTYPES[k]['dtype'], little_endian=False
+                ),
+                tf.float32,
             ),
         )
         for key in _VALID_MGH_DTYPES
     ]
 
-    return tf.case(
-        cases, default=lambda: tf.Assert(False, [f'Unknown data type: {dtype}'])
-    )
+    return tf.case(cases)
 
 
 def _parse(
@@ -53,7 +54,9 @@ def _parse(
 
 def _parse_header(tfbytes: tf.Tensor) -> dict[str, tf.Tensor]:
     version = _parse(tfbytes, 0, 4, tf.int32)
-    tf.Assert(version == 1, [f'Unknown MGH version: {version}'])
+    tf.debugging.assert_equal(
+        version, tf.constant(1, dtype=tf.int32), message='Unknown MGH version'
+    )
 
     width = _parse(tfbytes, 4, 4, tf.int32)
     height = _parse(tfbytes, 8, 4, tf.int32)
@@ -64,8 +67,10 @@ def _parse_header(tfbytes: tf.Tensor) -> dict[str, tf.Tensor]:
     bytes_per_voxel = _MGH_BYTE_SIZES.lookup(dtype)
 
     rasflag = _parse(tfbytes, 28, 2, tf.int16)
-    tf.Assert(
-        rasflag == 1, ['Load not implemented when goodRASflag is not set']
+    tf.debugging.assert_equal(
+        rasflag,
+        tf.constant(1, dtype=tf.int16),
+        message='Load not implemented when goodRASflag is not set',
     )
 
     return {
@@ -94,7 +99,6 @@ def load_mgh(path: str | tf.Tensor) -> tf.Tensor:
     imagebytes = tf.strings.substr(mghdata, 284, imagesize)
     image = _decode(imagebytes, header['dtype'])
     image = tf.reshape(image, header['shape'])
-    image = tf.cast(image, tf.float32)
     image = tf.transpose(image, [2, 1, 0])
 
     return image
