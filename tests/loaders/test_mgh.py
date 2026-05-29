@@ -55,3 +55,20 @@ def test_load_dtype_matches_nibabel(tmp_path, dtype, np_dtype, ext):
     expected = np.asarray(nib_image.dataobj).astype(np.float32)
 
     np.testing.assert_allclose(result, expected)
+
+
+def test_load_mgh_in_dataset_map(tmp_path):
+    paths = []
+    for dtype in [np.uint8, np.int16, np.int32, np.float32]:
+        data = np.arange(800, dtype=dtype).reshape(10, 8, 10)
+        img = nib.MGHImage(data, np.eye(4))
+        path = str(tmp_path / f'test_{dtype.__name__}.mgh')
+        nib.save(img, path)
+        paths.append(path)
+
+    dataset = tf.data.Dataset.from_tensor_slices(paths)
+    dataset = dataset.map(load_mgh)
+
+    for result in dataset:
+        assert result.dtype == tf.float32
+        assert result.shape == (10, 8, 10)
