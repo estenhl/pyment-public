@@ -1,0 +1,23 @@
+name: Verify MGH loader
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  verify-mgh-loader:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pyment
+        run: pip install .
+
+      - name: Run verify
+        run: |
+          python -m pyment.cli.verify_mgh_loader \
+            ${{ github.workspace }}/.github/workflows/fixtures/ixi/fastsurfer \
+            --regex '.*crop\.mgz$'

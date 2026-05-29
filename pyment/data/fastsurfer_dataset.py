@@ -9,7 +9,8 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow_neuroimaging.loaders import load_mgh
+
+from pyment.loaders.mgh import load_mgh
 
 from .dataset import Dataset
 from .utils.ensure_fastsurfer_crops_exists import ensure_fastsurfer_crops_exists

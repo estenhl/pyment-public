@@ -1,6 +1,6 @@
 [project]
 name = "pyment"
-version = "4.1.1"
+version = "4.1.2"
 description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
 authors = [
     {name = "Esten Leonardsen",email = "estenleonardsen@gmail.com"}
@@ -26,7 +26,6 @@ dependencies = [
     "scikit-learn==1.5.1",
     "xlrd==2.0.1",
     "pydantic==2.10",
-    "tensorflow-neuroimaging @ git+https://github.com/estenhl/tensorflow-neuroimaging",
 ]
 
 [project.scripts]

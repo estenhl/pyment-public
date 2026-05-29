@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project _after release v3.0.0_ will be documented in this file.
 
+## v4.1.2
+Replaced the external tensorflow-neuroimaging library with internal functionality
+
 ## v4.1.0
 Added more functionality for automatic testing and sanity checking
 
