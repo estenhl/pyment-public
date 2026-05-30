@@ -8,14 +8,14 @@ Outstanding work is tracked in [TODO.md](./TODO.md). Items are deleted when done
 
 `pyment` is the pretrained multi-task neuroimaging model from *Learning diverse and generic representations of the brain with large-scale multi-task pretraining* (medRxiv 2025). The package wraps an SFCN architecture trained on T1 MRI to predict age, sex, handedness, BMI, fluid intelligence, and neuroticism, and exposes finetuning + inference flows for downstream use. Current release: **v5.0.0**.
 
-Python is hard-pinned to **3.13.x** with **TensorFlow 2.21**. The SFCN code uses `tf.keras.optimizers.legacy.*` (see `_LEGACY_OPTIMIZERS` in `pyment/cli/finetune_from_configuration.py`) — verify this namespace still exists in TF 2.21 before touching the optimizer code. Weight checkpoints are TF SavedModel format.
+Python is hard-pinned to **3.13.x** with **TensorFlow 2.21**. Weight checkpoints use the native Keras 3 format (`.keras`).
 
 ## Common commands
 
 Environment setup uses **poetry** with **pyenv** for Python version control:
 ```
-pyenv local 3.10.4
-poetry env use 3.10.4
+pyenv local 3.13
+poetry env use 3.13
 poetry install
 eval $(poetry env activate)
 ```

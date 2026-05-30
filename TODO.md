@@ -3,6 +3,8 @@
 Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete them when done — anything worth preserving long-term belongs in `CLAUDE.md`.
 
 ## Open
+
+- [ ] **Replace IXI with an accessible tutorial dataset** — the IXI download URL (biomedic.doc.ic.ac.uk) now returns 403 and is inaccessible from the browser. Candidates: Calgary-Campinas-359 (CC359) or a small OpenNeuro dataset with T1 + age/sex metadata. Update `scripts/download_ixi.py`, the CI fixtures, and the README tutorial sections.
 - [ ] **Write a proper finetuning tutorial**
   - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.
   - Tutorial should cover:
@@ -23,5 +25,3 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
 - [ ] **Expose SFCN-reg 2022 weights** *(deferred — needs scoping)*
   - The SFCN-reg 2022 model was trained on a different preprocessing pipeline than the current FastSurfer-based flow, so serving it requires either a separate Docker image or a documented alternative preprocessing path. Needs a decision on whether to bother before any implementation work starts.
   - If pursued: upload weights via `scripts/upload_weights_to_github.py`, record blob SHAs, add identifier to `IDENTIFIERS`, add a smoke test (load → single forward pass → shape/range check).
-
-- [ ] **Update CUDA version in README system configuration section** — currently documents CUDA 11.2 (for TF 2.11); needs updating for TF 2.21's CUDA requirements.
