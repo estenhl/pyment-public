@@ -81,7 +81,7 @@ jobs:
                 --license /licenses/freesurfer.txt \
                 --python /envs/fastsurfer/bin/python \
                 /input /output/fastsurfer && \
-              /envs/pyment/bin/pyment-finetune \
+              pyment-finetune \
                 /configuration.json
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
