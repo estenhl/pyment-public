@@ -1,4 +1,4 @@
-FROM python:3.10.2-slim
+FROM python:3.13-slim
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -13,7 +13,7 @@ COPY README.md /repos/pyment/
 COPY LICENSE.md /repos/pyment/
 
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir pytest==8.3.3 && \
+    pip install --no-cache-dir "pytest>=9.0.3,<10.0.0" && \
     pip install --no-cache-dir .
 
 CMD ["pytest", "-q"]
