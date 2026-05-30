@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
       - name: Download weights
         run: |
           pip install .
