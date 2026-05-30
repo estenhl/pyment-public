@@ -88,7 +88,7 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
         epochs=configuration.epochs,
     )
 
-    model.save(os.path.join(configuration.destination, 'model'))
+    model.save(os.path.join(configuration.destination, 'model.keras'))
 
     history_serializable = {
         k: [float(v) for v in vals] for k, vals in history.history.items()

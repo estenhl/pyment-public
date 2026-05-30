@@ -96,7 +96,7 @@ jobs:
         run: |
           output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs/finetune_output"
           for f in \
-            "$output_dir/model/saved_model.pb" \
+            "$output_dir/model.keras" \
             "$output_dir/history.json" \
             "$output_dir/predictions.csv"; do
             if [ ! -f "$f" ]; then
