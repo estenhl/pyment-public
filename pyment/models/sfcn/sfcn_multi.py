@@ -3,10 +3,11 @@ prediction."""
 
 import logging
 
-from tensorflow import Tensor, concat
+from tensorflow import Tensor
 from tensorflow.keras.layers import (
     Activation,
     BatchNormalization,
+    Concatenate,
     Conv3D,
     Dense,
 )
@@ -57,7 +58,7 @@ class MultiTaskSFCN(SFCN):
         ]
         heads = [head(x) for head in heads]
 
-        return concat(heads, axis=-1)
+        return Concatenate(axis=-1)(heads)
 
     TARGETS = [
         'age',

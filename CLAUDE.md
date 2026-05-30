@@ -8,7 +8,7 @@ Outstanding work is tracked in [TODO.md](./TODO.md). Items are deleted when done
 
 `pyment` is the pretrained multi-task neuroimaging model from *Learning diverse and generic representations of the brain with large-scale multi-task pretraining* (medRxiv 2025). The package wraps an SFCN architecture trained on T1 MRI to predict age, sex, handedness, BMI, fluid intelligence, and neuroticism, and exposes finetuning + inference flows for downstream use. Current release: **v4.1.0**.
 
-Python is hard-pinned to **3.10.x** with **TensorFlow 2.11** (`tensorflow-macos` on Darwin, plain `tensorflow` elsewhere). Do not upgrade either casually — the SFCN code uses TF 1.x-style `tf.keras.optimizers.legacy.*` (see `_LEGACY_OPTIMIZERS` in `pyment/cli/finetune_from_configuration.py`) and weight checkpoints are TF SavedModel format.
+Python is hard-pinned to **3.13.x** with **TensorFlow 2.21**. The SFCN code uses `tf.keras.optimizers.legacy.*` (see `_LEGACY_OPTIMIZERS` in `pyment/cli/finetune_from_configuration.py`) — verify this namespace still exists in TF 2.21 before touching the optimizer code. Weight checkpoints are TF SavedModel format.
 
 ## Common commands
 
@@ -22,10 +22,12 @@ eval $(poetry env activate)
 
 Tests (pytest, configured via `tests/conftest.py` — fixture loads a sample nifti from `tests/fixtures/esten.nii.gz`):
 ```
-pytest                                          # all tests
-pytest tests/preprocessing/test_conform.py      # one file
-pytest tests/preprocessing/test_conform.py::test_<name>   # one test
+python -m pytest                                          # all tests
+python -m pytest tests/preprocessing/test_conform.py      # one file
+python -m pytest tests/preprocessing/test_conform.py::test_<name>   # one test
 ```
+
+Use `python -m pytest` rather than bare `pytest` — in the devcontainer the `pytest` binary may point to a different interpreter than the one with pyment installed.
 
 Tests in CI run inside a Docker container:
 ```
@@ -37,8 +39,9 @@ docker run --rm pyment-tests
 
 CLIs installed by `poetry install` (entry points in `pyproject.toml`):
 ```
-pyment-predict  <fastsurfer-folder>  -d <out.csv>       # inference
-pyment-finetune <configuration.json>                    # finetuning
+pyment-predict     <fastsurfer-folder>  -d <out.csv>    # inference
+pyment-finetune    <configuration.json>                 # finetuning
+pyment-verify-mgh  <fastsurfer-folder>  --regex '.*crop\.mgz$'  # sanity-check MGH loader
 ```
 
 Sanity-check IXI predictions (should yield MAE ≈ 3.12):

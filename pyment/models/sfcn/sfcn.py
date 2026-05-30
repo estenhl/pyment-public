@@ -40,8 +40,8 @@ class SFCN(Model):
         name: str = 'SFCN',
         weights: str | None = None,
     ):
-        self.inputs = Input(input_shape, name=f'{name}_inputs')
-        x = Reshape(input_shape + (1,), name=f'{name}_expand-dims')(self.inputs)
+        inputs = Input(input_shape, name=f'{name}_inputs')
+        x = Reshape(input_shape + (1,), name=f'{name}_expand-dims')(inputs)
 
         NUM_FILTERS = [32, 64, 128, 256, 256, 64]
 
@@ -85,7 +85,7 @@ class SFCN(Model):
             x = Dropout(dropout, name=f'{name}_dropout')(x)
             x = self.construct_prediction_head(x, name=f'{name}_predictions')
 
-        super().__init__(self.inputs, x)
+        super().__init__(inputs, x)
 
         if weights:
             weights = ensure_weights(weights)
