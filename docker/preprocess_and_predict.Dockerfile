@@ -8,10 +8,9 @@ COPY pyproject.toml /repos/pyment/
 COPY README.md /repos/pyment/
 COPY LICENSE.md /repos/pyment/
 
-RUN python -m venv /envs/pyment
-RUN /envs/pyment/bin/pip install --upgrade pip poetry-core build && \
+RUN pip install --upgrade pip poetry-core build && \
     cd /repos/pyment && \
-    /envs/pyment/bin/pip install --no-cache-dir .
+    pip install --no-cache-dir .
 
 RUN mkdir -p /.pyment/weights && \
     chmod -R 1777 /.pyment
@@ -25,7 +24,7 @@ CMD ["/bin/sh", "-c", "\
     --license /licenses/freesurfer.txt \
     --python /envs/fastsurfer/bin/python \
     /input /output/fastsurfer && \
-  /envs/pyment/bin/pyment-predict \
+  pyment-predict \
     /output/fastsurfer \
     -d /output/predictions.csv \
     --weights ${PYMENT_WEIGHTS} \

@@ -23,6 +23,6 @@ jobs:
 
       - name: Run verify
         run: |
-          pyment-verify-mgh \
+          pyment-verify-loader \
             ${{ github.workspace }}/.github/workflows/fixtures/ixi/fastsurfer \
             --regex '.*crop\.mgz$'

@@ -52,6 +52,10 @@ docker run --rm -it \
     --gpus all \
     estenhl/pyment-preprocess-and-predict:latest
 ```
+The weights identifier defaults to `multi-2025` and can be overridden with `PYMENT_WEIGHTS`:
+```
+docker run --env PYMENT_WEIGHTS=reg-2025 ... estenhl/pyment-preprocess-and-predict:latest
+```
 </details>
 
 <details>
@@ -172,7 +176,7 @@ echo 'eval "$(pyenv init - zsh)"' >> ~/.zshrc
 
 After installing pyenv, we can download the Python-version expected by this library:
 ```
-pyenv install 3.10.4
+pyenv install 3.13
 ```
 
 ## Install the pyment-package
@@ -185,7 +189,7 @@ From here, the approach diverges depending on whether we want to install the pac
 
 First, we need to create a Python-environment with the correct python version
 ```
-pyenv shell 3.10.4
+pyenv shell 3.13
 ```
 Next, we can create a virtual environment with this same Python-version using Pythons [venv-module](https://docs.python.org/3/library/venv.html):
 ```
@@ -216,8 +220,8 @@ cd pyment-public
 ```
 Then we can configure the local Python-version and install the package
 ```
-pyenv local 3.10.4
-poetry env use 3.10.4
+pyenv local 3.13
+poetry env use 3.13
 poetry install
 ```
 This will result in a virtual environment managed by poetry that can be activated with
@@ -339,7 +343,7 @@ python scripts/create_fastsurfer_conformed_crops.py \
 ```
 And then by running the built-in CLI for sanity checking from the other repository (this requires the library to be installed, either implicitly via installing this repository locally, or by cloning and building that repository directly):
 ```
-verify-mgh-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
+pyment-verify-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
 ```
 
 # Contributing

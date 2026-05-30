@@ -6,7 +6,7 @@ Outstanding work is tracked in [TODO.md](./TODO.md). Items are deleted when done
 
 ## Project
 
-`pyment` is the pretrained multi-task neuroimaging model from *Learning diverse and generic representations of the brain with large-scale multi-task pretraining* (medRxiv 2025). The package wraps an SFCN architecture trained on T1 MRI to predict age, sex, handedness, BMI, fluid intelligence, and neuroticism, and exposes finetuning + inference flows for downstream use. Current release: **v4.1.0**.
+`pyment` is the pretrained multi-task neuroimaging model from *Learning diverse and generic representations of the brain with large-scale multi-task pretraining* (medRxiv 2025). The package wraps an SFCN architecture trained on T1 MRI to predict age, sex, handedness, BMI, fluid intelligence, and neuroticism, and exposes finetuning + inference flows for downstream use. Current release: **v5.0.0**.
 
 Python is hard-pinned to **3.13.x** with **TensorFlow 2.21**. The SFCN code uses `tf.keras.optimizers.legacy.*` (see `_LEGACY_OPTIMIZERS` in `pyment/cli/finetune_from_configuration.py`) — verify this namespace still exists in TF 2.21 before touching the optimizer code. Weight checkpoints are TF SavedModel format.
 
@@ -41,7 +41,7 @@ CLIs installed by `poetry install` (entry points in `pyproject.toml`):
 ```
 pyment-predict     <fastsurfer-folder>  -d <out.csv>    # inference
 pyment-finetune    <configuration.json>                 # finetuning
-pyment-verify-mgh  <fastsurfer-folder>  --regex '.*crop\.mgz$'  # sanity-check MGH loader
+pyment-verify-loader  <fastsurfer-folder>  --regex '.*crop\.mgz$'  # sanity-check MGH loader
 ```
 
 Sanity-check IXI predictions (should yield MAE ≈ 3.12):

@@ -28,7 +28,7 @@ dependencies = [
 [project.scripts]
 pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
 pyment-finetune = "pyment.cli.finetune_from_configuration:main"
-pyment-verify-mgh = "pyment.cli.verify_mgh_loader:main"
+pyment-verify-loader = "pyment.cli.verify_mgh_loader:main"
 
 [tool.poetry]
 packages = [{include = "pyment"}]
