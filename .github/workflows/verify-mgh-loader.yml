@@ -16,13 +16,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.13'
 
       - name: Install pyment
         run: pip install .
 
       - name: Run verify
         run: |
-          python -m pyment.cli.verify_mgh_loader \
+          pyment-verify-loader \
             ${{ github.workspace }}/.github/workflows/fixtures/ixi/fastsurfer \
             --regex '.*crop\.mgz$'

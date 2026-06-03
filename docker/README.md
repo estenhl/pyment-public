@@ -23,12 +23,6 @@ docker build \
     .
 ```
 
-The weights identifier used at runtime defaults to `multi-2025` and can be overridden with the `PYMENT_WEIGHTS` environment variable:
-
-```
-docker run --env PYMENT_WEIGHTS=reg-2025 estenhl/pyment-preprocess-and-predict:<VERSION> ...
-```
-
 ## Building docker container for preprocessing
 Note that building the container requires a folder called `checkpoints` that contains the FastSurfer segmentation checkpoints in a subfolder called `fastsurfer`. This folder should contain the files `aparc_vinn_axial_v2.0.0.pkl`, `aparc_vinn_coronal_v2.0.0.pkl`, and `aparc_vinn_sagittal_v2.0.0.pkl`. The command should be run from the root of the repository:
 

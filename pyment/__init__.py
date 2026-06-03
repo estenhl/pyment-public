@@ -8,15 +8,14 @@ def _get_version():
         return version('pyment')
     except PackageNotFoundError:
         import os
-
-        import tomli
+        import tomllib
 
         pyproject_path = os.path.join(
             os.path.dirname(__file__), os.pardir, 'pyproject.toml'
         )
         if os.path.exists(pyproject_path):
             with open(pyproject_path, 'rb') as f:
-                data = tomli.load(f)
+                data = tomllib.load(f)
 
             return data['project']['version']
 

@@ -18,20 +18,20 @@ from pyment.models.sfcn import MultiTaskSFCN
 logger = logging.getLogger(__name__)
 
 
-def _resolve_optimizer(optimizer: str) -> tf.keras.optimizers.legacy.Optimizer:
-    _legacy_optimizers = {
-        'adam': tf.keras.optimizers.legacy.Adam,
-        'sgd': tf.keras.optimizers.legacy.SGD,
-        'rmsprop': tf.keras.optimizers.legacy.RMSprop,
+def _resolve_optimizer(optimizer: str) -> tf.keras.optimizers.Optimizer:
+    _optimizers = {
+        'adam': tf.keras.optimizers.Adam,
+        'sgd': tf.keras.optimizers.SGD,
+        'rmsprop': tf.keras.optimizers.RMSprop,
     }
 
     if not isinstance(optimizer, str):
         raise ValueError('Optimizer name must be a string')
 
-    if optimizer not in _legacy_optimizers:
+    if optimizer not in _optimizers:
         raise KeyError(f'Unknown optimizer name {optimizer}')
 
-    return _legacy_optimizers[optimizer]()
+    return _optimizers[optimizer]()
 
 
 def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
@@ -88,7 +88,7 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
         epochs=configuration.epochs,
     )
 
-    model.save(os.path.join(configuration.destination, 'model'))
+    model.save(os.path.join(configuration.destination, 'model.keras'))
 
     history_serializable = {
         k: [float(v) for v in vals] for k, vals in history.history.items()

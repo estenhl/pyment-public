@@ -1,10 +1,16 @@
-FROM python:3.10.2-slim
+FROM python:3.10-slim AS py310
+FROM python:3.13-slim
 
 RUN apt-get update && apt-get install -y \
-    apt-utils git \
+    apt-utils git patchelf \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /envs && python -m venv /envs/fastsurfer
+COPY --from=py310 /usr/local/bin/python3.10 /usr/local/bin/python3.10
+COPY --from=py310 /usr/local/lib/python3.10 /usr/local/lib/python3.10
+COPY --from=py310 /usr/local/lib/libpython3.10.so.1.0 /usr/local/lib/libpython3.10.so.1.0
+RUN ldconfig
+
+RUN mkdir -p /envs && python3.10 -m venv /envs/fastsurfer
 
 RUN mkdir /repos && \
     git clone https://github.com/Deep-MI/FastSurfer.git /repos/FastSurfer \
@@ -20,7 +26,9 @@ RUN /envs/fastsurfer/bin/pip install --upgrade pip && \
     sed -i '/simpleitk/d' ${FASTSURFER_HOME}/requirements.txt && \
     /envs/fastsurfer/bin/pip install -r ${FASTSURFER_HOME}/requirements.txt
 
-#COPY ${CHECKPOINTS_FOLDER} ${FASTSURFER_HOME}/FastSurferCNN/checkpoints
+# Clear executable stack flags on torch libs — required on glibc 2.35+
+RUN find /envs/fastsurfer -name "*.so" | xargs patchelf --clear-execstack
+
 COPY checkpoints/fastsurfer ${FASTSURFER_HOME}/FastSurferCNN/checkpoints
 
 RUN mkdir /scripts

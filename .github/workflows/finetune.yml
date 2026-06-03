@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.13'
 
       - name: Upgrade pip
         run: pip install --upgrade pip
@@ -81,7 +81,7 @@ jobs:
                 --license /licenses/freesurfer.txt \
                 --python /envs/fastsurfer/bin/python \
                 /input /output/fastsurfer && \
-              /envs/pyment/bin/pyment-finetune \
+              pyment-finetune \
                 /configuration.json
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
@@ -96,7 +96,7 @@ jobs:
         run: |
           output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs/finetune_output"
           for f in \
-            "$output_dir/model/saved_model.pb" \
+            "$output_dir/model.keras" \
             "$output_dir/history.json" \
             "$output_dir/predictions.csv"; do
             if [ ! -f "$f" ]; then

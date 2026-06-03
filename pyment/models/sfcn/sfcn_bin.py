@@ -18,6 +18,6 @@ class BinarySFCN(SFCN):
         bottleneck: Tensor,
         name: str,
     ) -> Tensor:
-        layer = Dense(1, activation='sigmoid', name=f'{name}/predictions')
+        layer = Dense(1, activation='sigmoid', name=f'{name}_predictions')
 
         return layer(bottleneck)

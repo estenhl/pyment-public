@@ -7,9 +7,9 @@ from pyment.cli.finetune_from_configuration import _resolve_optimizer
 @pytest.mark.parametrize(
     'name, expected_cls',
     [
-        ('adam', tf.keras.optimizers.legacy.Adam),
-        ('sgd', tf.keras.optimizers.legacy.SGD),
-        ('rmsprop', tf.keras.optimizers.legacy.RMSprop),
+        ('adam', tf.keras.optimizers.Adam),
+        ('sgd', tf.keras.optimizers.SGD),
+        ('rmsprop', tf.keras.optimizers.RMSprop),
     ],
 )
 def test_known_optimizer_returns_instance(name, expected_cls):

@@ -3,6 +3,8 @@
 Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete them when done — anything worth preserving long-term belongs in `CLAUDE.md`.
 
 ## Open
+
+- [ ] **Replace IXI with an accessible tutorial dataset** — the IXI download URL (biomedic.doc.ic.ac.uk) now returns 403 and is inaccessible from the browser. Candidates: Calgary-Campinas-359 (CC359) or a small OpenNeuro dataset with T1 + age/sex metadata. Update `scripts/download_ixi.py`, the CI fixtures, and the README tutorial sections.
 - [ ] **Write a proper finetuning tutorial**
   - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.
   - Tutorial should cover:

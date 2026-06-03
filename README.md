@@ -52,6 +52,10 @@ docker run --rm -it \
     --gpus all \
     estenhl/pyment-preprocess-and-predict:latest
 ```
+The weights identifier defaults to `multi-2025` and can be overridden with `PYMENT_WEIGHTS`:
+```
+docker run --env PYMENT_WEIGHTS=reg-2025 ... estenhl/pyment-preprocess-and-predict:latest
+```
 </details>
 
 <details>
@@ -94,41 +98,28 @@ docker run --rm -it \
 # Local install
 
 Installing the package locally allows for more flexibility in terms of modifying the model. Depending on the OS, this generally requires three steps:
-1. [Configure the system (only necessary on Linux)](#system-configuration)
+1. [Install drivers (only necessary on Linux)](#install-drivers)
 2. [Prepare a Python environment](#prepare-a-python-virtual-environment)
 3. [Install the pyment-package](#install-the-pyment-package)
 
 If we want to run either inference or finetuning locally, this would typically also require us to install FastSurfer for preprocessing. Once we have finished the setup, we can run either inference or finetuning via prepackaged scripts.
 
-## System configuration
+## Install drivers
 
-The system configuration is only necessary if we are sitting on a Linux machine:
+GPU drivers are only required on Linux. TensorFlow bundles its own CUDA libraries, so no manual CUDA or cuDNN installation is needed — only the NVIDIA driver.
 
 <details>
-<summary>Configure Ubuntu</summary>
+<summary>Install drivers on Ubuntu</summary>
 
-First we need to download and install CUDA 11.2:
 ```
-wget https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda_11.2.2_460.32.03_linux.run
-sudo sh cuda_11.2.2_460.32.03_linux.run --silent --toolkit --installpath=/usr/local/cuda-11.2
+sudo apt-get install ubuntu-drivers-common
+sudo ubuntu-drivers autoinstall
+sudo reboot
 ```
 
-Next, cudnn must be installed. Download a suitable deb-file from
-https://developer.nvidia.com/rdp/cudnn-archive. Then install the file:
+After rebooting, verify the driver is working:
 ```
-sudo dpkg -i ~/Downloads/cudnn-local-repo-ubuntu2204-8.9.7.29_1.0-1_amd64.deb
-sudo cp /var/cudnn-local-repo-ubuntu2204-8.9.7.29/cudnn-local-*-keyring.gpg /usr/share/keyrings/
-sudo apt update
-sudo apt install libcudnn8 libcudnn8-dev
-sudo cp /usr/include/cudnn*.h /usr/local/cuda-11.2/include/
-sudo cp -P /usr/lib/x86_64-linux-gnu/libcudnn*.so* /usr/local/cuda-11.2/lib64/
-sudo ldconfig
-```
-Finally, we must configure the system paths in .bashrc:
-```
-echo 'export CUDA_HOME=/usr/local/cuda-11.2' >> ~/.bashrc
-echo 'export PATH=$CUDA_HOME/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64' >> ~/.bashrc
+nvidia-smi
 ```
 
 </details>
@@ -170,9 +161,10 @@ echo 'eval "$(pyenv init - zsh)"' >> ~/.zshrc
 
 </details>
 
-After installing pyenv, we can download the Python-version expected by this library:
+After installing pyenv, we can download the Python-versions expected by this library:
 ```
-pyenv install 3.10.4
+pyenv install 3.13
+pyenv install 3.10.2
 ```
 
 ## Install the pyment-package
@@ -185,7 +177,7 @@ From here, the approach diverges depending on whether we want to install the pac
 
 First, we need to create a Python-environment with the correct python version
 ```
-pyenv shell 3.10.4
+pyenv shell 3.13
 ```
 Next, we can create a virtual environment with this same Python-version using Pythons [venv-module](https://docs.python.org/3/library/venv.html):
 ```
@@ -216,8 +208,8 @@ cd pyment-public
 ```
 Then we can configure the local Python-version and install the package
 ```
-pyenv local 3.10.4
-poetry env use 3.10.4
+pyenv local 3.13
+poetry env use 3.13
 poetry install
 ```
 This will result in a virtual environment managed by poetry that can be activated with
@@ -251,9 +243,11 @@ git clone --branch stable https://github.com/Deep-MI/FastSurfer.git $FASTSURFER_
 ```
 Then we can create a python environment for fastsurfer, and install its dependencies. Note that the packages are installed using pip from the newly created virtual environment, not the system default:
 ```
+pyenv shell 3.10.2  # FastSurfer requires Python 3.10
 mkdir -p $HOME/venvs
 export FASTSURFER_VENV=$HOME/venv/fastsurfer
 python -m venv $FASTSURFER_VENV
+pyenv shell 3.13    # Switch back for the rest of the tutorial
 # The SimpleITK version in the requirements-file has been yanked, so we manually install a valid version prior to installing the remaining requirements.
 $FASTSURFER_VENV/bin/pip install simpleitk==2.1.1.2
 # SimpleITK then has to be removed from requirements.txt before installing the rest
@@ -339,7 +333,7 @@ python scripts/create_fastsurfer_conformed_crops.py \
 ```
 And then by running the built-in CLI for sanity checking from the other repository (this requires the library to be installed, either implicitly via installing this repository locally, or by cloning and building that repository directly):
 ```
-verify-mgh-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
+pyment-verify-loader $HOME/data/ixi/outputs/fastsurfer -r crop.mgz
 ```
 
 # Contributing
