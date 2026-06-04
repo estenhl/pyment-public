@@ -6,8 +6,8 @@ usage() {
   echo "Arguments:"
   echo "  -l, --license LICENSE    Path to FreeSurfer license (required)"
   echo "  -p, --python PYTHON      Path to Python-executable to use (required)"
-  echo "  INPUT                    Input file (required)"
-  echo "  OUTPUT                   Output file (required)"
+  echo "  INPUT                    Directory with input data (required)"
+  echo "  OUTPUT                   Directory where FastSurfer data is written (required)"
 }
 
 LICENSE=""
@@ -24,6 +24,10 @@ while [ $# -gt 0 ]; do
     -p|--python)
       PYTHON="$2"
       shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
       ;;
     -*|--*)
       echo "Unknown option $1"

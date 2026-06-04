@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import nibabel as nib
 from nibabel.spatialimages import SpatialImage
+from tqdm import tqdm
 
 from pyment.preprocessing import conform
 
@@ -89,9 +90,12 @@ def ensure_fastsurfer_crops_exists(
 
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
         results = list(
-            executor.map(
-                lambda folder: ensure_fastsurfer_crop_exists(folder),
-                folders,
+            tqdm(
+                executor.map(
+                    lambda folder: ensure_fastsurfer_crop_exists(folder),
+                    folders,
+                ),
+                total=len(folders),
             )
         )
 
