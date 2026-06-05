@@ -1,18 +1,13 @@
 """Generate predictions for FastSurfer subject folders."""
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
 import re
 
-import nibabel as nib
-import numpy as np
 import pandas as pd
-from nibabel.spatialimages import SpatialImage
-from tqdm import tqdm
-
-from pyment.data.utils import ensure_fastsurfer_crop_exists
-from pyment.models.sfcn import sfcn_factory
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +90,14 @@ def predict_from_fastsurfer_folder(
     ValueError
         If ``destination`` already exists as a file.
     """
+
+    import nibabel as nib
+    import numpy as np
+    from nibabel.spatialimages import SpatialImage
+    from tqdm import tqdm
+
+    from pyment.data.utils import ensure_fastsurfer_crop_exists
+    from pyment.models.sfcn import sfcn_factory
 
     if destination is not None and os.path.isfile(destination):
         raise ValueError(f'Destination {destination} already exists')

@@ -108,13 +108,13 @@ docker run --rm -it \
     --user $(id -u):$(id -g) \
     --volume $HOME/data/ds000030/images:/input \
     --volume $HOME/data/ds000030/outputs:/output \
-    --volume $HOME/licenses:/licenses \
+    --volume <path_to_licenses>:/licenses \
     --gpus all \
     estenhl/pyment-preprocess-and-predict:latest
 ```
-The weights identifier defaults to `multi-2025` and can be overridden with `PYMENT_WEIGHTS`:
+The weights identifier defaults to `multi-2025` and can be overridden with `WEIGHTS`:
 ```
-docker run --env PYMENT_WEIGHTS=reg-2025 ... estenhl/pyment-preprocess-and-predict:latest
+docker run --env WEIGHTS=reg-2025 ... estenhl/pyment-preprocess-and-predict:latest
 ```
 </details>
 
@@ -158,7 +158,7 @@ docker run --rm -it \
 ## Local install
 
 Installing the package locally allows for more flexibility in terms of modifying the model. Depending on the OS, this generally requires three steps:
-1. [Install drivers (only necessary on Linux)](#install-drivers)
+1. [Install drivers (only necessary on Linux with a GPU)](#install-drivers)
 2. [Prepare a Python environment](#prepare-a-python-virtual-environment)
 3. [Install the pyment-package](#install-the-pyment-package)
 
@@ -166,7 +166,7 @@ If we want to run either inference or finetuning locally, this would typically a
 
 ### Install drivers
 
-GPU drivers are only required on Linux. TensorFlow bundles its own CUDA libraries, so no manual CUDA or cuDNN installation is needed — only the NVIDIA driver.
+GPU acceleration is only available on Linux. CPU-only Linux users can skip this step. Only the NVIDIA driver is required — CUDA libraries are installed via pip as part of the `cuda` optional extra (see [Install the pyment-package](#install-the-pyment-package)).
 
 <details>
 <summary>Install drivers on Ubuntu</summary>
@@ -183,6 +183,7 @@ nvidia-smi
 ```
 
 </details>
+
 
 ### Prepare a Python virtual environment
 
@@ -252,6 +253,10 @@ Finally, we can install the package using pip:
 ```
 pip install git+https://github.com/estenhl/pyment-public
 ```
+To enable GPU support, install the `cuda` extra instead:
+```
+pip install "pyment[cuda] @ git+https://github.com/estenhl/pyment-public"
+```
 </details>
 
 <details>
@@ -272,11 +277,23 @@ pyenv local 3.13
 poetry env use 3.13
 poetry install
 ```
+To enable GPU support on Linux, add the `cuda` extra:
+```
+poetry install --extras cuda
+```
 This will result in a virtual environment managed by poetry that can be activated with
 ```
 eval $(poetry env activate)
 ```
 </details>
+
+After installing the `cuda` extra (either via pip or poetry), register the CUDA libraries with the system linker so TensorFlow can find them (run once):
+```
+find $(python -c "import site; print(site.getsitepackages()[0])")/nvidia \
+    -mindepth 2 -maxdepth 2 -name lib -type d \
+    | sudo tee /etc/ld.so.conf.d/nvidia-pip.conf && \
+sudo ldconfig
+```
 
 ### Preprocessing images
 
@@ -308,7 +325,11 @@ Then, predictions can be generated either using the built-in CLI or native pytho
 <summary>Generate predictions using CLI</summary>
 
 ```
+# To generate predictions from the multi-task model
 pyment-predict $HOME/data/ds000030/preprocessed -d $HOME/data/ds000030/predictions.csv
+
+# To generate predictions from the regression model
+pyment-predict $HOME/data/ds000030/preprocessed/ -m sfcn-reg -w reg-2025 -t age -d $HOME/data/ds000030/reg-predictions.csv
 ```
 </details>
 
@@ -316,7 +337,11 @@ pyment-predict $HOME/data/ds000030/preprocessed -d $HOME/data/ds000030/predictio
 <summary>Generate predictions using Python</summary>
 
 ```
+# To generate predictions from the multi-task model
 python pyment/cli/predict_from_fastsurfer_folder.py $HOME/data/ds000030/preprocessed -d $HOME/data/ds000030/predictions.csv
+
+# To generate predictions from the regression model
+python pyment/cli/predict_from_fastsurfer_folder.py $HOME/data/ds000030/preprocessed/ -m sfcn-reg -w reg-2025 -t age -d $HOME/data/ds000030/reg-predictions.csv
 ```
 </details>
 
@@ -333,7 +358,7 @@ python scripts/evaluate_ds000030_predictions.py \
     -l $HOME/data/ds000030/labels.csv \
     -p $PREDICTION_PATH
 ```
-If everything works, this should yield MAE=4.58. There are also options for visualizing the predictions that can be explored via various parameters that are described in ```python scripts/evaluate_ds000030_predictions.py --help```.
+If everything works, this should yield MAE=4.58. There are also options for visualizing the predictions that can be explored via various parameters that are described in ```python scripts/evaluate_ds000030_predictions.py --help```. The regression model should yield MAE=5.19
 
 # Finetuning for a new task
 
