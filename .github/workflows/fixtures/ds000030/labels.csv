@@ -1,4 +1,4 @@
-id,age,sex,diagnosis,has_diagnosis
+image_id,age,sex,diagnosis,has_diagnosis
 sub-10159_T1w,30,F,CONTROL,False
 sub-10171_T1w,24,M,CONTROL,False
 sub-10189_T1w,49,M,CONTROL,False
