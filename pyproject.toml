@@ -1,6 +1,6 @@
 [project]
 name = "pyment"
-version = "5.0.0"
+version = "5.0.1"
 description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
 authors = [
     {name = "Esten Leonardsen", email = "estenleonardsen@proton.me"}
@@ -24,6 +24,9 @@ dependencies = [
     "xlrd==2.0.2",
     "pydantic==2.12.4",
 ]
+
+[project.optional-dependencies]
+cuda = ["tensorflow[and-cuda]==2.21.0; sys_platform == 'linux'"]
 
 [project.scripts]
 pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"

@@ -90,9 +90,9 @@ The CI fixture configuration that exercises this path lives at `.github/workflow
 
 `SFCN.__init__(weights=...)` accepts either a local path-prefix or a known identifier. Resolution happens in `pyment/models/utils/ensure_weights.py`:
 - Local path: looks for `<path>.index` + `<path>.data-00000-of-00001`.
-- Identifier: looks it up in the `IDENTIFIERS` dict (currently only `multi-2025`) and downloads the two blobs by SHA from the GitHub blob API into `~/.pyment/weights/`.
+- Identifier: looks it up in the `IDENTIFIERS` dict and downloads the blob by SHA from the GitHub blob API into `~/.pyment/weights/`. Current identifiers: `multi-2025` (6-head multi-task), `multi-2025-no-abcd` (same, trained without ABCD), `reg-2025` (single brain age regression head).
 
-CI workflows replicate this download mechanism inline (see the `Download weights` step in `.github/workflows/finetune.yml` and `preprocess-and-predict.yml`) — if you change `IDENTIFIERS`, update the workflow SHAs too.
+CI workflows download weights via `scripts/download_weights.py --identifiers <id...>` — if you add a new identifier to `IDENTIFIERS`, no workflow changes are needed unless the new identifier is used in a workflow step.
 
 ### Data path: FastSurfer-preprocessed MRI
 

@@ -10,7 +10,7 @@
         "kind": "sfcn-bin"
     },
     "target": {
-        "name": "bachelor",
+        "name": "has_diagnosis",
         "kind": "binary",
         "labels": [false, true]
     },

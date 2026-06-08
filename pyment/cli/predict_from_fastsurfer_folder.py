@@ -1,31 +1,37 @@
 """Generate predictions for FastSurfer subject folders."""
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
 import re
 
-import nibabel as nib
-import numpy as np
 import pandas as pd
-from nibabel.spatialimages import SpatialImage
-from tqdm import tqdm
-
-from pyment.data.utils import ensure_fastsurfer_crop_exists
-from pyment.models.sfcn import sfcn_factory
 
 logger = logging.getLogger(__name__)
 
 
-def _parse_folder_name(name: str) -> tuple[str, str, str]:
+def _parse_folder_name(
+    name: str,
+) -> tuple[str | None, str | None, str | None, str | None]:
     match = re.fullmatch(
-        r'sub-(?P<subject>.*)_ses-(?P<session>.*)_run-(?P<run>[^_]).*', name
+        r'sub-(?P<subject>[^_]+)'
+        r'(?:_ses-(?P<session>[^_]+))?'
+        r'(?:_run-(?P<run>[^_]+))?'
+        r'(?:_(?P<modality>[^_-]+))?',
+        name,
     )
 
     if not match:
         raise ValueError(f'Unable to match {name}')
 
-    return (match.group('subject'), match.group('session'), match.group('run'))
+    return (
+        match.group('subject'),
+        match.group('session'),
+        match.group('run'),
+        match.group('modality'),
+    )
 
 
 def predict_from_fastsurfer_folder(
@@ -85,6 +91,14 @@ def predict_from_fastsurfer_folder(
         If ``destination`` already exists as a file.
     """
 
+    import nibabel as nib
+    import numpy as np
+    from nibabel.spatialimages import SpatialImage
+    from tqdm import tqdm
+
+    from pyment.data.utils import ensure_fastsurfer_crop_exists
+    from pyment.models.sfcn import sfcn_factory
+
     if destination is not None and os.path.isfile(destination):
         raise ValueError(f'Destination {destination} already exists')
 
@@ -109,10 +123,10 @@ def predict_from_fastsurfer_folder(
 
     for folder in tqdm(folders):
         try:
-            subject, session, run = _parse_folder_name(folder)
+            subject, session, run, modality = _parse_folder_name(folder)
         except ValueError as e:
             logger.warning(str(e))
-            subject, session, run = None, None, None
+            subject, session, run, modality = None, None, None, None
 
         if not ensure_fastsurfer_crop_exists(os.path.join(source, folder)):
             logger.warning(
@@ -138,6 +152,7 @@ def predict_from_fastsurfer_folder(
                     'source': os.path.join(source, folder),
                     'subject': subject,
                     'session': session,
+                    'modality': modality,
                     'run': run,
                 },
                 **{targets[i]: predictions[i] for i in range(len(targets))},

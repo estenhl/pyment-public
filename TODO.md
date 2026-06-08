@@ -4,7 +4,6 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
 
 ## Open
 
-- [ ] **Replace IXI with an accessible tutorial dataset** — the IXI download URL (biomedic.doc.ic.ac.uk) now returns 403 and is inaccessible from the browser. Candidates: Calgary-Campinas-359 (CC359) or a small OpenNeuro dataset with T1 + age/sex metadata. Update `scripts/download_ixi.py`, the CI fixtures, and the README tutorial sections.
 - [ ] **Write a proper finetuning tutorial**
   - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.
   - Tutorial should cover:
@@ -15,12 +14,6 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
     - Output artifacts produced under `destination/`: `model/` (SavedModel), `history.json`, `predictions.csv`.
   - Probably belongs in `README.md` under a new "Finetuning" section, or as a standalone doc under a `docs/` directory.
 
-- [ ] **Add new pretrained weight identifiers**
-  - Blobs already uploaded for two new identifiers; remaining steps:
-    - [ ] Add all new identifiers to `IDENTIFIERS` in `pyment/models/utils/ensure_weights.py`.
-    - [ ] **Mirror the SHAs into CI workflows** — both `.github/workflows/finetune.yml` and `.github/workflows/preprocess-and-predict.yml` have a "Download weights" step that hardcodes the SHAs. Update both, or refactor those steps to call `ensure_weights` instead of duplicating the logic.
-    - [ ] **Test each identifier** — extend `scripts/evaluate_ixi_predictions.py` for new multi-task identifiers.
-    - [ ] Update the "Pretrained weight resolution" section of `CLAUDE.md` to list all identifiers and the naming convention.
 
 - [ ] **Expose SFCN-reg 2022 weights** *(deferred — needs scoping)*
   - The SFCN-reg 2022 model was trained on a different preprocessing pipeline than the current FastSurfer-based flow, so serving it requires either a separate Docker image or a documented alternative preprocessing path. Needs a decision on whether to bother before any implementation work starts.
