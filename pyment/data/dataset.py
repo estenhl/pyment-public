@@ -91,6 +91,38 @@ class Dataset:
 
         pass
 
+    def random_split(self, training_fraction: float) -> tuple[Dataset, Dataset]:
+        """Split a dataset into random training and validation subsets.
+
+        Parameters
+        ----------
+        training_fraction : float
+            The proportion of data to use for training
+
+        Returns
+        -------
+        tuple[Dataset, Dataset]
+            Training and validation subsets, split at
+            ``training_fraction * len(dataset)``.
+        """
+        train_len = int(training_fraction * len(self))
+
+        train_labels = self.labels.iloc[:train_len]
+        validation_labels = self.labels.iloc[train_len:]
+
+        return (
+            self.__class__(
+                labels=train_labels,
+                target=self.target,
+                target_encoder=self.target_encoder,
+            ),
+            self.__class__(
+                labels=validation_labels,
+                target=self.target,
+                target_encoder=self.target_encoder,
+            ),
+        )
+
     def __len__(self) -> int:
         return len(self.labels)
 

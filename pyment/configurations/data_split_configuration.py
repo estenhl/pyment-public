@@ -11,7 +11,7 @@ class DataSplitConfiguration(BaseModel):
     training_fraction: float
 
     def split(self, dataset: Dataset) -> tuple[Dataset, Dataset]:
-        """Split a dataset into training and validation subsets.
+        """Split a dataset into random training and validation subsets.
 
         Parameters
         ----------
@@ -24,20 +24,4 @@ class DataSplitConfiguration(BaseModel):
             Training and validation subsets, split at
             ``training_fraction * len(dataset)``.
         """
-        train_len = int(self.training_fraction * len(dataset))
-
-        train_labels = dataset.labels.iloc[:train_len]
-        validation_labels = dataset.labels.iloc[train_len:]
-
-        return (
-            dataset.__class__(
-                labels=train_labels,
-                target=dataset.target,
-                target_encoder=dataset.target_encoder,
-            ),
-            dataset.__class__(
-                labels=validation_labels,
-                target=dataset.target,
-                target_encoder=dataset.target_encoder,
-            ),
-        )
+        return dataset.random_split(self.training_fraction)

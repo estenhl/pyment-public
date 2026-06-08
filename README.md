@@ -368,6 +368,17 @@ The images should be [preprocessed](#preprocessing) using the same pipeline as d
 ## Finetuning via Python
 The most flexible way of finetuning the model is to use the pretrained model as a Python artifact and write custom Python-code around it, to both set up the data pipeline and reconfigure the model for a new task. An example can be found in [finetune.ipynb](notebooks/finetune.ipynb).
 
+To run the notebook, install the optional `notebooks` extra and launch JupyterLab:
+```
+pip install pyment[notebooks]
+jupyter lab
+```
+If installing from source with Poetry:
+```
+poetry install --extras notebooks
+jupyter lab
+```
+
 # Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, code style, and how to submit changes.
