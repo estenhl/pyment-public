@@ -61,8 +61,11 @@ def download_dataset(destination: str, n: int | None = None):
     labels = participants[
         ['participant_id', 'age', 'gender', 'diagnosis']
     ].copy()
+    labels['id'] = labels['participant_id'] + '_T1w'
+    labels = labels.drop(columns='participant_id')
     labels = labels.rename(columns={'gender': 'sex'})
     labels['has_diagnosis'] = labels['diagnosis'] != 'CONTROL'
+    labels = labels[['id', 'age', 'sex', 'diagnosis', 'has_diagnosis']]
     labels.to_csv(os.path.join(destination, 'labels.csv'), index=False)
 
 

@@ -14,14 +14,14 @@ def evaluate_predictions(
     labels = pd.read_csv(labels_path)
     predictions = pd.read_csv(predictions_path)
 
-    predictions['participant_id'] = predictions['source'].apply(
-        lambda path: path.split('/')[-1].split('_')[0]
+    predictions['id'] = predictions['source'].apply(
+        lambda path: path.split('/')[-1]
     )
     predictions = predictions.rename(columns={'age': 'age_prediction'})
     predictions = pd.merge(
-        predictions[['participant_id', 'age_prediction']],
-        labels[['participant_id', 'age']],
-        on='participant_id',
+        predictions[['id', 'age_prediction']],
+        labels[['id', 'age']],
+        on='id',
         how='left',
     )
 
