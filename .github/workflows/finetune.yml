@@ -85,16 +85,16 @@ jobs:
                 /configuration.json
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
-          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/raw/." "${CONTAINER}:/input/"
-          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/labels.csv" "${CONTAINER}:/labels.csv"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ds000030/raw/." "${CONTAINER}:/input/"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ds000030/labels.csv" "${CONTAINER}:/labels.csv"
           docker cp "${{ github.workspace }}/.github/workflows/fixtures/finetune_binary.json" "${CONTAINER}:/configuration.json"
           docker start -a "${CONTAINER}"
-          mkdir -p "${{ github.workspace }}/.act/ixi/finetune_outputs"
-          docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ixi/finetune_outputs/"
+          mkdir -p "${{ github.workspace }}/.act/ds000030/finetune_outputs"
+          docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ds000030/finetune_outputs/"
 
       - name: Verify output files
         run: |
-          output_dir="${{ github.workspace }}/.act/ixi/finetune_outputs/finetune_output"
+          output_dir="${{ github.workspace }}/.act/ds000030/finetune_outputs/finetune_output"
           for f in \
             "$output_dir/model.keras" \
             "$output_dir/history.json" \
