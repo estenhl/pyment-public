@@ -21,7 +21,8 @@ jobs:
       - name: Download weights
         run: |
           pip install .
-          python scripts/download_weights.py --identifiers multi-2025 --destination checkpoints/pyment
+          python scripts/download_weights.py --identifiers multi-2025 reg-2025 --destination checkpoints/pyment
+
       - name: Install Docker CLI
         run: |
           if ! command -v docker >/dev/null 2>&1; then
@@ -90,13 +91,17 @@ jobs:
                 /input /output/fastsurfer && \
               pyment-predict \
                 /output/fastsurfer \
-                -d /output/predictions.csv
+                -d /output/predictions_multi.csv && \
+              pyment-predict \
+                /output/fastsurfer \
+                -m sfcn-reg -w reg-2025 -t age \
+                -d /output/predictions_reg.csv
             ')
           echo "CONTAINER=${CONTAINER}" >> "$GITHUB_ENV"
-          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ixi/raw/." "${CONTAINER}:/input/"
+          docker cp "${{ github.workspace }}/.github/workflows/fixtures/ds000030/raw/." "${CONTAINER}:/input/"
           docker start -a "${CONTAINER}"
-          mkdir -p "${{ github.workspace }}/.act/ixi/outputs"
-          docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ixi/outputs/"
+          mkdir -p "${{ github.workspace }}/.act/ds000030/outputs"
+          docker cp "${CONTAINER}:/output/." "${{ github.workspace }}/.act/ds000030/outputs/"
 
       - name: Compare predictions
         run: |
@@ -106,52 +111,39 @@ jobs:
           import numpy as np
           import pandas as pd
 
-          gt = os.path.join(
-            os.environ["GITHUB_WORKSPACE"],
-            ".github/workflows/fixtures/ixi/predictions.csv"
-          )
-          pred = os.path.join(
-            os.environ["GITHUB_WORKSPACE"],
-            ".act/ixi/outputs/predictions.csv"
-          )
-          key = "source"
+          workspace = os.environ["GITHUB_WORKSPACE"]
+          outputs = os.path.join(workspace, ".act/ds000030/outputs")
 
-          gt = pd.read_csv(gt)
-          gt[key] = gt[key].apply(lambda x: x.split('/')[-1])
-          pred = pd.read_csv(pred)
-          pred[key] = pred[key].apply(lambda x: x.split('/')[-1])
+          gt = pd.read_csv(
+            os.path.join(workspace, ".github/workflows/fixtures/ds000030/predictions.csv")
+          )
 
-          if key not in gt.columns or key not in pred.columns:
+          multi = pd.read_csv(os.path.join(outputs, "predictions_multi.csv"))
+          multi["id"] = multi["source"].apply(lambda x: x.split("/")[-1])
+          multi = multi.rename(columns={"age": "multi-2025"})[["id", "multi-2025"]]
+
+          reg = pd.read_csv(os.path.join(outputs, "predictions_reg.csv"))
+          reg["id"] = reg["source"].apply(lambda x: x.split("/")[-1])
+          reg = reg.rename(columns={"age": "reg-2025"})[["id", "reg-2025"]]
+
+          pred = pd.merge(multi, reg, on="id", how="inner")
+          df = pd.merge(gt, pred, on="id", how="inner", suffixes=["_gt", "_pred"])
+
+          if len(df) != len(gt):
             print(
-              f"Missing key column '{key}' in one or both files.",
+              f"Expected {len(gt)} rows after join, got {len(df)}",
               file=sys.stderr
             )
-            print(f"Ground truth columns: {list(gt.columns)}", file=sys.stderr)
-            print(f"Prediction columns: {list(pred.columns)}", file=sys.stderr)
             sys.exit(1)
 
-          columns = [
-            'age', 'sex', 'handedness', 'bmi', 'fluid_intelligence',
-            'neuroticism'
-          ]
-
-          df = pd.merge(gt, pred, how='inner', on=key, suffixes=['_gt', '_pred'])
-
-          if not len(df) == len(gt):
-            print(
-              "Non-overlapping samples between new predictions and ground "
-              "truths"
-            )
-            sys.exit(1)
-
-          for col in columns:
-            if not np.allclose(df[f'{col}_gt'], df[f'{col}_pred'], atol=1e-3):
-              mean_difference = np.mean(
-                np.abs(df[f'{col}_gt'] - df[f'{col}_pred'])
-              )
+          for col in ["multi-2025", "reg-2025"]:
+            gt_col = f"{col}_gt"
+            pred_col = f"{col}_pred"
+            if not np.allclose(df[gt_col], df[pred_col], atol=1e-3):
+              mean_difference = np.mean(np.abs(df[gt_col] - df[pred_col]))
               print(
-                f'Column {col} differs between new predictions and ground '
-                f'truths. Mean difference: {mean_difference}'
+                f"Column {col} differs between new predictions and ground "
+                f"truths. Mean difference: {mean_difference}"
               )
               sys.exit(1)
           PY

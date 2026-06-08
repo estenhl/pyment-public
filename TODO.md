@@ -25,12 +25,6 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
     - Output artifacts produced under `destination/`: `model/` (SavedModel), `history.json`, `predictions.csv`.
   - Probably belongs in `README.md` under a new "Finetuning" section, or as a standalone doc under a `docs/` directory.
 
-- [ ] **Add new pretrained weight identifiers**
-  - Blobs already uploaded for two new identifiers; remaining steps:
-    - [ ] Add all new identifiers to `IDENTIFIERS` in `pyment/models/utils/ensure_weights.py`.
-    - [ ] **Mirror the SHAs into CI workflows** — both `.github/workflows/finetune.yml` and `.github/workflows/preprocess-and-predict.yml` have a "Download weights" step that hardcodes the SHAs. Update both, or refactor those steps to call `ensure_weights` instead of duplicating the logic.
-    - [ ] **Test each identifier** — extend `scripts/evaluate_ixi_predictions.py` for new multi-task identifiers.
-    - [ ] Update the "Pretrained weight resolution" section of `CLAUDE.md` to list all identifiers and the naming convention.
 
 - [ ] **Expose SFCN-reg 2022 weights** *(deferred — needs scoping)*
   - The SFCN-reg 2022 model was trained on a different preprocessing pipeline than the current FastSurfer-based flow, so serving it requires either a separate Docker image or a documented alternative preprocessing path. Needs a decision on whether to bother before any implementation work starts.
