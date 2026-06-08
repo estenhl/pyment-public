@@ -363,7 +363,10 @@ If everything works, this should yield MAE=4.58. There are also options for visu
 # Finetuning for a new task
 
 ## Preprocessing
-The images should also be [preprocessed](#preprocessing) using the same pipeline as during pretraining before further finetuning.
+The images should be [preprocessed](#preprocessing) using the same pipeline as during pretraining before further finetuning.
+
+## Finetuning via Python
+The most flexible way of finetuning the model is to use the pretrained model as a Python artifact and write custom Python-code around it, to both set up the data pipeline and reconfigure the model for a new task. An example can be found in [finetune.ipynb](notebooks/finetune.ipynb).
 
 # Contributing
 
