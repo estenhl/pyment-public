@@ -3,6 +3,7 @@
 from abc import ABC
 from typing import Annotated, Any, Callable, Literal
 
+from numpy.typing import ArrayLike
 from pydantic import BaseModel, Field
 
 
@@ -33,7 +34,7 @@ TargetConfiguration = Annotated[
 
 def compile_target_encoder(
     configuration: BaseTargetConfiguration,
-) -> Callable[[Any], int] | None:
+) -> Callable[[Any], ArrayLike] | None:
     """Return a label encoder for binary targets, or ``None``.
 
     For ``BinaryTargetConfiguration``, returns a callable that
@@ -48,7 +49,7 @@ def compile_target_encoder(
 
     Returns
     -------
-    Callable[[Any], int] | None
+    Callable[[Any], ArrayLike] | None
     """
     if (
         isinstance(configuration, BinaryTargetConfiguration)
