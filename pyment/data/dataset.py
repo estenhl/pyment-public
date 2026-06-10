@@ -9,6 +9,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from numpy.typing import ArrayLike
 from sklearn.utils.class_weight import compute_class_weight
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class Dataset:
         self,
         labels: pd.DataFrame,
         target: str,
-        target_encoder: Callable[[Any], int] | None = None,
+        target_encoder: Callable[[Any], ArrayLike] | None = None,
         class_weights: str | dict[Any, float] | None = None,
     ) -> None:
         """Initialise a dataset from a pandas DataFrame with labels and
@@ -65,7 +66,7 @@ class Dataset:
             Must contain ``image_path`` and ``target`` columns.
         target : str
             Column in ``labels`` to use as the prediction target.
-        target_encoder : Callable[[Any], int] | None, optional
+        target_encoder : Callable[[Any], ArrayLike] | None, optional
             Maps raw label values to integer indices.
         class_weights : str | dict[Any, float] | None, optional
             ``'balanced'`` to auto-compute weights from class
@@ -90,6 +91,38 @@ class Dataset:
         """Build a ``tf.data.Dataset`` representing this dataset."""
 
         pass
+
+    def random_split(self, training_fraction: float) -> tuple[Dataset, Dataset]:
+        """Split a dataset into random training and validation subsets.
+
+        Parameters
+        ----------
+        training_fraction : float
+            The proportion of data to use for training
+
+        Returns
+        -------
+        tuple[Dataset, Dataset]
+            Training and validation subsets, split at
+            ``training_fraction * len(dataset)``.
+        """
+        train_len = int(training_fraction * len(self))
+
+        train_labels = self.labels.iloc[:train_len]
+        validation_labels = self.labels.iloc[train_len:]
+
+        return (
+            self.__class__(
+                labels=train_labels,
+                target=self.target,
+                target_encoder=self.target_encoder,
+            ),
+            self.__class__(
+                labels=validation_labels,
+                target=self.target,
+                target_encoder=self.target_encoder,
+            ),
+        )
 
     def __len__(self) -> int:
         return len(self.labels)

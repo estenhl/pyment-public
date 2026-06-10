@@ -1,0 +1,27 @@
+{
+    "dataset": {
+        "images": "/output/fastsurfer",
+        "labels": "/labels.csv"
+    },
+    "data_split": {
+        "training_fraction": 0.8
+    },
+    "model": {
+        "kind": "sfcn-bin",
+        "input_shape": null,
+        "dropout": 0.0
+    },
+    "target": {
+        "name": "has_diagnosis",
+        "kind": "binary",
+        "labels": [false, true]
+    },
+    "pretrained_multitask_weights": "/.pyment/weights/multi-2025.h5",
+    "batch_size": 4,
+    "num_threads": 4,
+    "loss": "binary_crossentropy",
+    "metrics": ["accuracy"],
+    "optimizer": "adam",
+    "epochs": 10,
+    "destination": "/output/finetuned_binary_diagnosis"
+}

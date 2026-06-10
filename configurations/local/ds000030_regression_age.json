@@ -1,0 +1,26 @@
+{
+    "dataset": {
+        "images": "$HOME/data/ds000030/preprocessed",
+        "labels": "$HOME/data/ds000030/labels.csv"
+    },
+    "data_split": {
+        "training_fraction": 0.8
+    },
+    "model": {
+        "kind": "sfcn-reg",
+        "input_shape": null,
+        "dropout": 0.0
+    },
+    "target": {
+        "name": "age",
+        "kind": "regression"
+    },
+    "pretrained_multitask_weights": "multi-2025",
+    "batch_size": 4,
+    "num_threads": 4,
+    "loss": "mean_squared_error",
+    "metrics": ["mean_absolute_error"],
+    "optimizer": "adam",
+    "epochs": 10,
+    "destination": "$HOME/data/ds000030/finetuned_regression_age"
+}

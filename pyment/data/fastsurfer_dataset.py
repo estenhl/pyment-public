@@ -9,6 +9,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from numpy.typing import ArrayLike
 
 from pyment.loaders.mgh import load_mgh
 
@@ -31,7 +32,7 @@ class FastSurferDataset(Dataset):
         images_path: str,
         labels_path: str,
         target: str,
-        target_encoder: Callable[[Any], int] | None = None,
+        target_encoder: Callable[[Any], ArrayLike] | None = None,
         class_weights: str | dict[Any, float] | None = None,
     ) -> FastSurferDataset:
         """Construct a FastSurferDataset from directory paths.

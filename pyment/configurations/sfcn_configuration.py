@@ -5,7 +5,7 @@ from typing import Annotated, Any, ClassVar, Literal, cast
 
 from pydantic import BaseModel, Field
 
-from ..models.sfcn import SFCN, BinarySFCN, RegressionSFCN
+from ..models.sfcn import SFCN, BinarySFCN, CategoricalSFCN, RegressionSFCN
 
 
 class BaseSFCNConfiguration(BaseModel, ABC):
@@ -51,7 +51,26 @@ class RegressionSFCNConfiguration(BaseSFCNConfiguration):
     cls = RegressionSFCN
 
 
+class CategoricalSFCNConfiguration(BaseSFCNConfiguration):
+    """Configuration for a categorical-output SFCN (``sfcn-cat``)."""
+
+    kind: Literal['sfcn-cat']
+    num_classes: int
+
+    def build(self) -> SFCN:
+        kwargs: dict[str, Any] = {
+            'dropout': self.dropout,
+            'num_classes': self.num_classes,
+        }
+        if self.input_shape is not None:
+            kwargs['input_shape'] = self.input_shape
+
+        return cast(SFCN, CategoricalSFCN(**kwargs))
+
+
 SFCNConfiguration = Annotated[
-    BinarySFCNConfiguration | RegressionSFCNConfiguration,
+    BinarySFCNConfiguration
+    | RegressionSFCNConfiguration
+    | CategoricalSFCNConfiguration,
     Field(discriminator='kind'),
 ]

@@ -10,6 +10,7 @@ import pandas as pd
 import tensorflow as tf
 
 from pyment.configurations import (
+    CategoricalTargetConfiguration,
     FinetuningConfiguration,
     compile_target_encoder,
 )
@@ -99,26 +100,43 @@ def finetune_from_configuration(raw_configuration: dict[str, Any]) -> None:
         json.dump(history_serializable, f, indent=4)
 
     subsets = [('train', train), ('validation', validation)]
-    prediction_rows = []
+
+    if isinstance(configuration.target, CategoricalTargetConfiguration):
+        prediction_columns = [
+            f'prediction_{label}' for label in configuration.target.labels
+        ]
+    else:
+        prediction_columns = ['prediction']
+
+    predictions = pd.DataFrame(
+        [], columns=['image_id', 'ground_truth', 'subset'] + prediction_columns
+    )
     for subset_name, subset in subsets:
         pred_generator = subset.to_tensorflow_generator(
             batch_size=configuration.batch_size,
             num_threads=configuration.num_threads,
         )
-        predictions = model.predict(pred_generator).flatten()
-        ground_truths = subset.labels[configuration.target.name].values
-        image_ids = subset.labels['image_id'].values
-        for image_id, gt, pred in zip(image_ids, ground_truths, predictions):
-            prediction_rows.append(
-                {
-                    'image_id': image_id,
-                    'ground_truth': gt,
-                    'prediction': float(pred),
-                    'subset': subset_name,
-                }
-            )
 
-    pd.DataFrame(prediction_rows).to_csv(
+        subset_predictions = pd.DataFrame(
+            {
+                'image_id': subset.labels['image_id'].values,
+                'ground_truth': subset.labels[configuration.target.name].values,
+                'subset': subset_name,
+            }
+        )
+
+        if isinstance(configuration.target, CategoricalTargetConfiguration):
+            subset_predictions[prediction_columns] = model.predict(
+                pred_generator
+            )
+        else:
+            subset_predictions['prediction'] = model.predict(
+                pred_generator
+            ).flatten()
+
+        predictions = pd.concat([predictions, subset_predictions])
+
+    predictions.to_csv(
         os.path.join(configuration.destination, 'predictions.csv'), index=False
     )
 

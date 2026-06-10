@@ -1,5 +1,6 @@
 from .sfcn import SFCN
 from .sfcn_bin import BinarySFCN
+from .sfcn_cat import CategoricalSFCN
 from .sfcn_multi import MultiTaskSFCN
 from .sfcn_reg import RegressionSFCN
 
@@ -9,6 +10,8 @@ def sfcn_factory(model_type: str) -> type[SFCN]:
         return RegressionSFCN
     elif model_type in ['sfcn-bin', 'binary']:
         return BinarySFCN
+    elif model_type in ['sfcn-cat', 'categorical']:
+        return CategoricalSFCN
     elif model_type in ['sfcn-multi', 'multi']:
         return MultiTaskSFCN
 
@@ -16,9 +19,10 @@ def sfcn_factory(model_type: str) -> type[SFCN]:
 
 
 __all__ = [
-    'sfcn_factory',
+    'SFCN',
     'BinarySFCN',
+    'CategoricalSFCN',
     'MultiTaskSFCN',
     'RegressionSFCN',
-    'SFCN',
+    'sfcn_factory',
 ]

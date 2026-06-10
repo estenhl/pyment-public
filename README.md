@@ -363,7 +363,45 @@ If everything works, this should yield MAE=4.58. There are also options for visu
 # Finetuning for a new task
 
 ## Preprocessing
-The images should also be [preprocessed](#preprocessing) using the same pipeline as during pretraining before further finetuning.
+The images should be [preprocessed](#preprocessing) using the same pipeline as during pretraining before further finetuning.
+
+## Finetuning via Python
+The most flexible way of finetuning the model is to use the pretrained model as a Python artifact and write custom Python-code around it, to both set up the data pipeline and reconfigure the model for a new task. An example can be found in [finetune.ipynb](notebooks/finetune.ipynb).
+
+To run the notebook, install the optional `notebooks` extra and launch JupyterLab:
+```
+pip install pyment[notebooks]
+jupyter lab
+```
+If installing from source with Poetry:
+```
+poetry install --extras notebooks
+jupyter lab
+```
+
+## Finetuning via configurations
+A simplified endpoint for finetuning is offered via predefined configuration files. Examples of these files for three different use-cases based on the example-data from ds000030 is available in [configurations](configurations). This folder also contains a standalone README documenting the configuration-format.
+
+### Finetuning via the CLI
+Finetuning via the CLI can be achieved via the built in CLI-script ```pyment-finetune```. E.g. using on of the sample configuration files:
+```
+pyment-finetune configurations/local/ds000030_binary_diagnosis.json
+```
+
+### Finetuning via Docker
+Finetuning via the CLI can be achieved via the ```preprocess-and-finetune``` docker container. Note that the configuration files need to point to paths inside the docker container, see how this can be done in the [docker examples](configurations/docker):
+```
+docker pull estenhl/pyment-preprocess-and-finetune:latest
+docker run \
+    --gpus all \
+    --user $(id -u):$(id -g) \
+    --volume $HOME/data/ds000030/images:/input \
+    --volume $HOME/data/ds000030/labels.csv:/labels.csv \
+    --volume $(pwd)/configurations/docker/ds000030_binary_diagnosis.json:/configuration.json \
+    --volume $HOME/data/ds000030/finetune_outputs:/output \
+    --volume $HOME/licenses:/licenses \
+    estenhl/pyment-preprocess-and-finetune:latest
+```
 
 # Contributing
 

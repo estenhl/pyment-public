@@ -27,6 +27,7 @@ dependencies = [
 
 [project.optional-dependencies]
 cuda = ["tensorflow[and-cuda]==2.21.0; sys_platform == 'linux'"]
+notebooks = ["jupyterlab (>=4.0.0)", "ipykernel (>=6.0.0)"]
 
 [project.scripts]
 pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
@@ -42,7 +43,7 @@ include = [
 [tool.ruff]
 line-length = 80
 target-version = "py313"
-exclude = [".act", "checkpoints"]
+exclude = [".act", "checkpoints", ".ipynb_checkpoints"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "G"]
@@ -61,5 +62,5 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "ruff (>=0.15.13,<0.16.0)",
     "pre-commit (>=4.6.0,<5.0.0)",
-    "pytest (>=9.0.3,<10.0.0)"
+    "pytest (>=9.0.3,<10.0.0)",
 ]
