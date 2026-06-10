@@ -3,6 +3,7 @@
 import os
 from typing import Any, Callable
 
+from numpy.typing import ArrayLike
 from pydantic import BaseModel
 
 from ..data.fastsurfer_dataset import FastSurferDataset
@@ -19,7 +20,9 @@ class FastSurferDatasetConfiguration(BaseModel):
     labels: str
 
     def build(
-        self, target: str, target_encoder: Callable[[Any], int] | None = None
+        self,
+        target: str,
+        target_encoder: Callable[[Any], ArrayLike] | None = None,
     ) -> FastSurferDataset:
         """Build a FastSurferDataset from the configured paths.
 

@@ -1,3 +1,17 @@
-from .sfcn import SFCN, MultiTaskSFCN
+from .sfcn import (
+    SFCN,
+    BinarySFCN,
+    CategoricalSFCN,
+    MultiTaskSFCN,
+    RegressionSFCN,
+    sfcn_factory,
+)
 
-__all__ = ['SFCN', 'MultiTaskSFCN']
+__all__ = [
+    'SFCN',
+    'BinarySFCN',
+    'CategoricalSFCN',
+    'MultiTaskSFCN',
+    'RegressionSFCN',
+    'sfcn_factory',
+]

@@ -1,6 +1,8 @@
 """Top-level Pydantic configuration for a finetuning run."""
 
-from pydantic import BaseModel, Field
+import os
+
+from pydantic import BaseModel, Field, field_validator
 
 from .data_split_configuration import DataSplitConfiguration
 from .dataset_configuration import FastSurferDatasetConfiguration
@@ -28,3 +30,8 @@ class FinetuningConfiguration(BaseModel):
     optimizer: str = 'adam'
     epochs: int
     destination: str
+
+    @field_validator('destination')
+    @classmethod
+    def expand_destination(cls, v: str) -> str:
+        return os.path.expanduser(os.path.expandvars(v))

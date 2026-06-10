@@ -3,6 +3,7 @@
 from abc import ABC
 from typing import Annotated, Any, Callable, Literal
 
+import numpy as np
 from numpy.typing import ArrayLike
 from pydantic import BaseModel, Field
 
@@ -26,8 +27,17 @@ class RegressionTargetConfiguration(BaseTargetConfiguration):
     kind: Literal['regression']
 
 
+class CategoricalTargetConfiguration(BaseTargetConfiguration):
+    """Configuration for a multi-class classification target."""
+
+    kind: Literal['categorical']
+    labels: list[Any]
+
+
 TargetConfiguration = Annotated[
-    BinaryTargetConfiguration | RegressionTargetConfiguration,
+    BinaryTargetConfiguration
+    | RegressionTargetConfiguration
+    | CategoricalTargetConfiguration,
     Field(discriminator='kind'),
 ]
 
@@ -35,11 +45,12 @@ TargetConfiguration = Annotated[
 def compile_target_encoder(
     configuration: BaseTargetConfiguration,
 ) -> Callable[[Any], ArrayLike] | None:
-    """Return a label encoder for binary targets, or ``None``.
+    """Return a label encoder for classification targets, or ``None``.
 
-    For ``BinaryTargetConfiguration``, returns a callable that
-    maps a raw label to its integer index in
-    ``configuration.labels``. Returns ``None`` for regression
+    For ``BinaryTargetConfiguration``, returns a callable that maps a
+    raw label to its integer index in ``configuration.labels``. For
+    ``CategoricalTargetConfiguration``, returns a callable that maps a
+    raw label to a one-hot vector. Returns ``None`` for regression
     targets.
 
     Parameters
@@ -51,10 +62,11 @@ def compile_target_encoder(
     -------
     Callable[[Any], ArrayLike] | None
     """
-    if (
-        isinstance(configuration, BinaryTargetConfiguration)
-        and configuration.labels is not None
-    ):
+    if isinstance(configuration, BinaryTargetConfiguration):
         return lambda x: configuration.labels.index(x)
+
+    if isinstance(configuration, CategoricalTargetConfiguration):
+        n = len(configuration.labels)
+        return lambda x: np.eye(n)[configuration.labels.index(x)]
 
     return None

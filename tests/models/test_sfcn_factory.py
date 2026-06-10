@@ -2,6 +2,7 @@ import pytest
 
 from pyment.models.sfcn import (
     BinarySFCN,
+    CategoricalSFCN,
     MultiTaskSFCN,
     RegressionSFCN,
     sfcn_factory,
@@ -15,6 +16,8 @@ from pyment.models.sfcn import (
         ('regression', RegressionSFCN),
         ('sfcn-bin', BinarySFCN),
         ('binary', BinarySFCN),
+        ('sfcn-cat', CategoricalSFCN),
+        ('categorical', CategoricalSFCN),
         ('sfcn-multi', MultiTaskSFCN),
         ('multi', MultiTaskSFCN),
     ],
@@ -23,6 +26,8 @@ from pyment.models.sfcn import (
         'regression',
         'sfcn-bin',
         'binary',
+        'sfcn-cat',
+        'categorical',
         'sfcn-multi',
         'multi',
     ],

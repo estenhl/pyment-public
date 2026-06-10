@@ -379,6 +379,18 @@ poetry install --extras notebooks
 jupyter lab
 ```
 
+## Finetuning via configurations
+A simplified endpoint for finetuning is offered via predefined configuration files. Examples of these files for three different use-cases based on the example-data from ds000030 is available in [configurations](configurations). This folder also contains a standalone README documenting the configuration-format.
+
+### Finetuning via the CLI
+Finetuning via the CLI can be achieved via the built in CLI-script ```pyment-finetune```. E.g. using on of the sample configuration files:
+```
+pyment-finetune configurations/ds000030_binary_diagnosis.json
+```
+
+### Finetuning via Docker
+Not implemented
+
 # Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, code style, and how to submit changes.

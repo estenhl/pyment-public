@@ -1,9 +1,15 @@
 import pytest
 import tensorflow as tf
 
-from pyment.models.sfcn import BinarySFCN, MultiTaskSFCN, RegressionSFCN
+from pyment.models.sfcn import (
+    BinarySFCN,
+    CategoricalSFCN,
+    MultiTaskSFCN,
+    RegressionSFCN,
+)
 
 INPUT_SHAPE = (32, 32, 32)
+NUM_CLASSES = 4
 
 
 @pytest.fixture(scope='module')
@@ -14,6 +20,11 @@ def binary_sfcn():
 @pytest.fixture(scope='module')
 def regression_sfcn():
     return RegressionSFCN(input_shape=INPUT_SHAPE)
+
+
+@pytest.fixture(scope='module')
+def categorical_sfcn():
+    return CategoricalSFCN(input_shape=INPUT_SHAPE, num_classes=NUM_CLASSES)
 
 
 @pytest.fixture(scope='module')
@@ -42,6 +53,17 @@ def test_regression_sfcn(regression_sfcn):
     )
 
 
+def test_categorical_sfcn(categorical_sfcn):
+    assert categorical_sfcn.output_shape == (None, NUM_CLASSES), (
+        f'Expected CategoricalSFCN to yield output shape (None, {NUM_CLASSES})'
+    )
+    last = categorical_sfcn.layers[-1]
+    assert last.activation == tf.keras.activations.softmax, (
+        'Expected CategoricalSFCN to use softmax activation on the prediction '
+        'layer'
+    )
+
+
 def test_multi_sfcn(multi_sfcn):
     assert multi_sfcn.output_shape == (None, 6), (
         'Expected MultiTaskSFCN to yield output shape (None, 6)'
@@ -56,6 +78,7 @@ def test_multi_sfcn(multi_sfcn):
     [
         ('binary_sfcn', 28),
         ('regression_sfcn', 28),
+        ('categorical_sfcn', 28),
         ('multi_sfcn', 34),
     ],
 )

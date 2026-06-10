@@ -26,6 +26,8 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
   - Probably belongs in `README.md` under a new "Finetuning" section, or as a standalone doc under a `docs/` directory.
 
 
+- [ ] **Use `from_logits=True` for numerical stability in classification heads** — `BinarySFCN` and `CategoricalSFCN` currently apply their activation (`sigmoid`/`softmax`) inside the prediction head, so losses must use `from_logits=False`. Removing the activations from the heads and switching to `from_logits=True` would let TensorFlow fuse the activation and cross-entropy into a numerically stable `log_softmax` / `log_sigmoid` operation. Requires updating both model classes and the example configs.
+
 - [ ] **Expose SFCN-reg 2022 weights** *(deferred — needs scoping)*
   - The SFCN-reg 2022 model was trained on a different preprocessing pipeline than the current FastSurfer-based flow, so serving it requires either a separate Docker image or a documented alternative preprocessing path. Needs a decision on whether to bother before any implementation work starts.
   - If pursued: upload weights via `scripts/upload_weights_to_github.py`, record blob SHAs, add identifier to `IDENTIFIERS`, add a smoke test (load → single forward pass → shape/range check).
