@@ -2,7 +2,7 @@
 
 ## Downloading pretrained weights
 
-The `preprocess_and_predict` and `predict` images bundle pretrained weights at build time. Populate `checkpoints/pyment/` from the repo root before building:
+The `preprocess_and_predict`, `predict`, and `preprocess_and_finetune` images bundle pretrained weights at build time. Populate `checkpoints/pyment/` from the repo root before building:
 
 ```
 # download all identifiers (multi-2025, multi-2025-no-abcd, reg-2025)
@@ -41,5 +41,16 @@ Run from the repo root after downloading weights:
 docker build \
     -f docker/predict.Dockerfile \
     -t estenhl/pyment-predict:<VERSION> \
+    .
+```
+
+## Building docker container for preprocessing and finetuning
+
+Run from the repo root after downloading weights:
+
+```
+docker build \
+    -f docker/preprocess_and_finetune.Dockerfile \
+    -t estenhl/pyment-preprocess-and-finetune:<VERSION> \
     .
 ```

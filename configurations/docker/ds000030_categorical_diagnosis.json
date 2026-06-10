@@ -1,0 +1,28 @@
+{
+    "dataset": {
+        "images": "/output/fastsurfer",
+        "labels": "/labels.csv"
+    },
+    "data_split": {
+        "training_fraction": 0.8
+    },
+    "model": {
+        "kind": "sfcn-cat",
+        "num_classes": 4,
+        "input_shape": null,
+        "dropout": 0.0
+    },
+    "target": {
+        "name": "diagnosis",
+        "kind": "categorical",
+        "labels": ["CONTROL", "ADHD", "BIPOLAR", "SCHZ"]
+    },
+    "pretrained_multitask_weights": "/.pyment/weights/multi-2025.h5",
+    "batch_size": 4,
+    "num_threads": 4,
+    "loss": "categorical_crossentropy",
+    "metrics": ["accuracy"],
+    "optimizer": "adam",
+    "epochs": 10,
+    "destination": "/output/finetuned_categorical_diagnosis"
+}

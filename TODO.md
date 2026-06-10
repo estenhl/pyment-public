@@ -15,16 +15,6 @@ Tracking outstanding work on `pyment-public`. Add new items as `- [ ]`; delete t
   - [ ] Update `.github/workflows/preprocess-and-predict.yml` — replace `fixtures/ixi/` path references with `fixtures/ds000030/`
   - [ ] Update `.github/workflows/finetune.yml` — replace `fixtures/ixi/` path references with `fixtures/ds000030/`
   - [x] Update `README.md` — replace all ~15 IXI references across the download, preprocess, predict, evaluate, and finetune tutorial sections
-- [ ] **Write a proper finetuning tutorial**
-  - The finetuning surface (`pyment-finetune`) is currently only exercised by the vibe-coded GitHub Action in `.github/workflows/finetune.yml`. There is no user-facing tutorial — anyone trying to finetune locally has to reverse-engineer the config schema from `pyment/configurations/training_configuration.py`.
-  - Tutorial should cover:
-    - How to author a configuration JSON. The previous example configs (`configurations/local/finetune_ixi_*.json`) were deleted during the fixture reorg — author fresh worked examples for the tutorial. The CI fixture at `.github/workflows/fixtures/finetune_binary.json` is a working starting point to crib from.
-    - What each top-level field in `TrainingConfiguration` controls (`dataset`, `data_split`, `model`, `target`, `batch_size`, `num_threads`, `loss`, `metrics`, `optimizer`, `epochs`, `destination`).
-    - The `kind`-discriminator pattern in `SFCNConfiguration` and `TargetConfiguration` — currently `sfcn-bin`/`sfcn-reg` and `binary`/`regression`.
-    - How to invoke: `pyment-finetune <config.json>`.
-    - Output artifacts produced under `destination/`: `model/` (SavedModel), `history.json`, `predictions.csv`.
-  - Probably belongs in `README.md` under a new "Finetuning" section, or as a standalone doc under a `docs/` directory.
-
 
 - [ ] **Use `from_logits=True` for numerical stability in classification heads** — `BinarySFCN` and `CategoricalSFCN` currently apply their activation (`sigmoid`/`softmax`) inside the prediction head, so losses must use `from_logits=False`. Removing the activations from the heads and switching to `from_logits=True` would let TensorFlow fuse the activation and cross-entropy into a numerically stable `log_softmax` / `log_sigmoid` operation. Requires updating both model classes and the example configs.
 

@@ -385,11 +385,23 @@ A simplified endpoint for finetuning is offered via predefined configuration fil
 ### Finetuning via the CLI
 Finetuning via the CLI can be achieved via the built in CLI-script ```pyment-finetune```. E.g. using on of the sample configuration files:
 ```
-pyment-finetune configurations/ds000030_binary_diagnosis.json
+pyment-finetune configurations/local/ds000030_binary_diagnosis.json
 ```
 
 ### Finetuning via Docker
-Not implemented
+Finetuning via the CLI can be achieved via the ```preprocess-and-finetune``` docker container. Note that the configuration files need to point to paths inside the docker container, see how this can be done in the [docker examples](configurations/docker):
+```
+docker pull estenhl/pyment-preprocess-and-finetune:latest
+docker run \
+    --gpus all \
+    --user $(id -u):$(id -g) \
+    --volume $HOME/data/ds000030/images:/input \
+    --volume $HOME/data/ds000030/labels.csv:/labels.csv \
+    --volume $(pwd)/configurations/docker/ds000030_binary_diagnosis.json:/configuration.json \
+    --volume $HOME/data/ds000030/finetune_outputs:/output \
+    --volume $HOME/licenses:/licenses \
+    estenhl/pyment-preprocess-and-finetune:latest
+```
 
 # Contributing
 

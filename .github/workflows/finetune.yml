@@ -41,8 +41,8 @@ jobs:
       - name: Build finetune image
         run: |
           docker build \
-            -f docker/finetune.Dockerfile \
-            -t pyment-finetune:ci \
+            -f docker/preprocess_and_finetune.Dockerfile \
+            -t pyment-preprocess-and-finetune:ci \
             .
 
       - name: Validate license secret
@@ -73,7 +73,7 @@ jobs:
           CONTAINER=$(docker create \
             $gpu_flags \
             --env FREESURFER_LICENSE \
-            pyment-finetune:ci \
+            pyment-preprocess-and-finetune:ci \
             /bin/sh -c '
               mkdir -p /licenses /output/fastsurfer && \
               printf "%s" "$FREESURFER_LICENSE" > /licenses/freesurfer.txt && \

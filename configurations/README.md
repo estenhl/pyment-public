@@ -8,13 +8,21 @@ pyment-finetune <configuration.json>
 
 All examples are written for the [ds000030](https://openneuro.org/datasets/ds000030) dataset. See the [main README](../README.md) for instructions on downloading and preprocessing it.
 
+## Subfolders
+
+- `local/` — configurations for local finetuning via the `pyment-finetune` CLI
+- `docker/` — configurations for finetuning via Docker
+
 ## Examples
 
 | File | Task | Model | Loss |
 |------|------|-------|------|
-| `ds000030_binary_diagnosis.json` | Binary classification (`has_diagnosis`) | `sfcn-bin` | `binary_crossentropy` |
-| `ds000030_categorical_diagnosis.json` | 4-class classification (`diagnosis`) | `sfcn-cat` | `categorical_crossentropy` |
-| `ds000030_regression_age.json` | Brain age regression | `sfcn-reg` | `mean_squared_error` |
+| `local/ds000030_binary_diagnosis.json` | Binary classification (`has_diagnosis`) | `sfcn-bin` | `binary_crossentropy` |
+| `local/ds000030_categorical_diagnosis.json` | 4-class classification (`diagnosis`) | `sfcn-cat` | `categorical_crossentropy` |
+| `local/ds000030_regression_age.json` | Brain age regression | `sfcn-reg` | `mean_squared_error` |
+| `docker/ds000030_binary_diagnosis.json` | Binary classification (`has_diagnosis`) | `sfcn-bin` | `binary_crossentropy` |
+| `docker/ds000030_categorical_diagnosis.json` | 4-class classification (`diagnosis`) | `sfcn-cat` | `categorical_crossentropy` |
+| `docker/ds000030_regression_age.json` | Brain age regression | `sfcn-reg` | `mean_squared_error` |
 
 ## Configuration reference
 
