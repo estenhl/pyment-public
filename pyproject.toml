@@ -1,6 +1,6 @@
 [project]
 name = "pyment"
-version = "5.0.1"
+version = "5.1.0"
 description = "Repository containing the pretrained model from the paper \"Learning diverse and generic representations of the brain with multi-task pretraining\" and illustrative scripts for using it"
 authors = [
     {name = "Esten Leonardsen", email = "estenleonardsen@proton.me"}
@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "tensorflow==2.21.0",
-    "numpy==2.4.3",
+    "numpy==2.3.5",
     "pandas==3.0.3",
     "typing-extensions==4.15.0",
     "requests==2.32.5",
@@ -23,6 +23,8 @@ dependencies = [
     "scikit-learn==1.8.0",
     "xlrd==2.0.2",
     "pydantic==2.12.4",
+    "antspyx==0.6.3",
+    "antspynet==0.3.2",
 ]
 
 [project.optional-dependencies]
@@ -30,7 +32,7 @@ cuda = ["tensorflow[and-cuda]==2.21.0; sys_platform == 'linux'"]
 notebooks = ["jupyterlab (>=4.0.0)", "ipykernel (>=6.0.0)"]
 
 [project.scripts]
-pyment-predict = "pyment.cli.predict_from_fastsurfer_folder:main"
+pyment-predict = "pyment.cli.predict:main"
 pyment-finetune = "pyment.cli.finetune_from_configuration:main"
 pyment-verify-loader = "pyment.cli.verify_mgh_loader:main"
 
