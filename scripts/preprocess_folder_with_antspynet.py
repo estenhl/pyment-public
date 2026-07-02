@@ -14,11 +14,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+_IMAGE_EXTENSIONS = ('.nii.gz', '.nii', '.mgz', '.mgh')
+
 
 def preprocess_folder_with_antspynet(
     input: str, output: str, suffix: str = '.mgz', num_threads: int = 1
 ) -> None:
     """Preprocesses every image in input with antspynet, in parallel.
+
+    Non-image files (i.e. filenames not ending in one of
+    _IMAGE_EXTENSIONS) are skipped.
 
     Parameters
     ----------
@@ -34,12 +39,20 @@ def preprocess_folder_with_antspynet(
     """
     os.makedirs(output, exist_ok=True)
 
-    filenames = [
+    entries = [
         filename
         for filename in os.listdir(input)
         if os.path.isfile(os.path.join(input, filename))
     ]
-    logger.info('Found %d images in %s', len(filenames), input)
+    filenames = [
+        filename for filename in entries if filename.endswith(_IMAGE_EXTENSIONS)
+    ]
+    logger.info(
+        'Found %d images (of %d files) in %s',
+        len(filenames),
+        len(entries),
+        input,
+    )
 
     def _process(filename: str) -> None:
         source = os.path.join(input, filename)
