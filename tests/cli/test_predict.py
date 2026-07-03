@@ -1,6 +1,6 @@
 import pytest
 
-from pyment.cli.predict_from_fastsurfer_folder import _parse_folder_name
+from pyment.cli.predict import _detect_format, _parse_folder_name, predict
 
 
 @pytest.mark.parametrize(
@@ -62,3 +62,48 @@ def test_parse_folder_name_returns_groups(name, expected):
 def test_parse_folder_name_raises_on_invalid(name):
     with pytest.raises(ValueError, match='Unable to match'):
         _parse_folder_name(name)
+
+
+def test_detect_format_flat_folder(tmp_path):
+    (tmp_path / 'sub-01.mgz').touch()
+    (tmp_path / 'sub-02.mgz').touch()
+
+    assert _detect_format(str(tmp_path)) == 'flat', (
+        'Expected _detect_format to return flat for a folder of files'
+    )
+
+
+def test_detect_format_fastsurfer_folder(tmp_path):
+    (tmp_path / 'sub-01' / 'mri').mkdir(parents=True)
+    (tmp_path / 'sub-02' / 'mri').mkdir(parents=True)
+
+    assert _detect_format(str(tmp_path)) == 'fastsurfer', (
+        'Expected _detect_format to return fastsurfer for a folder of '
+        "subdirectories that each contain an 'mri' subdirectory"
+    )
+
+
+def test_detect_format_raises_on_empty_folder(tmp_path):
+    with pytest.raises(ValueError, match='empty'):
+        _detect_format(str(tmp_path))
+
+
+def test_detect_format_raises_on_mixed_contents(tmp_path):
+    (tmp_path / 'sub-01' / 'mri').mkdir(parents=True)
+    (tmp_path / 'sub-02.mgz').touch()
+
+    with pytest.raises(ValueError, match='mix of files and subdirectories'):
+        _detect_format(str(tmp_path))
+
+
+def test_detect_format_raises_on_subfolders_without_mri(tmp_path):
+    (tmp_path / 'sub-01').mkdir()
+    (tmp_path / 'sub-02').mkdir()
+
+    with pytest.raises(ValueError, match="not all contain an 'mri'"):
+        _detect_format(str(tmp_path))
+
+
+def test_predict_raises_on_unknown_format(tmp_path):
+    with pytest.raises(ValueError, match='Unknown format'):
+        predict(source=str(tmp_path), format='bogus')

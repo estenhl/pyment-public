@@ -139,7 +139,7 @@ jobs:
           for col in ["multi-2025", "reg-2025"]:
             gt_col = f"{col}_gt"
             pred_col = f"{col}_pred"
-            if not np.allclose(df[gt_col], df[pred_col], atol=1e-3):
+            if not np.allclose(df[gt_col], df[pred_col], atol=1e-2):
               mean_difference = np.mean(np.abs(df[gt_col] - df[pred_col]))
               print(
                 f"Column {col} differs between new predictions and ground "

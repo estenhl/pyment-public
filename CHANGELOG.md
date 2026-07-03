@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project _after release v3.0.0_ will be documented in this file.
 
+## v5.1.0
+Added a fully Python-based preprocessing alternative
+
 ## v5.0.0
 Updated runtime to Python 3.13 and TensorFlow 2.21. Ported model code to Keras 3 (removed legacy optimizer namespace, fixed layer naming, replaced `tf.concat` with `Concatenate` layer). Finetuned models now saved in native Keras format (`.keras`). Added `pyment-verify-loader` CLI endpoint. Docker images updated to use Python 3.13 with FastSurfer isolated to Python 3.10.
 

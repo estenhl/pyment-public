@@ -82,7 +82,7 @@ The CI fixture configuration that exercises this path lives at `.github/workflow
 `pyment/models/sfcn/` defines the 3D conv trunk in `SFCN` (base, abstract `construct_prediction_head`), with three concrete heads:
 - `RegressionSFCN` — single regression output
 - `BinarySFCN` — single sigmoid output
-- `MultiTaskSFCN` — 6 hard-coded heads concatenated along the last axis (order: `age, sex, handedness, bmi, fluid_intelligence, neuroticism`). The target list in `predict_from_fastsurfer_folder.py` mirrors this order; changing one without the other will silently mislabel predictions.
+- `MultiTaskSFCN` — 6 hard-coded heads concatenated along the last axis (order: `age, sex, handedness, bmi, fluid_intelligence, neuroticism`). The default target list in `pyment/cli/predict.py` mirrors this order; changing one without the other will silently mislabel predictions.
 
 `sfcn_factory(model_type)` dispatches by string (`sfcn-reg` | `sfcn-bin` | `sfcn-multi`).
 

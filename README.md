@@ -338,10 +338,10 @@ pyment-predict $HOME/data/ds000030/preprocessed/ -m sfcn-reg -w reg-2025 -t age 
 
 ```
 # To generate predictions from the multi-task model
-python pyment/cli/predict_from_fastsurfer_folder.py $HOME/data/ds000030/preprocessed -d $HOME/data/ds000030/predictions.csv
+python pyment/cli/predict.py $HOME/data/ds000030/preprocessed -d $HOME/data/ds000030/predictions.csv
 
 # To generate predictions from the regression model
-python pyment/cli/predict_from_fastsurfer_folder.py $HOME/data/ds000030/preprocessed/ -m sfcn-reg -w reg-2025 -t age -d $HOME/data/ds000030/reg-predictions.csv
+python pyment/cli/predict.py $HOME/data/ds000030/preprocessed/ -m sfcn-reg -w reg-2025 -t age -d $HOME/data/ds000030/reg-predictions.csv
 ```
 </details>
 
