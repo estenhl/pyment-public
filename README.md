@@ -15,7 +15,7 @@ This repository contains pretrained predictive models for structural Magnetic Re
 |----|-----------|
 |multi-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|
 |reg-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|
-|multi-2025-no-abcd|TBA|
+|multi-2025-no-abcd|[Latent neural network representations of the brain reflect broad-scale adolescent phenotypic variation](https://www.biorxiv.org/content/10.64898/2026.04.16.718661v1.abstract)|
 
 # Preparations
 
