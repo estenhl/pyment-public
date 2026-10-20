@@ -11,12 +11,17 @@ tags:
 ---
 This repository contains pretrained predictive models for structural Magnetic Resonance Images from multiple publications. The current models that are hosted in the repository are:
 
-|Name|Publication|
-|----|-----------|
-|multi-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|
-|reg-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|
-|multi-2025-no-abcd|[Latent neural network representations of the brain reflect broad-scale adolescent phenotypic variation](https://www.biorxiv.org/content/10.64898/2026.04.16.718661v1.abstract)|
+|Name|Publication|Identifier|
+|----|-----------|----------|
+|multi-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|c18be19f64b4e398c446d871a7e9d35ec8c88f1d|
+|reg-2025|[Learning diverse and generic representations of the brain with large-scale multi-task pretraining](https://www.medrxiv.org/content/10.64898/2025.12.19.25342659v)|a8baaed43082ebac70427a8bf122ffd7c63b51e2|
+|multi-2025-no-abcd|[Latent neural network representations of the brain reflect broad-scale adolescent phenotypic variation](https://www.biorxiv.org/content/10.64898/2026.04.16.718661v1.abstract)|1c8e9bc7c33af1625044fb1a54a03500ecc050c4|
 
+## Downloading weights
+The weights can be downloaded automatically through the python-library, e.g. by calling `model = SFCNMulti(weights='multi-2025')` in Python. If you want to download the weights manually you can use the provided `download_weights.py`-script, e.g.:
+```
+python download_weights.py -i <identifier1> <identifier2> ... -d </path/where/weights/should/be/stored>
+```
 # Preparations
 
 ## Deciding upon a model
